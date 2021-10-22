@@ -8,6 +8,12 @@ import java.util.stream.Stream;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 
+/**
+ * Resolver for processor settings.
+ *
+ * @author Ashley Scopes
+ * @since 0.0.1
+ */
 public class SettingsResolver {
   private final ProcessingEnvironment processingEnv;
 

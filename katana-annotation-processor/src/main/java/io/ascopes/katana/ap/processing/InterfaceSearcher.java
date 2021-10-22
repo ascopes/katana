@@ -1,6 +1,6 @@
 package io.ascopes.katana.ap.processing;
 
-import io.ascopes.katana.ap.utils.MoreElements;
+import io.ascopes.katana.ap.utils.ElementUtils;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -62,7 +62,7 @@ public class InterfaceSearcher {
   }
 
   private void failNotAnInterface(TypeElement annotationType, Element annotatedElement) {
-    AnnotationMirror annotationMirror = MoreElements
+    AnnotationMirror annotationMirror = ElementUtils
         .fetchAnnotationMirrorFor(this.processingEnv.getTypeUtils(), annotatedElement, annotationType);
 
     String message = "Annotation @"

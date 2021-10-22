@@ -10,8 +10,8 @@ import java.util.stream.Stream;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public abstract class Functors {
-  private Functors() {
+public abstract class FunctorUtils {
+  private FunctorUtils() {
     // Static-only class.
     throw new UnsupportedOperationException("static-only class");
   }

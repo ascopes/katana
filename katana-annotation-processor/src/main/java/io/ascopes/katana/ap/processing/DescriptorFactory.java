@@ -46,6 +46,6 @@ public class DescriptorFactory {
       Model descriptor,
       Settings annotationSettings
   ) {
-
+    throw new UnsupportedOperationException();
   }
 }

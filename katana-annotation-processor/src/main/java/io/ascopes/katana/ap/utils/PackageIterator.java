@@ -63,7 +63,7 @@ public class PackageIterator implements Iterator<PackageElement> {
     // if all compilers guard against that.
     if (lastPeriod <= 0) {
       // Return the unnamed root package.
-      this.next = MoreElements.fetchUnnamedPackage(this.elementUtils);
+      this.next = ElementUtils.fetchUnnamedPackage(this.elementUtils);
     } else {
       name = name.substring(0, lastPeriod);
       this.next = this.elementUtils.getPackageElement(name);

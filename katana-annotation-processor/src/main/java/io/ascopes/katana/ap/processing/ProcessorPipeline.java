@@ -3,7 +3,7 @@ package io.ascopes.katana.ap.processing;
 import io.ascopes.katana.annotations.ImmutableModel;
 import io.ascopes.katana.annotations.MutableModel;
 import io.ascopes.katana.ap.descriptors.Model;
-import io.ascopes.katana.ap.utils.Functors;
+import io.ascopes.katana.ap.utils.FunctorUtils;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -68,7 +68,7 @@ public class ProcessorPipeline {
     return this.interfaceSearcher
         .findAnnotatedInterfacesFor(this.roundEnv, annotationType)
         .map(interfaceElement -> generateSingleDescriptor(annotationType, interfaceElement))
-        .flatMap(Functors.removeEmpties());
+        .flatMap(FunctorUtils.removeEmpties());
   }
 
   private Optional<Model> generateSingleDescriptor(TypeElement annotationType, TypeElement annotatedElement) {

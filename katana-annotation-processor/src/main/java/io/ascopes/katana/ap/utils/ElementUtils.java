@@ -13,8 +13,8 @@ import javax.lang.model.util.Types;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public abstract class MoreElements {
-  private MoreElements() {
+public abstract class ElementUtils {
+  private ElementUtils() {
     // Static-only class.
     throw new UnsupportedOperationException("static-only class");
   }
