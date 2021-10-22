@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.ascopes.katana</groupId>
+    <artifactId>katana-parent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Katana Parent</name>
+
+    <description>
+        Parent project for Katana.
+
+        ${katana.description}
+    </description>
+
+    <modules>
+        <module>katana</module>
+        <module>katana-annotations</module>
+        <module>katana-annotation-processor</module>
+    </modules>
+
+    <properties>
+        <compile-testing.version>0.19</compile-testing.version>
+        <junit-jupiter.version>5.8.1</junit-jupiter.version>
+
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <katana.jdk.version>8</katana.jdk.version>
+        <katana.description>
+            Katana is an annotation processor for Java 8 and higher which produces data class implementations
+            from interface definitions. Using Katana, you can massively reduce the boilerplate needed to implement
+            standards-compliant models in a Java application.
+        </katana.description>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.testing.compile</groupId>
+                <artifactId>compile-testing</artifactId>
+                <version>${compile-testing.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit-jupiter.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+
+                    <configuration>
+                        <source>${katana.jdk.version}</source>
+                        <target>${katana.jdk.version}</target>
+                        <testSource>${katana.jdk.version}</testSource>
+                        <testTarget>${katana.jdk.version}</testTarget>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
+
+                    <configuration>
+                        <archive>
+                            <manifestEntries>
+                                <Sealed>true</Sealed>
+                            </manifestEntries>
+                            <manifest>
+                                <addBuildEnvironmentEntries>true</addBuildEnvironmentEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <!-- We have to bump the version for JUnit5 support. -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
