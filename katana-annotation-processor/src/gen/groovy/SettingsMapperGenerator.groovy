@@ -30,7 +30,6 @@ static def getter(def fieldName) {
 
 static def settingsMethods() {
     def settingsMethods = []
-    //noinspection GroovyAssignabilityCheck
     settingsMethods.addAll Arrays.asList(*Settings.declaredMethods)
     settingsMethods.sort { m1, m2 -> m1.name.compareTo m2.name }
     return settingsMethods
@@ -130,9 +129,7 @@ static def generateMapperClass(def settingClass, def settingsEntryClass, def set
             .build()
 }
 
-//noinspection GrUnresolvedAccess
 def generatedSourcesDir = properties["generatedSources.outputDir"]
-//noinspection GrUnresolvedAccess
 def packageName = properties["generatedSources.package"]
 
 // We do not refer to the actual class here, as it is not yet compiled when the script runs.
@@ -146,7 +143,6 @@ def types = [
         generateMapperClass(settingClass, settingsEntryClass, settingLocationClass)
 ]
 
-//noinspection GroovyAssignabilityCheck
 def fullPath = Paths
         .get(generatedSourcesDir, "target", "generated-sources", "katana")
         .toAbsolutePath()
