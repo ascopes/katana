@@ -8,7 +8,7 @@ import io.ascopes.katana.annotations.Settings
 import javax.lang.model.element.Modifier
 import java.nio.file.Paths
 
-static def typeNameOf(def type) {
+static def typeNameOf(type) {
     if (type.isArray()) {
         // Arrays have to be constructed in a special way!
         return ArrayTypeName.of(type.componentType)
@@ -21,7 +21,7 @@ static def typeNameOf(def type) {
     }
 }
 
-static def getter(def fieldName) {
+static def getter(fieldName) {
     assert fieldName.length() > 1
     def firstChar = fieldName.substring(0, 1).toUpperCase Locale.ROOT
     def rest = fieldName.substring 1
@@ -35,7 +35,7 @@ static def settingsMethods() {
     return settingsMethods
 }
 
-static def generateCollectionClass(def settingClass) {
+static def generateCollectionClass(settingClass) {
     def typeBuilder = TypeSpec
             .classBuilder("SettingsCollection")
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -83,7 +83,7 @@ static def generateCollectionClass(def settingClass) {
             .build()
 }
 
-static def generateFlattenMethod(def settingClass) {
+static def generateFlattenMethod(settingClass) {
     def flattenTypeVar = TypeVariableName.get("T")
     def settingType = ParameterizedTypeName.get(settingClass, flattenTypeVar)
     def paramType = ParameterizedTypeName.get(ClassName.get(List.class), settingType)
@@ -96,7 +96,7 @@ static def generateFlattenMethod(def settingClass) {
             .build()
 }
 
-static def generateMapMethod(def settingClass, def settingsEntryClass, def settingLocationClass) {
+static def generateMapMethod(settingClass, settingsEntryClass, settingLocationClass) {
     def entryListClass = ParameterizedTypeName
             .get(ClassName.get(List.class), settingsEntryClass)
 
@@ -109,7 +109,7 @@ static def generateMapMethod(def settingClass, def settingsEntryClass, def setti
             .build()
 }
 
-static def generateMapperClass(def settingClass, def settingsEntryClass, def settingLocationClass) {
+static def generateMapperClass(settingClass, settingsEntryClass, settingLocationClass) {
     def constructor = MethodSpec
             .constructorBuilder()
             .addModifiers(Modifier.PUBLIC)
