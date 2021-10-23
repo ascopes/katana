@@ -1,9 +1,11 @@
-package io.ascopes.katana.ap.processing;
+package io.ascopes.katana.ap;
 
 import io.ascopes.katana.annotations.ImmutableModel;
 import io.ascopes.katana.annotations.MutableModel;
+import io.ascopes.katana.ap.commons.Streams;
+import io.ascopes.katana.ap.descriptors.DescriptorFactory;
 import io.ascopes.katana.ap.descriptors.Model;
-import io.ascopes.katana.ap.utils.FunctorUtils;
+import io.ascopes.katana.ap.introspection.InterfaceSearcher;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -67,8 +69,8 @@ public class ProcessorPipeline {
   private Stream<Model> generateAllDescriptors(TypeElement annotationType) {
     return this.interfaceSearcher
         .findAnnotatedInterfacesFor(this.roundEnv, annotationType)
-        .map(interfaceElement -> generateSingleDescriptor(annotationType, interfaceElement))
-        .flatMap(FunctorUtils.removeEmpties());
+        .map(interfaceElement -> this.generateSingleDescriptor(annotationType, interfaceElement))
+        .flatMap(Streams.removeEmpties());
   }
 
   private Optional<Model> generateSingleDescriptor(TypeElement annotationType, TypeElement annotatedElement) {

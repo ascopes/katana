@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.utils;
+package io.ascopes.katana.ap.commons;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -10,8 +10,8 @@ import java.util.stream.Stream;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public abstract class FunctorUtils {
-  private FunctorUtils() {
+public abstract class Streams {
+  private Streams() {
     // Static-only class.
     throw new UnsupportedOperationException("static-only class");
   }
@@ -27,5 +27,18 @@ public abstract class FunctorUtils {
     return opt -> opt
         .map(Stream::of)
         .orElseGet(Stream::empty);
+  }
+
+  /**
+   * Flat map operation that flattens a stream of streams into a single stream.
+   *
+   * @param <T> the elements in each stream.
+   * @return the function to apply.
+   */
+  public static <T> Function<Stream<T>, Stream<T>> flatten() {
+    // This is more explicit than just adding Function.identity and not immediately realising that
+    // it is being used to flatten a stream of streams into a stream. JVM will likely JIT this out
+    // anyway.
+    return Function.identity();
   }
 }

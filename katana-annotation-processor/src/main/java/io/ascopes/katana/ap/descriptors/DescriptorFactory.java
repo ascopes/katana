@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.processing;
+package io.ascopes.katana.ap.descriptors;
 
 import io.ascopes.katana.annotations.ImmutableModel;
 import io.ascopes.katana.annotations.MutableModel;

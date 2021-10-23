@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.descriptors;
+package io.ascopes.katana.ap.settings;
 
 import io.ascopes.katana.annotations.ImmutableModel;
 import io.ascopes.katana.annotations.MutableModel;
@@ -26,9 +26,4 @@ public enum SettingLocation {
    * The setting was set on a package level.
    */
   PACKAGE,
-
-  /**
-   * The setting was left as a default value.
-   */
-  KATANA_DEFAULT,
 }

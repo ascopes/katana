@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.utils;
+package io.ascopes.katana.ap.introspection;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;

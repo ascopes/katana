@@ -1,6 +1,5 @@
 package io.ascopes.katana.ap;
 
-import io.ascopes.katana.ap.processing.ProcessorPipeline;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.processing.AbstractProcessor;

@@ -1,6 +1,5 @@
-package io.ascopes.katana.ap.processing;
+package io.ascopes.katana.ap.introspection;
 
-import io.ascopes.katana.ap.utils.ElementUtils;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;

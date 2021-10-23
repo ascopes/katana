@@ -1,11 +1,8 @@
-package io.ascopes.katana.ap.utils;
+package io.ascopes.katana.ap.introspection;
 
-import java.util.Iterator;
+import io.ascopes.katana.ap.commons.StreamableIterator;
 import java.util.NoSuchElementException;
 import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.util.Elements;
@@ -19,7 +16,7 @@ import javax.lang.model.util.Elements;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public class PackageIterator implements Iterator<PackageElement> {
+public class PackageIterator implements StreamableIterator<PackageElement> {
   private final Elements elementUtils;
   private PackageElement next;
 
@@ -36,15 +33,7 @@ public class PackageIterator implements Iterator<PackageElement> {
    * {@inheritDoc}
    */
   @Override
-  public boolean hasNext() {
-    return this.next != null;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public PackageElement next() {
+  public PackageElement next() throws NoSuchElementException {
     PackageElement current = this.next;
 
     if (current == null) {
@@ -73,19 +62,18 @@ public class PackageIterator implements Iterator<PackageElement> {
   }
 
   /**
-   * @return this iterator wrapped within a spliterator.
+   * {@inheritDoc}
    */
-  public Spliterator<PackageElement> toSpliterator() {
-    return Spliterators.spliteratorUnknownSize(
-        this,
-        Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.DISTINCT
-    );
+  @Override
+  public boolean hasNext() {
+    return this.next != null;
   }
 
   /**
-   * @return this iterator wrapped within a stream.
+   * {@inheritDoc}
    */
-  public Stream<PackageElement> toStream() {
-    return StreamSupport.stream(this.toSpliterator(), false);
+  @Override
+  public int characteristics() {
+    return Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.DISTINCT;
   }
-};
+}
