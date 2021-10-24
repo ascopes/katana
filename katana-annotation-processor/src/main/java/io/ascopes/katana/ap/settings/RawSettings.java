@@ -9,12 +9,12 @@ import java.util.Objects;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public class SettingsEntry {
+final class RawSettings {
   private final String name;
   private final SettingLocation location;
   private final Settings value;
 
-  public SettingsEntry(String name, SettingLocation location, Settings value) {
+  public RawSettings(String name, SettingLocation location, Settings value) {
     this.name = Objects.requireNonNull(name);
     this.location = Objects.requireNonNull(location);
     this.value = Objects.requireNonNull(value);

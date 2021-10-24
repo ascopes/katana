@@ -27,27 +27,27 @@ public class SettingsResolver {
   }
 
   public SettingsCollection parseSettings(Settings annotationSettings, TypeElement interfaceElement) {
-    List<SettingsEntry> allSettingsEntries = this
+    List<RawSettings> allSettingsEntries = this
         .findAllSettingsEntries(annotationSettings, interfaceElement)
         .collect(Collectors.toList());
 
     return null;
   }
 
-  private Stream<SettingsEntry> findAllSettingsEntries(
+  private Stream<RawSettings> findAllSettingsEntries(
       Settings annotationSettings,
       TypeElement interfaceElement
   ) {
-    Stream<SettingsEntry> annotationEntries = Stream
-        .of(new SettingsEntry("annotation", SettingLocation.ANNOTATION, annotationSettings));
+    Stream<RawSettings> annotationEntries = Stream
+        .of(new RawSettings("annotation", SettingLocation.ANNOTATION, annotationSettings));
 
-    Stream<SettingsEntry> interfaceEntries =
+    Stream<RawSettings> interfaceEntries =
         new SuperInterfaceIterator(this.processingEnv.getTypeUtils(), interfaceElement)
             .stream()
             .map(this::findSettingsOn)
             .flatMap(Streams.removeEmpties());
 
-    Stream<SettingsEntry> packageEntries =
+    Stream<RawSettings> packageEntries =
         new PackageIterator(this.processingEnv.getElementUtils(), interfaceElement)
             .stream()
             .map(this::findSettingsOn)
@@ -58,7 +58,7 @@ public class SettingsResolver {
         .flatMap(Streams.flatten());
   }
 
-  private Optional<SettingsEntry> findSettingsOn(TypeElement typeElement) {
+  private Optional<RawSettings> findSettingsOn(TypeElement typeElement) {
     return this.findSettingsOn(
         typeElement,
         typeElement.getQualifiedName().toString(),
@@ -66,7 +66,7 @@ public class SettingsResolver {
     );
   }
 
-  private Optional<SettingsEntry> findSettingsOn(PackageElement packageElement) {
+  private Optional<RawSettings> findSettingsOn(PackageElement packageElement) {
     return this.findSettingsOn(
         packageElement,
         packageElement.getQualifiedName().toString(),
@@ -74,13 +74,13 @@ public class SettingsResolver {
     );
   }
 
-  private Optional<SettingsEntry> findSettingsOn(
+  private Optional<RawSettings> findSettingsOn(
       AnnotatedConstruct annotated,
       String qualifiedName,
       SettingLocation location
   ) {
     return Optional
         .ofNullable(annotated.getAnnotation(Settings.class))
-        .map(settings -> new SettingsEntry(qualifiedName, location, settings));
+        .map(settings -> new RawSettings(qualifiedName, location, settings));
   }
 }

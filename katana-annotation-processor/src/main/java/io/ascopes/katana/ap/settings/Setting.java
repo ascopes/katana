@@ -17,35 +17,35 @@ import java.util.Objects;
  * @since 0.0.1
  */
 public class Setting<T> {
-  private final String name;
   private final T value;
   private final SettingLocation settingLocation;
+  private final SettingSchema<T> settingSchema;
 
-  public Setting(String name, T value, SettingLocation settingLocation) {
-    this.name = Objects.requireNonNull(name);
+  public Setting(T value, SettingLocation settingLocation, SettingSchema<T> settingSchema) {
+    // Annotation values can't be null, so this is a perfectly valid assumption to be making.
     this.value = Objects.requireNonNull(value);
     this.settingLocation = Objects.requireNonNull(settingLocation);
-  }
-
-  /**
-   * @return the name of the setting.
-   */
-  public String getName() {
-    return Objects.requireNonNull(this.name);
+    this.settingSchema = Objects.requireNonNull(settingSchema);
   }
 
   /**
    * @return the value of the setting.
    */
   public T getValue() {
-    // Annotation values can't be null, so this is a perfectly valid assumption to be making.
-    return Objects.requireNonNull(this.value);
+    return this.value;
   }
 
   /**
    * @return where the setting came from.
    */
   public SettingLocation getSettingLocation() {
-    return Objects.requireNonNull(this.settingLocation);
+    return this.settingLocation;
+  }
+
+  /**
+   * @return the schema data for the setting.
+   */
+  public SettingSchema<T> getSettingSchema() {
+    return this.settingSchema;
   }
 }
