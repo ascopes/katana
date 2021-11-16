@@ -69,7 +69,7 @@ List<String> getDefaultValueFor(Method method, Class<Annotation> annotation) {
 
 CodeBlock parseDefaultValue(List<String> exprs, Class<?> targetType) {
   if (targetType.isArray()) {
-    String dimensionName = targetType.componentType().canonicalName
+    String dimensionName = targetType.componentType.canonicalName
     // XXX: how do I make multiple dimensions work? Do I even care?
     return exprs.stream()
         .map { parseDefaultValue([it], targetType.componentType) }
@@ -117,7 +117,7 @@ CodeBlock parseDefaultValue(List<String> exprs, Class<?> targetType) {
 
 CodeBlock parseInheritedValue(Object value) {
   if (value.class.isArray()) {
-    String dimensionName = value.class.componentType().canonicalName
+    String dimensionName = value.class.componentType.canonicalName
     // XXX: how do I make multiple dimensions work? Do I even care?
     return Stream
         .of((Object[]) value)
