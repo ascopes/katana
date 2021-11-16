@@ -13,7 +13,17 @@
  * @author Ashley Scopes
  * @since 0.0.1
  */
-import com.squareup.javapoet.*
+import com.squareup.javapoet.AnnotationSpec
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.CodeBlock
+import com.squareup.javapoet.FieldSpec
+import com.squareup.javapoet.JavaFile
+import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.ParameterSpec
+import com.squareup.javapoet.TypeName
+import com.squareup.javapoet.TypeSpec
+import com.squareup.javapoet.WildcardTypeName
 import io.ascopes.katana.annotations.Generated
 import io.ascopes.katana.annotations.Settings
 import io.ascopes.katana.annotations.internal.DefaultSetting
@@ -80,7 +90,7 @@ CodeBlock parseDefaultValue(List<String> exprs, Class<?> targetType) {
   String expr = exprs[0]
 
   if (targetType.isEnum()) {
-    def enumValue = Enum.valueOf((Class) targetType, expr)
+    Enum enumValue = Enum.valueOf((Class) targetType, expr)
     return CodeBlock.of('$T.$L', targetType, enumValue.name())
   }
   if (Class.isAssignableFrom(targetType)) {
@@ -149,8 +159,8 @@ CodeBlock buildEqualityMethod(Class<?> targetType) {
 }
 
 AnnotationSpec buildGeneratedAnnotation() {
-  def now = OffsetDateTime.now(Clock.systemDefaultZone())
-  def nowString = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(now)
+  OffsetDateTime now = OffsetDateTime.now(Clock.systemDefaultZone())
+  String nowString = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(now)
 
   return AnnotationSpec
       .builder(Generated)
@@ -327,7 +337,7 @@ JavaFile buildSchemaConstants(
 }
 
 
-def schemas = Stream
+List<CodegenSettingSchema> schemas = Stream
     .of(Settings.getDeclaredMethods())
     .map { buildSchemaFor(it) }
     .collect(Collectors.toList())
@@ -348,14 +358,14 @@ String settingClassName = getMavenProperty("settings.settingClassName")
 String settingSchemaPackageName = getMavenProperty("settings.settingSchemaPackageName")
 String settingSchemaClassName = getMavenProperty("settings.settingSchemaClassName")
 
-def dataClass = buildSettingsCollectionClass(
+JavaFile dataClass = buildSettingsCollectionClass(
     generatedPackageName,
     settingPackageName,
     settingClassName,
     schemas
 )
 
-def schemaDefinition = buildSchemaConstants(
+JavaFile schemaDefinition = buildSchemaConstants(
     generatedPackageName,
     dataClass.typeSpec,
     settingSchemaPackageName,
@@ -363,7 +373,7 @@ def schemaDefinition = buildSchemaConstants(
     schemas
 )
 
-def outputPath = Path.of(generatedOutputRoot).toAbsolutePath()
+Path outputPath = Path.of(generatedOutputRoot).toAbsolutePath()
 System.err.printf("Writing out generated code to %s%n", outputPath)
 
 dataClass.writeTo(outputPath)
