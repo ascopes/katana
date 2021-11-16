@@ -14,6 +14,7 @@
  * @since 0.0.1
  */
 import com.squareup.javapoet.AnnotationSpec
+import com.squareup.javapoet.ArrayTypeName
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec
