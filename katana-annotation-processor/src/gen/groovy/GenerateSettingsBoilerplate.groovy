@@ -35,6 +35,7 @@ import javax.lang.model.element.Modifier
 import java.lang.annotation.Annotation
 import java.lang.reflect.Method
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.Clock
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -374,7 +375,8 @@ JavaFile schemaDefinition = buildSchemaConstants(
     schemas
 )
 
-Path outputPath = Path.of(generatedOutputRoot).toAbsolutePath()
+// Can't use Path.of in Java 8 builds
+Path outputPath = Paths.get(generatedOutputRoot).toAbsolutePath()
 System.err.printf("Writing out generated code to %s%n", outputPath)
 
 dataClass.writeTo(outputPath)
