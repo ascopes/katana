@@ -1,5 +1,18 @@
+#!/usr/bin/env groovy
 //file:noinspection GrMethodMayBeStatic
 
+/*
+ * Build script which looks at the @Settings annotation in katana-annotations and will generate
+ * the boilerplate SettingsCollection definition, as well as the list of SettingSchema objects
+ * that define how to initialize and parse each setting.
+ *
+ * This should be able to automatically handle new settings with no further logic changes in
+ * katana-annotation-processor, so should improve maintainability as we add more and more
+ * settings going forwards.
+ *
+ * @author Ashley Scopes
+ * @since 0.0.1
+ */
 import com.squareup.javapoet.*
 import io.ascopes.katana.annotations.Generated
 import io.ascopes.katana.annotations.Settings
@@ -321,34 +334,36 @@ def schemas = Stream
 
 String getMavenProperty(String name) {
   //noinspection GrUnresolvedAccess
-  return properties[name]
+  String property = project.properties[name]
+  String err = "Maven Property " + name + " was not set"
+  return Objects.requireNonNull(property, err)
 }
 
 System.err.println("Generating setting schema definitions from @Settings annotation")
 
-String packageName = getMavenProperty("packageName")
-String outputRoot = getMavenProperty("outputRoot")
-String settingPackageName = getMavenProperty("settingPackageName")
-String settingClassName = getMavenProperty("settingClassName")
-String settingSchemaPackageName = getMavenProperty("settingSchemaPackageName")
-String settingSchemaClassName = getMavenProperty("settingSchemaClassName")
+String generatedPackageName = getMavenProperty("settings.generatedPackageName")
+String generatedOutputRoot = getMavenProperty("settings.generatedOutputRoot")
+String settingPackageName = getMavenProperty("settings.settingPackageName")
+String settingClassName = getMavenProperty("settings.settingClassName")
+String settingSchemaPackageName = getMavenProperty("settings.settingSchemaPackageName")
+String settingSchemaClassName = getMavenProperty("settings.settingSchemaClassName")
 
 def dataClass = buildSettingsCollectionClass(
-    packageName,
+    generatedPackageName,
     settingPackageName,
     settingClassName,
     schemas
 )
 
 def schemaDefinition = buildSchemaConstants(
-    packageName,
+    generatedPackageName,
     dataClass.typeSpec,
     settingSchemaPackageName,
     settingSchemaClassName,
     schemas
 )
 
-def outputPath = Path.of(outputRoot).toAbsolutePath()
+def outputPath = Path.of(generatedOutputRoot).toAbsolutePath()
 System.err.printf("Writing out generated code to %s%n", outputPath)
 
 dataClass.writeTo(outputPath)

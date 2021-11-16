@@ -23,11 +23,14 @@
 
   <properties>
 
+
     <settings.packageName>io.ascopes.katana.ap.settings</settings.packageName>
+    <settings.settingPackageName>${settings.packageName}</settings.settingPackageName>
     <settings.settingClassName>Setting</settings.settingClassName>
+    <settings.settingSchemaPackageName>${settings.packageName}</settings.settingSchemaPackageName>
     <settings.settingSchemaClassName>SettingSchema</settings.settingSchemaClassName>
-    <generated-schemas.outputRoot>${project.build.directory}/generated-sources/settings</generated-schemas.outputRoot>
-    <generated-schemas.packageName>${settings.packageName}.gen</generated-schemas.packageName>
+    <settings.generatedOutputRoot>${project.build.directory}/generated-sources/settings</settings.generatedOutputRoot>
+    <settings.generatedPackageName>${settings.packageName}.gen</settings.generatedPackageName>
   </properties>
 
   <dependencies>
@@ -119,8 +122,8 @@
       </plugin>
 
       <plugin>
-        <groupId>org.codehaus.gmaven</groupId>
-        <artifactId>groovy-maven-plugin</artifactId>
+        <groupId>org.codehaus.gmavenplus</groupId>
+        <artifactId>gmavenplus-plugin</artifactId>
 
         <executions>
           <execution>
@@ -130,16 +133,10 @@
               <goal>execute</goal>
             </goals>
             <configuration>
-              <classpathScope>compile</classpathScope>
-              <source>${project.basedir}/src/gen/groovy/GenerateSettingsBoilerplate.groovy</source>
-              <properties>
-                <outputRoot>${generated-schemas.outputRoot}</outputRoot>
-                <packageName>${generated-schemas.packageName}</packageName>
-                <settingPackageName>${settings.packageName}</settingPackageName>
-                <settingClassName>${settings.settingClassName}</settingClassName>
-                <settingSchemaPackageName>${settings.packageName}</settingSchemaPackageName>
-                <settingSchemaClassName>${settings.settingSchemaClassName}</settingSchemaClassName>
-              </properties>
+              <includeClasspath>PROJECT_AND_PLUGIN</includeClasspath>
+              <scripts>
+                <script>${project.basedir}/src/gen/groovy/GenerateSettingsBoilerplate.groovy</script>
+              </scripts>
             </configuration>
           </execution>
         </executions>
@@ -156,7 +153,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>${generated-schemas.outputRoot}</source>
+                <source>${settings.generatedOutputRoot}</source>
               </sources>
             </configuration>
           </execution>
