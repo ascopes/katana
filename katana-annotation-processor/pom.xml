@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.ascopes.katana</groupId>
+    <artifactId>katana-parent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>katana-annotation-processor</artifactId>
+  <name>Katana Annotation Processor</name>
+
+  <description>
+    Annotation processor for Katana to generate data classes during compilation.
+
+    ${katana.description}
+  </description>
+
+  <properties>
+
+    <settings.packageName>io.ascopes.katana.ap.settings</settings.packageName>
+    <settings.settingClassName>Setting</settings.settingClassName>
+    <settings.settingSchemaClassName>SettingSchema</settings.settingSchemaClassName>
+    <generated-schemas.outputRoot>${project.build.directory}/generated-sources/settings</generated-schemas.outputRoot>
+    <generated-schemas.packageName>${settings.packageName}.gen</generated-schemas.packageName>
+  </properties>
+
+  <dependencies>
+    <!-- Application dependencies -->
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>katana-annotations</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.jknack</groupId>
+      <artifactId>handlebars</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.squareup</groupId>
+      <artifactId>javapoet</artifactId>
+    </dependency>
+
+    <!-- Test dependencies -->
+
+    <dependency>
+      <groupId>com.google.testing.compile</groupId>
+      <artifactId>compile-testing</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <compilerArgs>
+            <!--
+            Disable annotation processing during compilation. This prevents the services file
+            from creating a circular dependency during the compilation phase. I could have used
+            Google's AutoService here instead but I'd rather not clutter the classpath more than
+            I have to.
+            -->
+            <arg>-proc:none</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Automatic-Module-Name>io.ascopes.katana.ap</Automatic-Module-Name>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.gmaven</groupId>
+        <artifactId>groovy-maven-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>generate-settings-boilerplate</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>execute</goal>
+            </goals>
+            <configuration>
+              <classpathScope>compile</classpathScope>
+              <source>${project.basedir}/src/gen/groovy/GenerateSettingsBoilerplate.groovy</source>
+              <properties>
+                <outputRoot>${generated-schemas.outputRoot}</outputRoot>
+                <packageName>${generated-schemas.packageName}</packageName>
+                <settingPackageName>${settings.packageName}</settingPackageName>
+                <settingClassName>${settings.settingClassName}</settingClassName>
+                <settingSchemaPackageName>${settings.packageName}</settingSchemaPackageName>
+                <settingSchemaClassName>${settings.settingSchemaClassName}</settingSchemaClassName>
+              </properties>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${generated-schemas.outputRoot}</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

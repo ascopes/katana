@@ -1,0 +1,7 @@
+overloaded attribute methods are not allowed.
+Attempted to define attribute from {{ quoted newMethodSignature }} in {{ quoted newTypeName }}.
+
+This attribute was already defined by {{ quoted existingMethodSignature }} in {{ quoted existingTypeName }}.
+
+Attribute methods can only have one getter and one setter. Consider
+renaming or removing one of these definitions.

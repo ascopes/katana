@@ -1,0 +1,7 @@
+unexpected element annotated with @{{ annotationName }} annotation.
+The annotated element was {{ quoted erroneousElementName }}, which is {{ an erroneousElementKind }}.
+
+Katana only supports annotating regular interfaces with these annotations. Annotation
+interfaces and other constructs are not supported. If you are using a new JDK, this may
+be due to using a new language feature that Katana does not recognise. If this is the
+case, consider filing a bug report on GitHub at https://github.com/ascopes/katana/issues.

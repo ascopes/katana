@@ -1,0 +1,13 @@
+disallowed element annotated with @{{ annotationName }}.
+Element {{ quoted erroneousElementName }} (which is {{ an erroneousElementKind }}) cannot be annotated as a model.
+Only regular interfaces and packages can be annotated. For example:
+
+@{{ annotationName }}(@Settings(packageName="*.impl"))
+package foo.bar.baz;
+
+@{{ annotationName }}
+public interface User {
+  String getId();
+  String getUserName();
+  Set<String> getAuthorities();
+}
