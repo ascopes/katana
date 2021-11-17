@@ -114,7 +114,7 @@ public @interface Settings {
    * include the primitive type implicitly.
    */
   @DefaultSetting({"java.lang.Boolean", "java.util.concurrent.atomic.AtomicBoolean"})
-  String[] booleanTypes() default {};
+  Class<?>[] booleanTypes() default {};
 
   /**
    * Return the name for boolean getter methods.
@@ -166,5 +166,5 @@ public @interface Settings {
    * Return the policy for generating a {@link Object#toString()} override.
    */
   @DefaultSetting("INCLUDE_ALL")
-  ToString toStringOverride() default ToString.INHERITED;
+  ToString toStringMethod() default ToString.INHERITED;
 }

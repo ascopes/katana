@@ -96,7 +96,7 @@ CodeBlock parseDefaultValue(List<String> exprs, Class<?> targetType) {
     return CodeBlock.of('$T.$L', targetType, enumValue.name())
   }
   if (Class.isAssignableFrom(targetType)) {
-    return CodeBlock.of('$L', expr)
+    return CodeBlock.of('$L.class', expr)
   }
   if (byte.isAssignableFrom(targetType)) {
     return CodeBlock.of('$L', Byte.parseByte(expr))
@@ -142,7 +142,7 @@ CodeBlock parseInheritedValue(Object value) {
   }
 
   if (value instanceof Class<?>) {
-    return CodeBlock.of('$T', value)
+    return CodeBlock.of('$T.class', value)
   }
 
   if (value instanceof String) {

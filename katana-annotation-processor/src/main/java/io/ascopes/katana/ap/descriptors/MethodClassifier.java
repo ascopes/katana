@@ -212,8 +212,8 @@ public final class MethodClassifier {
       TypeElement declaredTypeElement = (TypeElement) declaredReturnType.asElement();
       String className = declaredTypeElement.getQualifiedName().toString();
 
-      for (String type : settings.getBooleanTypes().getValue()) {
-        if (className.equals(type)) {
+      for (Class<?> type : settings.getBooleanTypes().getValue()) {
+        if (className.equals(type.getCanonicalName())) {
           return true;
         }
       }
@@ -251,7 +251,9 @@ public final class MethodClassifier {
   ) {
     Setting<String> booleanGetterPrefix = settings.getBooleanGetterPrefix();
     Setting<String> getterPrefix = settings.getGetterPrefix();
-    Setting<String[]> booleanTypes = settings.getBooleanTypes();
+    // XXX: fix build script to handle generics properly
+    @SuppressWarnings("rawtypes")
+    Setting<Class[]> booleanTypes = (Setting<Class[]>) settings.getBooleanTypes();
 
     String message = this.diagnosticTemplates
         .template(this.getClass(), "nonBooleanGetter")
