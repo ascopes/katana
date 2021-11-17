@@ -2,6 +2,7 @@ package io.ascopes.katana.ap;
 
 import io.ascopes.katana.annotations.ImmutableModel;
 import io.ascopes.katana.annotations.MutableModel;
+import io.ascopes.katana.ap.descriptors.AttributeFactory;
 import io.ascopes.katana.ap.descriptors.InterfaceSearcher;
 import io.ascopes.katana.ap.descriptors.MethodClassifier;
 import io.ascopes.katana.ap.descriptors.Model;
@@ -103,9 +104,12 @@ public final class KatanaAnnotationProcessor extends AbstractProcessor {
         processingEnv.getMessager()
     );
 
+    AttributeFactory attributeFactory = new AttributeFactory();
+
     ModelFactory modelFactory = new ModelFactory(
         settingsResolver,
         methodClassifier,
+        attributeFactory,
         processingEnv.getMessager(),
         processingEnv.getElementUtils()
     );

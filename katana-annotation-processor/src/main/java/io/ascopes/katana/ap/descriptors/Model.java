@@ -2,7 +2,9 @@ package io.ascopes.katana.ap.descriptors;
 
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.ObjectBuilder;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.SortedMap;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 
@@ -21,6 +23,7 @@ public final class Model {
   private final String className;
   private final SettingsCollection settingsCollection;
   private final ClassifiedMethods methods;
+  private final SortedMap<String, Attribute> attributes;
 
   /**
    * @param builder the model builder.
@@ -33,6 +36,7 @@ public final class Model {
     this.className = builder.getClassName();
     this.settingsCollection = builder.getSettingsCollection();
     this.methods = builder.getMethods();
+    this.attributes = builder.getAttributes();
   }
 
   /**
@@ -81,6 +85,7 @@ public final class Model {
     private String className;
     private SettingsCollection settingsCollection;
     private ClassifiedMethods methods;
+    private SortedMap<String, Attribute> attributes;
 
     private Builder() {
     }
@@ -111,6 +116,10 @@ public final class Model {
 
     public ClassifiedMethods getMethods() {
       return Objects.requireNonNull(this.methods);
+    }
+
+    public SortedMap<String, Attribute> getAttributes() {
+      return Objects.requireNonNull(this.attributes);
     }
 
     public Builder modelInterface(TypeElement modelInterface) {
@@ -146,6 +155,13 @@ public final class Model {
 
     public Builder methods(ClassifiedMethods methods) {
       this.methods = methods;
+      return this;
+    }
+
+    public Builder attributes(SortedMap<String, Attribute> attributes) {
+      Objects.requireNonNull(attributes, "map was null");
+      attributes.forEach((k, v) -> Objects.requireNonNull(v, "Value for key " + k + " was null"));
+      this.attributes = Collections.unmodifiableSortedMap(attributes);
       return this;
     }
 

@@ -1,5 +1,7 @@
 package io.ascopes.katana.ap.utils;
 
+import javax.lang.model.SourceVersion;
+
 /**
  * Utilities for naming processing and manipulation.
  *
@@ -97,5 +99,22 @@ public abstract class NamingUtils {
         throw new IllegalArgumentException("invalid character '" + c + "' at position " + (i + 1));
       }
     }
+  }
+
+  /**
+   * Make a name suitable for use as an identifier, if it is not appropriate already.
+   * <p>
+   * This assumes the most recently supported language version. This may vary in behaviour
+   * depending on the JDK you use.
+   *
+   * @param name the name to manipulate.
+   * @return the identifier to use.
+   */
+  public static String transmogrifyIdentifier(String name) {
+    if (SourceVersion.isKeyword(name)) {
+      return "$__" + name + "__";
+    }
+
+    return name;
   }
 }

@@ -23,23 +23,27 @@ public final class ModelFactory {
 
   private final SettingsResolver settingsResolver;
   private final MethodClassifier methodClassifier;
+  private final AttributeFactory attributeFactory;
   private final Elements elementUtils;
   private final Messager messager;
 
   /**
    * @param settingsResolver the settings resolver to use.
    * @param methodClassifier the method classifier to use.
+   * @param attributeFactory the attribute factory to use.
    * @param messager         the messager to use to report errors.
    * @param elementUtils     the element utilities to use.
    */
   public ModelFactory(
       SettingsResolver settingsResolver,
       MethodClassifier methodClassifier,
+      AttributeFactory attributeFactory,
       Messager messager,
       Elements elementUtils
   ) {
     this.settingsResolver = settingsResolver;
     this.methodClassifier = methodClassifier;
+    this.attributeFactory = attributeFactory;
     this.elementUtils = elementUtils;
     this.messager = messager;
   }
@@ -78,6 +82,7 @@ public final class ModelFactory {
         .ifOkFlatMap(this::determinePackageName)
         .ifOkFlatMap(this::determineClassName)
         .ifOkFlatMap(this::classifyMethods)
+        .ifOkFlatMap(this::generateAttributes)
         .ifOkMap(Model.Builder::build);
   }
 
@@ -155,5 +160,11 @@ public final class ModelFactory {
     return this.methodClassifier
         .classifyMethods(builder.getModelInterface(), builder.getSettingsCollection())
         .ifOkMap(builder::methods);
+  }
+
+  private Result<Model.Builder> generateAttributes(Model.Builder builder) {
+    return this.attributeFactory
+        .buildFor(builder.getMethods(), builder.getSettingsCollection())
+        .ifOkMap(builder::attributes);
   }
 }
