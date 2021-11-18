@@ -122,19 +122,6 @@ public final class Result<T> {
   }
 
   /**
-   * If this result is failed, perform some logic.
-   *
-   * @param then the logic to perform.
-   * @return this result to allow further chaining.
-   */
-  public Result<T> ifFailedThen(Runnable then) {
-    if (this.isOk()) {
-      then.run();
-    }
-    return this;
-  }
-
-  /**
    * If this result is ignored, perform some logic and return that. Otherwise, return this result.
    *
    * @param then the flat map function to perform, if this is ignored.
@@ -210,16 +197,6 @@ public final class Result<T> {
    */
   public static <T> Result<T> fail() {
     return castFailedOrIgnored(FAILED);
-  }
-
-  /**
-   * @param condition a condition to check.
-   * @return a failed result if the condition holds, or an empty OK result otherwise.
-   */
-  public static Result<Void> failIf(boolean condition) {
-    return condition
-        ? fail()
-        : ok();
   }
 
   /**

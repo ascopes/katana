@@ -37,6 +37,8 @@ public final class Attribute {
   /**
    * @return the attribute name, modified where appropriate to avoid name clashes with keywords.
    */
+  // TODO: remove suppression later
+  @SuppressWarnings("unused")
   public String getIdentifierName() {
     return NamingUtils.transmogrifyIdentifier(this.name);
   }
@@ -46,13 +48,6 @@ public final class Attribute {
    */
   public TypeMirror getType() {
     return this.getterToOverride.getReturnType();
-  }
-
-  /**
-   * @return the getter to override.
-   */
-  public ExecutableElement getGetterToOverride() {
-    return this.getterToOverride;
   }
 
   /**

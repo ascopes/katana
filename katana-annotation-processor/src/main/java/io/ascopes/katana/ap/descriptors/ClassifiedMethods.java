@@ -46,20 +46,6 @@ public final class ClassifiedMethods {
   }
 
   /**
-   * @return any other instance methods.
-   */
-  public SortedMap<String, Set<ExecutableElement>> getOtherInstanceMethods() {
-    return this.otherInstanceMethods;
-  }
-
-  /**
-   * @return any static instance methods.
-   */
-  public SortedMap<String, Set<ExecutableElement>> getStaticMethods() {
-    return this.staticMethods;
-  }
-
-  /**
    * @return a string representation of this collection.
    */
   @Override

@@ -48,10 +48,9 @@ public abstract class AnnotationUtils {
    *
    * @param mirror the mirror to check.
    * @param name   the name of the attribute.
-   * @param <T>    the type to cast to.
    * @return an optional holding the attribute value, or an empty optional if not present.
    */
-  public static <T> Optional<? extends AnnotationValue> getValue(
+  public static Optional<? extends AnnotationValue> getValue(
       AnnotationMirror mirror,
       String name
   ) {
