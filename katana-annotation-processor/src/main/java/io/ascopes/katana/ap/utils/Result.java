@@ -29,6 +29,20 @@ public final class Result<T> {
   }
 
   /**
+   * Procedurally unwrap the result value.
+   *
+   * @return the result value.
+   * @throws IllegalStateException if the result was not OK.
+   */
+  public T unwrap() throws IllegalStateException {
+    if (this.isNotOk()) {
+      throw new IllegalStateException("Cannot unwrap an ignored/failed result!");
+    }
+
+    return this.value;
+  }
+
+  /**
    * @return true if the result is OK.
    */
   public boolean isOk() {
@@ -70,18 +84,6 @@ public final class Result<T> {
   }
 
   /**
-   * If this result is OK, perform some logic and replace the value.
-   *
-   * @param then the logic to perform to replace the current value with.
-   * @return this result to allow further chaining.
-   */
-  public <U> Result<U> ifOkReplace(Supplier<U> then) {
-    return this.isOk()
-        ? Result.ok(then.get())
-        : castFailedOrIgnored(this);
-  }
-
-  /**
    * If this result is OK, perform some logic and return that in a new OK result. Otherwise, return
    * this result.
    *
@@ -106,6 +108,17 @@ public final class Result<T> {
     return this.isOk()
         ? then.apply(this.value)
         : castFailedOrIgnored(this);
+  }
+
+  /**
+   * If this result is OK, replace this result with the given result. Otherwise, return this
+   * result.
+   *
+   * @param then the result to replace with if this result is OK.
+   * @return the new result.
+   */
+  public <U> Result<U> ifOkFlatReplace(Result<U> then) {
+    return this.ifOkFlatMap(unused -> then);
   }
 
   /**
@@ -200,6 +213,16 @@ public final class Result<T> {
   }
 
   /**
+   * @param condition a condition to check.
+   * @return a failed result if the condition holds, or an empty OK result otherwise.
+   */
+  public static Result<Void> failIf(boolean condition) {
+    return condition
+        ? fail()
+        : ok();
+  }
+
+  /**
    * @return an ignored result with no value.
    */
   public static <T> Result<T> ignore() {
@@ -212,4 +235,5 @@ public final class Result<T> {
     // Type erasure is a beautiful thing sometimes.
     return (Result<T>) result;
   }
+
 }

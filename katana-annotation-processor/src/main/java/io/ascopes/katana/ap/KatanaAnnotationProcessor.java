@@ -104,7 +104,11 @@ public final class KatanaAnnotationProcessor extends AbstractProcessor {
         processingEnv.getMessager()
     );
 
-    AttributeFactory attributeFactory = new AttributeFactory();
+    AttributeFactory attributeFactory = new AttributeFactory(
+        diagnosticTemplates,
+        processingEnv.getMessager(),
+        processingEnv.getElementUtils()
+    );
 
     ModelFactory modelFactory = new ModelFactory(
         settingsResolver,

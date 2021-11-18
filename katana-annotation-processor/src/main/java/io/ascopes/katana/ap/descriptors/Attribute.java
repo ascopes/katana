@@ -5,6 +5,7 @@ import io.ascopes.katana.ap.utils.ObjectBuilder;
 import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.TypeMirror;
 
 /**
  * Representation of an attribute within a model.
@@ -17,11 +18,13 @@ public final class Attribute {
   private final String name;
   private final ExecutableElement getterToOverride;
   private final ExecutableElement setterToOverride;
+  private final boolean setterEnabled;
 
   private Attribute(Builder builder) {
     this.name = Objects.requireNonNull(builder.name);
     this.getterToOverride = Objects.requireNonNull(builder.getterToOverride);
     this.setterToOverride = builder.setterToOverride;
+    this.setterEnabled = Objects.requireNonNull(builder.setterEnabled);
   }
 
   /**
@@ -39,6 +42,13 @@ public final class Attribute {
   }
 
   /**
+   * @return the attribute type.
+   */
+  public TypeMirror getType() {
+    return this.getterToOverride.getReturnType();
+  }
+
+  /**
    * @return the getter to override.
    */
   public ExecutableElement getGetterToOverride() {
@@ -52,6 +62,15 @@ public final class Attribute {
     return Optional.ofNullable(this.setterToOverride);
   }
 
+  @Override
+  public String toString() {
+    return "Attribute{" +
+        "name='" + this.name + "', " +
+        "type='" + this.getterToOverride.getReturnType() + "', " +
+        "get=true, set=" + this.setterEnabled +
+      '}';
+  }
+
   public static Builder builder() {
     return new Builder();
   }
@@ -61,8 +80,17 @@ public final class Attribute {
     private String name;
     private ExecutableElement getterToOverride;
     private ExecutableElement setterToOverride;
+    private Boolean setterEnabled;
 
     private Builder() {
+    }
+
+    String getName() {
+      return Objects.requireNonNull(this.name);
+    }
+
+    ExecutableElement getGetterToOverride() {
+      return Objects.requireNonNull(this.getterToOverride);
     }
 
     public Builder name(String name) {
@@ -77,6 +105,11 @@ public final class Attribute {
 
     public Builder setterToOverride(ExecutableElement setterToOverride) {
       this.setterToOverride = Objects.requireNonNull(setterToOverride);
+      return this;
+    }
+
+    public Builder setterEnabled(boolean setterEnabled) {
+      this.setterEnabled = setterEnabled;
       return this;
     }
 

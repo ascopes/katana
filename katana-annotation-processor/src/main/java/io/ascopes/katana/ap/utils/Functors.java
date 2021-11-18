@@ -1,8 +1,13 @@
 package io.ascopes.katana.ap.utils;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Optional;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -68,5 +73,30 @@ public abstract class Functors {
     // it is being used to flatten a stream of collections into a stream. JVM will likely JIT this
     // out anyway.
     return Collection::stream;
+  }
+
+  /**
+   * Collector that collects keys and values to a sorted map.
+   * @param keyMapper the key mapper.
+   * @param valueMapper the value mapper.
+   * @param keyComparator the algorithm to sort the keys with.
+   * @param <T> the input type.
+   * @param <K> the key type.
+   * @param <V> the value type.
+   * @return the collector.
+   */
+  public static <T, K, V> Collector<T, ?, SortedMap<K, V>> toSortedMap(
+      Function<T, K> keyMapper,
+      Function<T, V> valueMapper,
+      Comparator<K> keyComparator
+  ) {
+    return Collectors.toMap(
+        keyMapper,
+        valueMapper,
+        (a, b) -> {
+          throw new IllegalStateException("Element " + a + " has the same key as " + b);
+        },
+        () -> new TreeMap<>(keyComparator)
+    );
   }
 }

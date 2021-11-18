@@ -29,35 +29,14 @@ public final class Model {
    * @param builder the model builder.
    */
   private Model(Builder builder) {
-    this.modelInterface = builder.getModelInterface();
-    this.annotationMirror = builder.getAnnotationMirror();
-    this.mutable = builder.isMutable();
-    this.packageName = builder.getPackageName();
-    this.className = builder.getClassName();
-    this.settingsCollection = builder.getSettingsCollection();
-    this.methods = builder.getMethods();
-    this.attributes = builder.getAttributes();
-  }
-
-  /**
-   * @return the interface TypeElement that the model is being generated from.
-   */
-  public TypeElement getModelInterface() {
-    return this.modelInterface;
-  }
-
-  /**
-   * @return the model annotation mirror (either ImmutableModel or MutableModel).
-   */
-  public AnnotationMirror getAnnotationMirror() {
-    return this.annotationMirror;
-  }
-
-  /**
-   * @return true if a mutable model, false if an immutable model.
-   */
-  public boolean isMutable() {
-    return this.mutable;
+    this.modelInterface = Objects.requireNonNull(builder.modelInterface);
+    this.annotationMirror = Objects.requireNonNull(builder.annotationMirror);
+    this.mutable = Objects.requireNonNull(builder.mutable);
+    this.packageName = Objects.requireNonNull(builder.packageName);
+    this.className = Objects.requireNonNull(builder.className);
+    this.settingsCollection = Objects.requireNonNull(builder.settingsCollection);
+    this.methods = Objects.requireNonNull(builder.methods);
+    this.attributes = Objects.requireNonNull(builder.attributes);
   }
 
   @Override
@@ -65,7 +44,7 @@ public final class Model {
     return "Model{" +
         "packageName='" + this.packageName + "', " +
         "className='" + this.className + "', " +
-        "methods=" + this.methods + ", " +
+        "attributes=" + this.attributes + ", " +
         "modelInterface='" + this.modelInterface.getQualifiedName() + "', " +
         "mutable=" + this.mutable +
         '}';
@@ -90,36 +69,24 @@ public final class Model {
     private Builder() {
     }
 
-    public TypeElement getModelInterface() {
+    TypeElement getModelInterface() {
       return Objects.requireNonNull(this.modelInterface);
     }
 
-    public AnnotationMirror getAnnotationMirror() {
+    AnnotationMirror getAnnotationMirror() {
       return Objects.requireNonNull(this.annotationMirror);
     }
 
-    public SettingsCollection getSettingsCollection() {
+    SettingsCollection getSettingsCollection() {
       return Objects.requireNonNull(this.settingsCollection);
     }
 
-    public boolean isMutable() {
+    boolean isMutable() {
       return Objects.requireNonNull(this.mutable);
     }
 
-    public String getPackageName() {
-      return Objects.requireNonNull(this.packageName);
-    }
-
-    public String getClassName() {
-      return Objects.requireNonNull(this.className);
-    }
-
-    public ClassifiedMethods getMethods() {
+    ClassifiedMethods getMethods() {
       return Objects.requireNonNull(this.methods);
-    }
-
-    public SortedMap<String, Attribute> getAttributes() {
-      return Objects.requireNonNull(this.attributes);
     }
 
     public Builder modelInterface(TypeElement modelInterface) {

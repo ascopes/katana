@@ -1,0 +1,6 @@
+Ambiguous intent for {{category}} generation on attribute {{quoted attributeName}}.
+Both {{quoted inclusionAnnotation}} and {{quoted exclusionAnnotation}} were defined on the getter
+{{quoted getter}}.
+
+Remove {{quoted inclusionAnnotation}} if you do not wish to have {{a category}}, or remove
+{{quoted exclusionAnnotation}} if you want to generate {{a category}}.
