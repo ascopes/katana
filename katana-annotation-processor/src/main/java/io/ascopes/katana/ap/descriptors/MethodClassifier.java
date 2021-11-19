@@ -235,7 +235,7 @@ public final class MethodClassifier {
     String newMethodSignature = this.signatureOf(newMethod);
 
     String message = this.diagnosticTemplates
-        .template(this.getClass(), "overloadedMethodForAttribute")
+        .template("overloadedMethodForAttribute")
         .placeholder("existingTypeName", existingTypeName)
         .placeholder("existingMethodSignature", existingMethodSignature)
         .placeholder("newTypeName", newTypeName)
@@ -256,7 +256,7 @@ public final class MethodClassifier {
     Setting<Class[]> booleanTypes = settings.getBooleanTypes();
 
     String message = this.diagnosticTemplates
-        .template(this.getClass(), "nonBooleanGetter")
+        .template("nonBooleanGetter")
         .placeholder("method", method.toString())
         .placeholder("booleanGetterPrefix", booleanGetterPrefix.getValue())
         .placeholder("booleanGetterPrefixProperty", booleanGetterPrefix.getDescription())

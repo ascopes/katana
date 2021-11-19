@@ -18,7 +18,7 @@ public class DiagnosticTemplates {
 
   public DiagnosticTemplates() {
     this.handlebars = new Handlebars()
-        .with(new ClassPathTemplateLoader("/io/ascopes/katana/ap/messages/", ".txt"))
+        .with(new ClassPathTemplateLoader("/"))
         .with(new DefaultHelperRegistry()
             .registerHelpers(HandlebarsHelpers.class)
             .registerHelpers(StringHelpers.class)
@@ -27,15 +27,31 @@ public class DiagnosticTemplates {
   }
 
   /**
+   * Render a template for the class that called this method.
+   *
+   * @param templateName the template name to render
+   * @return the template builder to use.
+   */
+  public MessageBuilder template(String templateName) {
+    return this.template(
+        Thread.currentThread().getStackTrace()[2].getClassName(),
+        templateName
+    );
+  }
+
+  /**
    * Generate a new template builder for a template.
    *
-   * @param klass        the class that is generating the message.
+   * @param className    the class that is generating the message.
    * @param templateName the name of the message template.
    * @return the builder.
    */
-  public MessageBuilder template(Class<?> klass, String templateName) {
+  private MessageBuilder template(String className, String templateName) {
     try {
-      Template template = this.handlebars.compile(klass.getSimpleName() + "/" + templateName);
+      String path = className.replace('.', '/')
+          + "Messages/"
+          + templateName;
+      Template template = this.handlebars.compile(path);
       return new MessageBuilder(template);
     } catch (HandlebarsException | IOException ex) {
       throw new RuntimeException("Failed to compile handlebars template", ex);

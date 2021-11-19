@@ -164,7 +164,7 @@ public class AttributeFactory {
       ExecutableElement definedMethod
   ) {
     String message = this.diagnosticTemplates
-        .template(this.getClass(), "missingGetter")
+        .template("missingGetter")
         .placeholder("category", category)
         .placeholder("attributeName", attributeName)
         .placeholder("definedMethod", definedMethod.toString())
@@ -183,7 +183,7 @@ public class AttributeFactory {
       AnnotationMirror exclusionAnnotation
   ) {
     String message = this.diagnosticTemplates
-        .template(this.getClass(), "excludedExplicitSetter")
+        .template("excludedExplicitSetter")
         .placeholder("attributeName", attributeName)
         .placeholder("explicitSetter", explicitSetter)
         .placeholder("exclusionAnnotation", exclusionAnnotation)
@@ -205,7 +205,7 @@ public class AttributeFactory {
       AnnotationMirror exclusionAnnotation
   ) {
     String message = this.diagnosticTemplates
-        .template(this.getClass(), "includedAndExcluded")
+        .template("includedAndExcluded")
         .placeholder("attributeName", attributeName)
         .placeholder("category", category)
         .placeholder("getter", getter)

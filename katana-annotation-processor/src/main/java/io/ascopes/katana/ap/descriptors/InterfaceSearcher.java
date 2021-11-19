@@ -80,7 +80,7 @@ public final class InterfaceSearcher {
         .elseReturn(null);
 
     String message = this.diagnosticTemplates
-        .template(this.getClass(), "notAnInterfaceOrPackage")
+        .template("notAnInterfaceOrPackage")
         .placeholder("annotationName", annotationType.getSimpleName())
         .placeholder("erroneousElementName", annotatedElement.getSimpleName())
         .placeholder("erroneousElementKind", annotatedElement.getKind())
@@ -97,7 +97,7 @@ public final class InterfaceSearcher {
         .elseReturn(null);
 
     String message = this.diagnosticTemplates
-        .template(this.getClass(), "unexpectedElement")
+        .template("unexpectedElement")
         .placeholder("annotationName", annotationType.getSimpleName())
         .placeholder("erroneousElementName", annotatedElement.getSimpleName())
         .placeholder("erroneousElementKind", annotatedElement.getKind())
