@@ -27,6 +27,15 @@ public class DiagnosticTemplates {
   }
 
   /**
+   * <strong>This is only exposed for testing purposes.</strong>
+   *
+   * @return the handlebars internal instance.
+   */
+  Handlebars getHandlebars() {
+    return this.handlebars;
+  }
+
+  /**
    * Render a template for the class that called this method.
    *
    * @param templateName the template name to render

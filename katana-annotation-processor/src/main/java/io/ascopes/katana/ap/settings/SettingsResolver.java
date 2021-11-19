@@ -114,18 +114,18 @@ public final class SettingsResolver {
     T inheritedValue = schema.getInheritedValue();
 
     for (SettingsAnnotation annotation : annotations) {
-      Optional<? extends AnnotationValue> possibleValue = AnnotationUtils
+      Result<? extends AnnotationValue> possibleValue = AnnotationUtils
           .getValue(annotation.mirror, schema.getName());
 
-      if (!possibleValue.isPresent()) {
+      if (!possibleValue.isOk()) {
         // Ignore attributes that haven't been explicitly defined by the user.
         continue;
       }
 
       T actualValue = possibleValue
-          .map(AnnotationValue::getValue)
-          .map(schema.getType()::cast)
-          .orElse(inheritedValue);
+          .ifOkMap(AnnotationValue::getValue)
+          .ifOkMap(schema.getType()::cast)
+          .elseReturn(inheritedValue);
 
       if (equalityFunction.test(inheritedValue, actualValue)) {
         // Ignore inherited default values explicitly defined by the user.
@@ -140,7 +140,7 @@ public final class SettingsResolver {
           actualValue,
           annotation.declaringElement,
           annotation.mirror,
-          possibleValue.get()
+          possibleValue.unwrap()
       );
 
       return new Setting<>(

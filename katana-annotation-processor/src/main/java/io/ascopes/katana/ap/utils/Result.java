@@ -35,6 +35,10 @@ public final class Result<T> {
    * @throws IllegalStateException if the result was not OK.
    */
   public T unwrap() throws IllegalStateException {
+    if (this == CLEARED) {
+      throw new IllegalStateException("Cannot unwrap an empty OK result!");
+    }
+
     if (this.isNotOk()) {
       throw new IllegalStateException("Cannot unwrap an ignored/failed result!");
     }
@@ -176,6 +180,45 @@ public final class Result<T> {
           "Did not expect element to be ignored! " + errorMessage.get());
     }
     return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean equals(Object other) {
+    if (!(other instanceof Result<?>)) {
+      return false;
+    }
+
+    Result<?> that = (Result<?>) other;
+
+    return this == that || this.isOk() && that.isOk() && this.value == that.value;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(value);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public String toString() {
+    if (this == FAILED) {
+      return "Result{failed}";
+    }
+    if (this == IGNORED) {
+      return "Result{ignored}";
+    }
+    if (this == CLEARED) {
+      return "Result{ok}";
+    }
+    return "Result{ok, " + this.value + "}";
   }
 
   /**

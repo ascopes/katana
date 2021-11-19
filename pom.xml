@@ -32,6 +32,7 @@
     <javapoet.version>1.13.0</javapoet.version>
     <junit-jupiter.version>5.8.1</junit-jupiter.version>
     <mockito-core.version>4.0.0</mockito-core.version>
+    <slf4j.version>1.7.32</slf4j.version>
 
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
@@ -89,6 +90,13 @@
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
         <version>${mockito-core.version}</version>
+      </dependency>
+
+      <dependency>
+        <!-- Needed by tests, etc -->
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -15,93 +15,6 @@ public abstract class NamingUtils {
   }
 
   /**
-   * Validate that a package is a valid Java package name.
-   *
-   * @param packageName the package name to validate.
-   * @throws IllegalArgumentException if invalid.
-   */
-  public static void validatePackageName(String packageName) throws IllegalArgumentException {
-    if (packageName.isEmpty()) {
-      // Empty packages are allowed.
-      return;
-    }
-
-    int start = 0;
-    for (int i = start; i < packageName.length(); ++i) {
-      char c = packageName.charAt(i);
-      if (c == '.') {
-        if (start == i || start + 1 >= packageName.length()) {
-          throw new IllegalArgumentException(
-              "invalid package name '" + packageName + "' at position " + (i + 1)
-                  + ": expected an identifier but received '.'"
-          );
-        }
-        start = i;
-        continue;
-      }
-
-      if (start == i - 1) {
-        if (!Character.isJavaIdentifierStart(c)) {
-          throw new IllegalArgumentException(
-              "invalid package name '" + packageName + "' at position " + (i + 1)
-                  + ": first character '" + c + "' is not allowed here"
-          );
-        }
-
-        continue;
-      }
-
-      if (!Character.isJavaIdentifierPart(c)) {
-        throw new IllegalArgumentException(
-            "invalid package name '" + packageName + "' at position " + (i + 1)
-                + ": character '" + c + "' is not allowed here"
-        );
-      }
-    }
-  }
-
-  /**
-   * Validate that a string is a valid Java class name.
-   *
-   * @param className the identifier to validate.
-   * @throws IllegalArgumentException if invalid.
-   */
-  public static void validateClassName(String className) throws IllegalArgumentException {
-    try {
-      validateIdentifier(className);
-    } catch (IllegalArgumentException ex) {
-      throw new IllegalArgumentException(
-          "invalid class name '" + className + "': " + ex.getMessage()
-      );
-    }
-  }
-
-  /**
-   * Validate that a string is a valid Java identifier.
-   *
-   * @param identifier the identifier to validate.
-   * @throws IllegalArgumentException if invalid.
-   */
-  public static void validateIdentifier(String identifier) throws IllegalArgumentException {
-    if (identifier.isEmpty()) {
-      throw new IllegalArgumentException("empty identifier");
-    }
-
-    char c = identifier.charAt(0);
-
-    if (!Character.isJavaIdentifierStart(c)) {
-      throw new IllegalArgumentException("invalid character '" + c + "' at position 1");
-    }
-
-    for (int i = 1; i < identifier.length(); ++i) {
-      c = identifier.charAt(i);
-      if (!Character.isJavaIdentifierPart(c)) {
-        throw new IllegalArgumentException("invalid character '" + c + "' at position " + (i + 1));
-      }
-    }
-  }
-
-  /**
    * Make a name suitable for use as an identifier, if it is not appropriate already.
    * <p>
    * This assumes the most recently supported language version. This may vary in behaviour
@@ -116,5 +29,91 @@ public abstract class NamingUtils {
     }
 
     return name;
+  }
+
+  /**
+   * Validate that a string is a valid Java class name.
+   *
+   * @param className the identifier to validate.
+   * @throws IllegalArgumentException if invalid.
+   */
+  public static void validateClassName(String className) throws IllegalArgumentException {
+    try {
+      validateIdentifier(className);
+    } catch (IllegalArgumentException ex) {
+      throwInvalidClassName(className, ex.getMessage(), ex);
+    }
+  }
+
+  /**
+   * Validate that a package is a valid Java package name.
+   *
+   * @param packageName the package name to validate.
+   * @throws IllegalArgumentException if invalid.
+   */
+  public static void validatePackageName(String packageName) throws IllegalArgumentException {
+    if (packageName.isEmpty()) {
+      // Empty packages are allowed.
+      return;
+    }
+
+    if (packageName.startsWith(".")) {
+      throwInvalidPackageName(packageName, "cannot start with a period", null);
+    }
+
+    if (packageName.endsWith(".")) {
+      throwInvalidPackageName(packageName, "cannot end with a period", null);
+    }
+
+    if (packageName.contains("..")) {
+      throwInvalidPackageName(packageName, "cannot contain empty level names", null);
+    }
+
+    for (String fragment : packageName.split("\\.")) {
+      try {
+        validateIdentifier(fragment);
+      } catch (IllegalArgumentException ex) {
+        throwInvalidPackageName(packageName, ex.getMessage(), ex);
+      }
+    }
+  }
+
+  /**
+   * Validate that a string is a valid Java identifier.
+   *
+   * @param identifier the identifier to validate.
+   * @throws IllegalArgumentException if invalid.
+   */
+  static void validateIdentifier(String identifier) throws IllegalArgumentException {
+    if (identifier.isEmpty()) {
+      throwInvalidIdentifier(identifier, "cannot be empty");
+    }
+
+    // Keep behaviour consistent with Java 9 by disallowing '_'
+    if (identifier.equals("_") || SourceVersion.isKeyword(identifier)) {
+      throwInvalidIdentifier(identifier, "is a reserved keyword in Java");
+    }
+
+    if (!SourceVersion.isIdentifier(identifier)) {
+      throwInvalidIdentifier(identifier, "is not a valid Java identifier");
+    }
+  }
+
+  private static void throwInvalidIdentifier(String name, String reason) {
+    throw new IllegalArgumentException("name '" + name + "' " + reason);
+  }
+
+  private static void throwInvalidClassName(String name, String reason, Throwable cause) {
+    throw new IllegalArgumentException(
+        "invalid class name '" + name + "': " + reason,
+        cause
+    );
+  }
+
+  private static void throwInvalidPackageName(String name, String reason, Throwable cause) {
+    throw new IllegalArgumentException(
+        "invalid package name '" + name + "': " + reason,
+        cause
+    );
   }
 }

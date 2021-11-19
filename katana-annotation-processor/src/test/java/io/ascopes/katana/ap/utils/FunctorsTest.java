@@ -2,7 +2,10 @@ package io.ascopes.katana.ap.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Optional;
+import java.util.SortedMap;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +29,7 @@ class FunctorsTest {
   }
 
   @Test
-  void flatten_flattens_the_stream() {
+  void flattenStream_flattens_the_stream() {
     Stream<String> strings = Stream
         .of(
             Stream.of("foo", "bar", "baz"),
@@ -37,5 +40,37 @@ class FunctorsTest {
 
     assertThat(strings)
         .containsExactly("foo", "bar", "baz", "doh", "ray", "me", "troll", "lol", "lol");
+  }
+
+  @Test
+  void flattenCollection_flattens_the_collections() {
+    Stream<String> strings = Stream
+        .of(
+            Arrays.asList("sudo", "apt", "install"),
+            Arrays.asList("yay", "-Syuu"),
+            Arrays.asList("sdk", "install", "java")
+        )
+        .flatMap(Functors.flattenCollection());
+
+    assertThat(strings)
+        .containsExactly("sudo", "apt", "install", "yay", "-Syuu", "sdk", "install", "java");
+  }
+
+  @Test
+  void toSortedMap_collects_to_a_sorted_map() {
+    SortedMap<Integer, Integer> map = Stream
+        .of("900", "33", "12", "114", "73")
+        .collect(Functors.toSortedMap(
+            Integer::valueOf,
+            String::length,
+            Comparator.comparing(i -> -i)
+        ));
+
+    assertThat(map.keySet().iterator()).containsExactly(900, 114, 73, 33, 12);
+    assertThat(map).containsEntry(900, 3);
+    assertThat(map).containsEntry(33, 2);
+    assertThat(map).containsEntry(12, 2);
+    assertThat(map).containsEntry(114, 3);
+    assertThat(map).containsEntry(73, 2);
   }
 }

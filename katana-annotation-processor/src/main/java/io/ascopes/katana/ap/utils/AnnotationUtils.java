@@ -48,9 +48,9 @@ public abstract class AnnotationUtils {
    *
    * @param mirror the mirror to check.
    * @param name   the name of the attribute.
-   * @return an optional holding the attribute value, or an empty optional if not present.
+   * @return an result holding the attribute value, or a failed result if not present.
    */
-  public static Optional<? extends AnnotationValue> getValue(
+  public static Result<? extends AnnotationValue> getValue(
       AnnotationMirror mirror,
       String name
   ) {
@@ -60,6 +60,8 @@ public abstract class AnnotationUtils {
         .stream()
         .filter(entry -> entry.getKey().getSimpleName().contentEquals(name))
         .map(Entry::getValue)
-        .findAny();
+        .findAny()
+        .map(Result::ok)
+        .orElseGet(Result::fail);
   }
 }
