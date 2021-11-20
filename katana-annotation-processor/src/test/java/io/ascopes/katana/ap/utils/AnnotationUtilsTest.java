@@ -1,6 +1,6 @@
 package io.ascopes.katana.ap.utils;
 
-import io.ascopes.katana.ap.stubs.StubName;
+import io.ascopes.katana.ap.mocking.StubName;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

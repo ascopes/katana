@@ -59,9 +59,9 @@ public final class MethodClassifier {
       ExecutableElement method = it.next();
 
       failed |= this.processAsGetter(builder, method, settings)
-          .ifIgnoredFlatMap(() -> this.processAsSetter(builder, method, settings))
-          .ifIgnoredFlatMap(() -> this.processAsInstanceMethod(builder, method))
-          .ifIgnoredFlatMap(() -> this.processAsStaticMethod(builder, method))
+          .ifIgnoredReplace(() -> this.processAsSetter(builder, method, settings))
+          .ifIgnoredReplace(() -> this.processAsInstanceMethod(builder, method))
+          .ifIgnoredReplace(() -> this.processAsStaticMethod(builder, method))
           .assertNotIgnored(() -> "No method processors consumed method " + method)
           .isNotOk();
     }
@@ -101,7 +101,7 @@ public final class MethodClassifier {
             return Result.ok(attrName);
           }
         })
-        .ifIgnoredFlatMap(() -> this.removePrefixCamelCase(method, getterPrefix))
+        .ifIgnoredReplace(() -> this.removePrefixCamelCase(method, getterPrefix))
         .ifOkFlatMap(attributeName -> {
           ExecutableElement existingMethod = builder.getGetters().get(attributeName);
           if (existingMethod != null) {

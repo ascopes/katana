@@ -64,7 +64,7 @@ public class AttributeFactory {
     // we can provide a meaningful set of error messages for those as well.
     return this
         .ensureNoOrphans(classifiedMethods)
-        .ifOkFlatReplace(attributes);
+        .ifOkReplace(() -> attributes);
   }
 
   private Result<Attribute> buildFor(

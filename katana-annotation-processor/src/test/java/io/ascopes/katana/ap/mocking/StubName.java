@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.stubs;
+package io.ascopes.katana.ap.mocking;
 
 import java.util.Objects;
 import javax.lang.model.element.Name;

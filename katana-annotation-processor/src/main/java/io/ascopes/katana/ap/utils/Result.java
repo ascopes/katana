@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 
 /**
@@ -38,10 +37,7 @@ public final class Result<T> {
    * @throws IllegalStateException if the result was not OK.
    */
   public T unwrap() throws IllegalStateException {
-    if (this == CLEARED) {
-      throw new IllegalStateException("Cannot unwrap an empty OK result!");
-    }
-
+    this.assertNotCleared();
     if (this.isNotOk()) {
       throw new IllegalStateException("Cannot unwrap an ignored/failed result!");
     }
@@ -85,6 +81,7 @@ public final class Result<T> {
    */
   public Result<T> ifOkThen(Consumer<T> then) {
     Objects.requireNonNull(then);
+    this.assertNotCleared();
     if (this.isOk()) {
       then.accept(this.unwrap());
     }
@@ -101,6 +98,7 @@ public final class Result<T> {
    */
   public <U> Result<U> ifOkMap(Function<T, U> then) {
     Objects.requireNonNull(then);
+    this.assertNotCleared();
     return this.isOk()
         ? then.andThen(Result::ok).apply(this.unwrap())
         : castFailedOrIgnored(this);
@@ -115,8 +113,9 @@ public final class Result<T> {
    */
   public <U> Result<U> ifOkFlatMap(Function<T, Result<U>> then) {
     Objects.requireNonNull(then);
+    this.assertNotCleared();
     return this.isOk()
-        ? then.apply(this.unwrap())
+        ? Objects.requireNonNull(then.apply(this.unwrap()))
         : castFailedOrIgnored(this);
   }
 
@@ -124,12 +123,14 @@ public final class Result<T> {
    * If this result is OK, replace this result with the given result. Otherwise, return this
    * result.
    *
-   * @param then the result to replace with if this result is OK.
+   * @param then the supplier of the result to replace with if this result is OK.
    * @return the new result.
    */
-  public <U> Result<U> ifOkFlatReplace(Result<U> then) {
+  public <U> Result<U> ifOkReplace(Supplier<Result<U>> then) {
     Objects.requireNonNull(then);
-    return this.ifOkFlatMap(unused -> then);
+    return this.isOk()
+        ? Objects.requireNonNull(then.get())
+        : castFailedOrIgnored(this);
   }
 
   /**
@@ -138,10 +139,10 @@ public final class Result<T> {
    * @param then the flat map function to perform, if this is ignored.
    * @return the new result if this result was ignored, otherwise this result.
    */
-  public Result<T> ifIgnoredFlatMap(Supplier<Result<T>> then) {
+  public Result<T> ifIgnoredReplace(Supplier<Result<T>> then) {
     Objects.requireNonNull(then);
     return this.isIgnored()
-        ? then.get()
+        ? Objects.requireNonNull(then.get())
         : this;
   }
 
@@ -160,9 +161,9 @@ public final class Result<T> {
    * @return the value of this result if it was OK, or the result of the supplier otherwise.
    */
   public @PolyNull T elseReturn(@PolyNull T ifNotOk) {
-    T unwrapped = this.unwrap();
+    this.assertNotCleared();
     return this.isOk()
-        ? unwrapped
+        ? this.unwrap()
         : ifNotOk;
   }
 
@@ -171,9 +172,10 @@ public final class Result<T> {
    * @return the value of this result if it was OK, or the result of the supplier otherwise.
    */
   public @PolyNull T elseGet(Supplier<@PolyNull T> ifNotOk) {
+    this.assertNotCleared();
     Objects.requireNonNull(ifNotOk);
     return this.isOk()
-        ? this.value
+        ? this.unwrap()
         : ifNotOk.get();
   }
 
@@ -212,6 +214,18 @@ public final class Result<T> {
    */
   @Override
   public int hashCode() {
+    if (this == CLEARED) {
+      return Integer.MIN_VALUE + 1;
+    }
+
+    if (this == FAILED) {
+      return Integer.MIN_VALUE + 2;
+    }
+
+    if (this == IGNORED) {
+      return Integer.MIN_VALUE + 3;
+    }
+
     return Objects.hash(this.value);
   }
 
@@ -230,6 +244,12 @@ public final class Result<T> {
       return "Result{ok}";
     }
     return "Result{ok, " + this.value + "}";
+  }
+
+  private void assertNotCleared() {
+    if (this == CLEARED) {
+      throw new IllegalStateException("Cannot unwrap an empty OK result!");
+    }
   }
 
   /**
@@ -266,5 +286,4 @@ public final class Result<T> {
     // Type erasure is a beautiful thing sometimes.
     return (Result<T>) result;
   }
-
 }
