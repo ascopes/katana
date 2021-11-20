@@ -9,6 +9,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.NoType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Streamable iterator which yields the given type element and all unique supertypes, in a top-down
@@ -47,6 +48,7 @@ public final class SupertypeIterator implements StreamableIterator<TypeElement> 
    */
   @Override
   public TypeElement next() throws NoSuchElementException {
+    @Nullable
     TypeElement next = this.upcoming.poll();
 
     if (next == null) {

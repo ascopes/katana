@@ -1,11 +1,13 @@
 package io.ascopes.katana.ap.utils;
 
 import java.util.Map.Entry;
-import java.util.Optional;
+import java.util.Objects;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import org.checkerframework.common.util.report.qual.ReportCreation;
+import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
  * Various helpers for annotation processing.
@@ -13,6 +15,8 @@ import javax.lang.model.element.TypeElement;
  * @author Ashley Scopes
  * @since 0.0.1
  */
+@ReportCreation
+@ReportInherit
 public abstract class AnnotationUtils {
 
   private AnnotationUtils() {
@@ -30,6 +34,9 @@ public abstract class AnnotationUtils {
       Element annotatedElement,
       TypeElement annotationType
   ) {
+    Objects.requireNonNull(annotatedElement, "annotatedElement was null");
+    Objects.requireNonNull(annotationType, "annotationType was null");
+
     return annotatedElement
         .getAnnotationMirrors()
         .stream()
@@ -54,6 +61,9 @@ public abstract class AnnotationUtils {
       AnnotationMirror mirror,
       String name
   ) {
+    Objects.requireNonNull(mirror, "mirror was null");
+    Objects.requireNonNull(name, "name was null");
+
     return mirror
         .getElementValues()
         .entrySet()

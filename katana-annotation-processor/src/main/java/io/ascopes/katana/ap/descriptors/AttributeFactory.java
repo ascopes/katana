@@ -8,6 +8,7 @@ import io.ascopes.katana.ap.utils.DiagnosticTemplates;
 import io.ascopes.katana.ap.utils.Functors;
 import io.ascopes.katana.ap.utils.Result;
 import io.ascopes.katana.ap.utils.ResultCollector;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.function.Function;
 import javax.annotation.processing.Messager;
@@ -34,9 +35,9 @@ public class AttributeFactory {
       Messager messager,
       Elements elementUtils
   ) {
-    this.diagnosticTemplates = diagnosticTemplates;
-    this.messager = messager;
-    this.elementUtils = elementUtils;
+    this.diagnosticTemplates = Objects.requireNonNull(diagnosticTemplates);
+    this.messager = Objects.requireNonNull(messager);
+    this.elementUtils = Objects.requireNonNull(elementUtils);
   }
 
   /**

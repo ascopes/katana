@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.SortedMap;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
  * Descriptor for a model that should be generated.
@@ -57,14 +58,14 @@ public final class Model {
   @SuppressWarnings("UnusedReturnValue")
   public static final class Builder extends ObjectBuilder<Model> {
 
-    private TypeElement modelInterface;
-    private AnnotationMirror annotationMirror;
-    private Boolean mutable;
-    private String packageName;
-    private String className;
-    private SettingsCollection settingsCollection;
-    private ClassifiedMethods methods;
-    private SortedMap<String, Attribute> attributes;
+    private @MonotonicNonNull TypeElement modelInterface;
+    private @MonotonicNonNull AnnotationMirror annotationMirror;
+    private @MonotonicNonNull Boolean mutable;
+    private @MonotonicNonNull String packageName;
+    private @MonotonicNonNull String className;
+    private @MonotonicNonNull SettingsCollection settingsCollection;
+    private @MonotonicNonNull ClassifiedMethods methods;
+    private @MonotonicNonNull SortedMap<String, Attribute> attributes;
 
     private Builder() {
     }
@@ -127,7 +128,10 @@ public final class Model {
 
     public Builder attributes(SortedMap<String, Attribute> attributes) {
       Objects.requireNonNull(attributes, "map was null");
-      attributes.forEach((k, v) -> Objects.requireNonNull(v, "Value for key " + k + " was null"));
+      attributes.forEach((key, value) -> {
+        Objects.requireNonNull(key, () -> "key was null for value " + value);
+        Objects.requireNonNull(value, () -> "value was null for key " + key);
+      });
       this.attributes = Collections.unmodifiableSortedMap(attributes);
       return this;
     }

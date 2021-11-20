@@ -11,7 +11,18 @@ import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+
+/**
+ * Templating for diagnostic error messages ('compilation' errors). This keeps the code
+ * tidier by delegating any rendering to the Handlebars templating engine. Error messages
+ * are then defined as Handlebars templates in the classpath and are only loaded when needed.
+ *
+ * @author Ashley Scopes
+ * @since 0.0.1
+ */
 public class DiagnosticTemplates {
 
   private final Handlebars handlebars;
@@ -73,14 +84,16 @@ public class DiagnosticTemplates {
   public static class MessageBuilder extends ObjectBuilder<String> {
 
     private final Template template;
-    private final Map<String, Object> args;
+    private final Map<String, @Nullable Object> args;
 
     private MessageBuilder(Template template) {
+      Objects.requireNonNull(template);
       this.template = template;
       this.args = new HashMap<>();
     }
 
-    public MessageBuilder placeholder(String name, Object value) {
+    public MessageBuilder placeholder(String name, @Nullable Object value) {
+      Objects.requireNonNull(name);
       this.args.put(name, value);
       return this;
     }

@@ -4,6 +4,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 
 /**
  * Monadic representation of a result that can be marked as OK with a value, OK with no value,
@@ -22,9 +24,10 @@ public final class Result<T> {
   private static final Result<?> FAILED = new Result<>(null);
   private static final Result<?> IGNORED = new Result<>(null);
 
+  @PolyNull
   private final T value;
 
-  private Result(T value) {
+  private Result(@PolyNull T value) {
     this.value = value;
   }
 
@@ -43,7 +46,7 @@ public final class Result<T> {
       throw new IllegalStateException("Cannot unwrap an ignored/failed result!");
     }
 
-    return this.value;
+    return Objects.requireNonNull(this.value);
   }
 
   /**
@@ -81,8 +84,9 @@ public final class Result<T> {
    * @return this result to allow further chaining.
    */
   public Result<T> ifOkThen(Consumer<T> then) {
+    Objects.requireNonNull(then);
     if (this.isOk()) {
-      then.accept(this.value);
+      then.accept(this.unwrap());
     }
     return this;
   }
@@ -96,8 +100,9 @@ public final class Result<T> {
    * @return the new result if this result was OK, otherwise this result.
    */
   public <U> Result<U> ifOkMap(Function<T, U> then) {
+    Objects.requireNonNull(then);
     return this.isOk()
-        ? then.andThen(Result::ok).apply(this.value)
+        ? then.andThen(Result::ok).apply(this.unwrap())
         : castFailedOrIgnored(this);
   }
 
@@ -109,8 +114,9 @@ public final class Result<T> {
    * @return the new result if this result was ok, otherwise this result.
    */
   public <U> Result<U> ifOkFlatMap(Function<T, Result<U>> then) {
+    Objects.requireNonNull(then);
     return this.isOk()
-        ? then.apply(this.value)
+        ? then.apply(this.unwrap())
         : castFailedOrIgnored(this);
   }
 
@@ -122,6 +128,7 @@ public final class Result<T> {
    * @return the new result.
    */
   public <U> Result<U> ifOkFlatReplace(Result<U> then) {
+    Objects.requireNonNull(then);
     return this.ifOkFlatMap(unused -> then);
   }
 
@@ -132,6 +139,7 @@ public final class Result<T> {
    * @return the new result if this result was ignored, otherwise this result.
    */
   public Result<T> ifIgnoredFlatMap(Supplier<Result<T>> then) {
+    Objects.requireNonNull(then);
     return this.isIgnored()
         ? then.get()
         : this;
@@ -151,9 +159,10 @@ public final class Result<T> {
    * @param ifNotOk value to use if not OK.
    * @return the value of this result if it was OK, or the result of the supplier otherwise.
    */
-  public T elseReturn(T ifNotOk) {
+  public @PolyNull T elseReturn(@PolyNull T ifNotOk) {
+    T unwrapped = this.unwrap();
     return this.isOk()
-        ? this.value
+        ? unwrapped
         : ifNotOk;
   }
 
@@ -161,7 +170,8 @@ public final class Result<T> {
    * @param ifNotOk supplier to perform to get some result if this result is not OK.
    * @return the value of this result if it was OK, or the result of the supplier otherwise.
    */
-  public T elseGet(Supplier<T> ifNotOk) {
+  public @PolyNull T elseGet(Supplier<@PolyNull T> ifNotOk) {
+    Objects.requireNonNull(ifNotOk);
     return this.isOk()
         ? this.value
         : ifNotOk.get();
@@ -175,6 +185,7 @@ public final class Result<T> {
    * @throws IllegalStateException if ignored.
    */
   public Result<T> assertNotIgnored(Supplier<String> errorMessage) throws IllegalStateException {
+    Objects.requireNonNull(errorMessage);
     if (this.isIgnored()) {
       throw new IllegalStateException(
           "Did not expect element to be ignored! " + errorMessage.get());
@@ -201,7 +212,7 @@ public final class Result<T> {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(value);
+    return Objects.hash(this.value);
   }
 
   /**

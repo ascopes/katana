@@ -3,9 +3,10 @@ package io.ascopes.katana.ap.descriptors;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.ObjectBuilder;
 import java.util.Objects;
-import java.util.Optional;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Representation of an attribute within a model.
@@ -17,7 +18,9 @@ public final class Attribute {
 
   private final String name;
   private final ExecutableElement getterToOverride;
-  private final ExecutableElement setterToOverride;
+
+  private final @Nullable ExecutableElement setterToOverride;
+
   private final boolean setterEnabled;
 
   private Attribute(Builder builder) {
@@ -50,20 +53,13 @@ public final class Attribute {
     return this.getterToOverride.getReturnType();
   }
 
-  /**
-   * @return the optional setter to override.
-   */
-  public Optional<ExecutableElement> getSetterToOverride() {
-    return Optional.ofNullable(this.setterToOverride);
-  }
-
   @Override
   public String toString() {
     return "Attribute{" +
         "name='" + this.name + "', " +
         "type='" + this.getterToOverride.getReturnType() + "', " +
         "get=true, set=" + this.setterEnabled +
-      '}';
+        '}';
   }
 
   public static Builder builder() {
@@ -72,10 +68,10 @@ public final class Attribute {
 
   public static final class Builder extends ObjectBuilder<Attribute> {
 
-    private String name;
-    private ExecutableElement getterToOverride;
-    private ExecutableElement setterToOverride;
-    private Boolean setterEnabled;
+    private @MonotonicNonNull String name;
+    private @MonotonicNonNull ExecutableElement getterToOverride;
+    private @Nullable ExecutableElement setterToOverride;
+    private @MonotonicNonNull Boolean setterEnabled;
 
     private Builder() {
     }

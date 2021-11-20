@@ -1,6 +1,10 @@
 package io.ascopes.katana.ap.utils;
 
 import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.util.report.qual.ReportCreation;
+import org.checkerframework.common.util.report.qual.ReportInherit;
+import org.checkerframework.common.value.qual.StaticallyExecutable;
 
 /**
  * Helper methods for handlebars templates.
@@ -8,6 +12,8 @@ import java.util.Objects;
  * @author Ashley Scopes
  * @since 0.0.1
  */
+@ReportCreation
+@ReportInherit
 @SuppressWarnings("unused")
 public abstract class HandlebarsHelpers {
 
@@ -21,7 +27,7 @@ public abstract class HandlebarsHelpers {
    * @param value the object to quote.
    * @return the quoted representation.
    */
-  public static String quoted(Object value) {
+  public static String quoted(@Nullable Object value) {
     String raw = Objects.toString(value);
     StringBuilder builder = new StringBuilder("\"");
 
@@ -50,7 +56,7 @@ public abstract class HandlebarsHelpers {
    * @param element the element to prefix.
    * @return the full string.
    */
-  public static String a(Object element) {
+  public static String a(@Nullable Object element) {
     if (element == null) {
       return "null";
     }
@@ -76,7 +82,7 @@ public abstract class HandlebarsHelpers {
   /**
    * Alias for {@link #a}
    */
-  public static String an(Object element) {
+  public static String an(@Nullable Object element) {
     return a(element);
   }
 }

@@ -25,8 +25,8 @@ public final class ClassifiedMethods {
   private final SortedMap<String, Set<ExecutableElement>> staticMethods;
 
   private ClassifiedMethods(Builder builder) {
-    this.getters = Collections.unmodifiableSortedMap(builder.getGetters());
-    this.setters = Collections.unmodifiableSortedMap(builder.getSetters());
+    this.getters = unmodifiableSortedMap(builder.getGetters());
+    this.setters = unmodifiableSortedMap(builder.getSetters());
     this.otherInstanceMethods = deepImmutableOverloads(builder.getOtherInstanceMethods());
     this.staticMethods = deepImmutableOverloads(builder.getStaticMethods());
   }
@@ -93,8 +93,21 @@ public final class ClassifiedMethods {
       SortedMap<String, Set<ExecutableElement>> elements
   ) {
     SortedMap<String, Set<ExecutableElement>> elementsCopy = new TreeMap<>(String::compareTo);
-    elements.forEach((key, values) -> elementsCopy.put(key, Collections.unmodifiableSet(values)));
-    return Collections.unmodifiableSortedMap(elementsCopy);
+    elements.forEach((key, values) -> {
+      Objects.requireNonNull(values, () -> "set was null for " + key);
+      values.forEach(item -> Objects.requireNonNull(item, () -> "null item in set for " + key));
+      elementsCopy.put(key, Collections.unmodifiableSet(values));
+    });
+    return unmodifiableSortedMap(elementsCopy);
+  }
+
+  private static <K, V> SortedMap<K, V> unmodifiableSortedMap(SortedMap<K, V> map) {
+    Objects.requireNonNull(map, "Map was null");
+    map.forEach((key, value) -> {
+      Objects.requireNonNull(key, () -> "key was null for value " + value);
+      Objects.requireNonNull(value, () -> "value was null for key " + key);
+    });
+    return Collections.unmodifiableSortedMap(map);
   }
 
   /**

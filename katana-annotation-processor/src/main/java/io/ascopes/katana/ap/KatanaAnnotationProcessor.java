@@ -23,6 +23,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
  * Entrypoint for the Katana annotation processor.
@@ -38,8 +39,8 @@ public final class KatanaAnnotationProcessor extends AbstractProcessor {
 
   private final Logger logger;
 
-  private InterfaceSearcher interfaceSearcher;
-  private ModelFactory modelFactory;
+  private @MonotonicNonNull InterfaceSearcher interfaceSearcher;
+  private @MonotonicNonNull ModelFactory modelFactory;
 
   /**
    * Pre-initialize the processor.

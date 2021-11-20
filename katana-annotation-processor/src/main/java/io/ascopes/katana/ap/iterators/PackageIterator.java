@@ -5,6 +5,7 @@ import java.util.Spliterator;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.util.Elements;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Iterator across all parent packages for a given element.
@@ -17,6 +18,8 @@ import javax.lang.model.util.Elements;
 public final class PackageIterator implements StreamableIterator<PackageElement> {
 
   private final Elements elementUtils;
+
+  @Nullable
   private PackageElement next;
 
   /**

@@ -5,6 +5,8 @@ import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
+import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.optional.qual.PolyPresent;
 
 /**
  * Encapsulation of a value of an evaluated setting. This contains the parsed value as well as the
@@ -17,9 +19,9 @@ import javax.lang.model.element.Element;
 class SettingValueHolder<T> {
 
   private final T value;
-  private final Element declaringElement;
-  private final AnnotationMirror annotationMirror;
-  private final AnnotationValue annotationValue;
+  private final @PolyNull Element declaringElement;
+  private final @PolyNull AnnotationMirror annotationMirror;
+  private final @PolyNull AnnotationValue annotationValue;
 
   /**
    * Initialize a default setting holder.
@@ -48,7 +50,7 @@ class SettingValueHolder<T> {
       AnnotationValue annotationValue
   ) {
     this.value = Objects.requireNonNull(value);
-    this.declaringElement = declaringElement;
+    this.declaringElement = Objects.requireNonNull(declaringElement);
     this.annotationMirror = Objects.requireNonNull(annotationMirror);
     this.annotationValue = Objects.requireNonNull(annotationValue);
   }
@@ -64,14 +66,14 @@ class SettingValueHolder<T> {
    * @return the declaring element defining the setting, or an empty optional if this is a default
    * setting.
    */
-  public Optional<Element> getDeclaringElement() {
+  public @PolyPresent Optional<Element> getDeclaringElement() {
     return Optional.ofNullable(this.declaringElement);
   }
 
   /**
    * @return the mirror defining the setting, or an empty optional if this is a default setting.
    */
-  public Optional<AnnotationMirror> getAnnotationMirror() {
+  public @PolyPresent Optional<AnnotationMirror> getAnnotationMirror() {
     return Optional.ofNullable(this.annotationMirror);
   }
 
@@ -79,7 +81,7 @@ class SettingValueHolder<T> {
    * @return the value of the setting within the annotation, or an empty optional if this is a
    * default setting.
    */
-  public Optional<AnnotationValue> getAnnotationValue() {
+  public @PolyPresent Optional<AnnotationValue> getAnnotationValue() {
     return Optional.ofNullable(this.annotationValue);
   }
 }

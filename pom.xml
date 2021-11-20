@@ -26,7 +26,8 @@
   <properties>
     <assertj.version>3.11.1</assertj.version>
     <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
-    <compile-testing.version>0.19</compile-testing.version>
+    <checkerframework.version>3.19.0</checkerframework.version>
+    <google-compile-testing.version>0.19</google-compile-testing.version>
     <groovy.version>3.0.9</groovy.version>
     <handlebars.version>4.3.0</handlebars.version>
     <javapoet.version>1.13.0</javapoet.version>
@@ -57,15 +58,15 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>com.google.testing.compile</groupId>
-        <artifactId>compile-testing</artifactId>
-        <version>${compile-testing.version}</version>
-      </dependency>
-
-      <dependency>
         <groupId>com.github.jknack</groupId>
         <artifactId>handlebars</artifactId>
         <version>${handlebars.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.testing.compile</groupId>
+        <artifactId>compile-testing</artifactId>
+        <version>${google-compile-testing.version}</version>
       </dependency>
 
       <dependency>
@@ -78,6 +79,12 @@
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
         <version>${assertj.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.checkerframework</groupId>
+        <artifactId>checker-qual</artifactId>
+        <version>${checkerframework.version}</version>
       </dependency>
 
       <dependency>

@@ -159,8 +159,10 @@ public final class SettingsResolver {
     return new Setting<>(new SettingValueHolder<>(defaultValue), description, schema);
   }
 
-  private Optional<SettingsAnnotation> findSettingsOnAnnotation(Element declaringElement,
-      AnnotationMirror annotationMirror) {
+  private Optional<SettingsAnnotation> findSettingsOnAnnotation(
+      Element declaringElement,
+      AnnotationMirror annotationMirror
+  ) {
     return annotationMirror
         .getElementValues()
         .entrySet()

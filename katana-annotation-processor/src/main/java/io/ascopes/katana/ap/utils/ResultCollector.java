@@ -3,6 +3,7 @@ package io.ascopes.katana.ap.utils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -24,13 +25,13 @@ import java.util.stream.Collector;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class ResultCollector<T, C> implements
-    Collector<Result<T>, Result<Collection<T>>, Result<C>> {
+public final class ResultCollector<T, C>
+    implements Collector<Result<T>, Result<Collection<T>>, Result<C>> {
 
   private final Collector<T, ?, C> finalCollector;
 
   private ResultCollector(Collector<T, ?, C> finalCollector) {
-    this.finalCollector = finalCollector;
+    this.finalCollector = Objects.requireNonNull(finalCollector);
   }
 
   /**
@@ -68,7 +69,7 @@ public final class ResultCollector<T, C> implements
   public Function<Result<Collection<T>>, Result<C>> finisher() {
     return listResult -> listResult
         .ifOkMap(Collection::stream)
-        .ifOkMap(stream -> stream.collect(finalCollector));
+        .ifOkMap(stream -> stream.collect(this.finalCollector));
   }
 
   /**

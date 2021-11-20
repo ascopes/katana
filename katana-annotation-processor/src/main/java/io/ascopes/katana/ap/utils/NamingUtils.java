@@ -1,6 +1,9 @@
 package io.ascopes.katana.ap.utils;
 
+import java.util.Objects;
 import javax.lang.model.SourceVersion;
+import org.checkerframework.common.util.report.qual.ReportCreation;
+import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
  * Utilities for naming processing and manipulation.
@@ -8,6 +11,8 @@ import javax.lang.model.SourceVersion;
  * @author Ashley Scopes
  * @since 0.0.1
  */
+@ReportCreation
+@ReportInherit
 public abstract class NamingUtils {
 
   private NamingUtils() {
@@ -24,6 +29,8 @@ public abstract class NamingUtils {
    * @return the identifier to use.
    */
   public static String transmogrifyIdentifier(String name) {
+    Objects.requireNonNull(name);
+
     if (SourceVersion.isKeyword(name)) {
       return "$__" + name + "__";
     }
@@ -52,6 +59,8 @@ public abstract class NamingUtils {
    * @throws IllegalArgumentException if invalid.
    */
   public static void validatePackageName(String packageName) throws IllegalArgumentException {
+    Objects.requireNonNull(packageName);
+
     if (packageName.isEmpty()) {
       // Empty packages are allowed.
       return;
@@ -85,6 +94,8 @@ public abstract class NamingUtils {
    * @throws IllegalArgumentException if invalid.
    */
   static void validateIdentifier(String identifier) throws IllegalArgumentException {
+    Objects.requireNonNull(identifier);
+
     if (identifier.isEmpty()) {
       throwInvalidIdentifier(identifier, "cannot be empty");
     }

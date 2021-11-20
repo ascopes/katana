@@ -3,6 +3,7 @@ package io.ascopes.katana.ap.utils;
 import java.io.PrintStream;
 import java.time.LocalDateTime;
 import java.util.regex.Pattern;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Simple logger that writes to stderr.
@@ -36,7 +37,7 @@ public final class Logger {
    * @param template the template string to use.
    * @param args     the arguments to use.
    */
-  public void info(String template, Object... args) {
+  public void info(String template, Object @Nullable ... args) {
     this.log(Level.INFO, template, args);
   }
 
@@ -46,7 +47,7 @@ public final class Logger {
    * @param template the template string to use.
    * @param args     the arguments to use.
    */
-  public void debug(String template, Object... args) {
+  public void debug(String template, Object @Nullable ... args) {
     this.log(Level.DEBUG, template, args);
   }
 
