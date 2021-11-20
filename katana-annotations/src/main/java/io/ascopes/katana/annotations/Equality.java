@@ -1,7 +1,5 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.internal.ExclusionMarker;
-import io.ascopes.katana.annotations.internal.InclusionMarker;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -59,7 +57,6 @@ public enum Equality {
    * Annotation to explicitly enable checking for an attribute.
    */
   @Documented
-  @InclusionMarker
   @Retention(RetentionPolicy.SOURCE)
   @Target(ElementType.METHOD)
   public @interface Include {
@@ -70,7 +67,6 @@ public enum Equality {
    * Annotation to explicitly disable checking for an attribute.
    */
   @Documented
-  @ExclusionMarker
   @Retention(RetentionPolicy.SOURCE)
   @Target(ElementType.METHOD)
   public @interface Exclude {
