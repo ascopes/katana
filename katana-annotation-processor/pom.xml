@@ -22,8 +22,6 @@
   </description>
 
   <properties>
-
-
     <settings.packageName>io.ascopes.katana.ap.settings</settings.packageName>
     <settings.settingPackageName>${settings.packageName}</settings.settingPackageName>
     <settings.settingClassName>Setting</settings.settingClassName>
