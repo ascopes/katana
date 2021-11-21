@@ -24,7 +24,7 @@ import javax.tools.Diagnostic.Kind;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public class AttributeFactory {
+public final class AttributeFactory {
 
   private final Elements elementUtils;
   private final Messager messager;

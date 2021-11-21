@@ -17,7 +17,7 @@ import javax.tools.Diagnostic.Kind;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public class JavaFileWriter {
+public final class JavaFileWriter {
 
   private final Logger logger;
   private final Filer filer;

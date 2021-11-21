@@ -16,7 +16,7 @@ import org.checkerframework.checker.optional.qual.PolyPresent;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-class SettingValueHolder<T> {
+final class SettingValueHolder<T> {
 
   private final T value;
   private final @PolyNull Element declaringElement;

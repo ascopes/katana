@@ -23,7 +23,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public class DiagnosticTemplates {
+public final class DiagnosticTemplates {
 
   private final Handlebars handlebars;
 
