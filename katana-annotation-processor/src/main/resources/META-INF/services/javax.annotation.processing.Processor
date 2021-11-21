@@ -1,1 +1,2 @@
-io.ascopes.katana.ap.KatanaAnnotationProcessor
+io.ascopes.katana.ap.KatanaCodegenAnnotationProcessor
+io.ascopes.katana.ap.KatanaCompletionsAnnotationProcessor

@@ -1,7 +1,5 @@
 package io.ascopes.katana.ap;
 
-import io.ascopes.katana.annotations.ImmutableModel;
-import io.ascopes.katana.annotations.MutableModel;
 import io.ascopes.katana.ap.descriptors.AttributeFactory;
 import io.ascopes.katana.ap.descriptors.InterfaceSearcher;
 import io.ascopes.katana.ap.descriptors.MethodClassifier;
@@ -10,18 +8,10 @@ import io.ascopes.katana.ap.descriptors.ModelFactory;
 import io.ascopes.katana.ap.settings.SettingsResolver;
 import io.ascopes.katana.ap.utils.DiagnosticTemplates;
 import io.ascopes.katana.ap.utils.Functors;
-import io.ascopes.katana.ap.utils.Logger;
-import io.ascopes.katana.ap.utils.Logger.Level;
-import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -31,92 +21,46 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class KatanaAnnotationProcessor extends AbstractProcessor {
-
-  private static final Class<MutableModel> MUTABLE_ANNOTATION = MutableModel.class;
-  private static final Class<ImmutableModel> IMMUTABLE_ANNOTATION = ImmutableModel.class;
-  private static final String LOGGING_LEVEL = "logging.level";
-
-  private final Logger logger;
+public final class KatanaCodegenAnnotationProcessor extends AbstractKatanaAnnotationProcessor {
 
   private @MonotonicNonNull InterfaceSearcher interfaceSearcher;
   private @MonotonicNonNull ModelFactory modelFactory;
 
   /**
-   * Pre-initialize the processor.
-   */
-  public KatanaAnnotationProcessor() {
-    this.logger = new Logger();
-  }
-
-  @Override
-  public Set<String> getSupportedOptions() {
-    return Collections.singleton(LOGGING_LEVEL);
-  }
-
-  /**
-   * @return the supported annotation types.
-   */
-  @Override
-  public Set<String> getSupportedAnnotationTypes() {
-    return Stream.of(MUTABLE_ANNOTATION, IMMUTABLE_ANNOTATION)
-        .map(Class::getCanonicalName)
-        .collect(Collectors.toSet());
-  }
-
-  /**
-   * @return the supported source version.
-   */
-  @Override
-  public SourceVersion getSupportedSourceVersion() {
-    // We support up to JDK-17 at the time of writing, but we do not have access to that constant,
-    // so just bodge in the current compiler version and hope for the best.
-    return SourceVersion.latestSupported();
-  }
-
-  /**
    * {@inheritDoc}
    */
   @Override
-  public synchronized void init(ProcessingEnvironment processingEnv) {
-    super.init(processingEnv);
-
-    // Init the loggers.
-    Optional
-        .ofNullable(processingEnv.getOptions().get(LOGGING_LEVEL))
-        .map(Level::valueOf)
-        .ifPresent(Logger::setGlobalLevel);
-
+  protected void doInit() {
     DiagnosticTemplates diagnosticTemplates = new DiagnosticTemplates();
 
     SettingsResolver settingsResolver = new SettingsResolver(
-        processingEnv.getElementUtils(),
-        processingEnv.getTypeUtils()
+        this.processingEnv.getElementUtils(),
+        this.processingEnv.getTypeUtils()
     );
 
     MethodClassifier methodClassifier = new MethodClassifier(
         diagnosticTemplates,
-        processingEnv.getMessager(),
-        processingEnv.getTypeUtils()
+        this.processingEnv.getMessager(),
+        this.processingEnv.getTypeUtils()
     );
 
     InterfaceSearcher interfaceSearcher = new InterfaceSearcher(
         diagnosticTemplates,
-        processingEnv.getMessager()
+        this.processingEnv.getMessager()
     );
 
     AttributeFactory attributeFactory = new AttributeFactory(
         diagnosticTemplates,
-        processingEnv.getMessager(),
-        processingEnv.getElementUtils()
+        this.processingEnv.getMessager(),
+        this.processingEnv.getElementUtils()
     );
 
     ModelFactory modelFactory = new ModelFactory(
         settingsResolver,
         methodClassifier,
         attributeFactory,
-        processingEnv.getMessager(),
-        processingEnv.getElementUtils()
+        this.processingEnv.getMessager(),
+        this.processingEnv.getElementUtils()
     );
 
     this.interfaceSearcher = interfaceSearcher;
@@ -131,7 +75,10 @@ public final class KatanaAnnotationProcessor extends AbstractProcessor {
    * @return {@code true} if the processor ran.
    */
   @Override
-  public boolean process(Set<? extends TypeElement> annotationTypes, RoundEnvironment roundEnv) {
+  public boolean process(
+      Set<? extends TypeElement> annotationTypes,
+      RoundEnvironment roundEnv
+  ) {
     if (annotationTypes.isEmpty()) {
       // Don't do anything.
       return true;

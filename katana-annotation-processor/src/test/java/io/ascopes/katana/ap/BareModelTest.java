@@ -13,7 +13,7 @@ class BareModelTest {
   void test_bare_model() {
     Compilation result = Compiler
         .javac()
-        .withProcessors(new KatanaAnnotationProcessor())
+        .withProcessors(new KatanaCodegenAnnotationProcessor())
         .compile(
             forSourceLines(
                 "test.package-info",
