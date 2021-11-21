@@ -13,7 +13,11 @@ import java.util.Objects;
 public final class SettingSchema<T> {
 
   private final String name;
-  private final Class<T> type;
+
+  // This explicitly is not extended from T, as it enables us to dereference arrays of generic
+  // types correctly (e.g. an array of classes would be Class<?>[] but we can't produce a literal
+  // for this as it is not reified, and Class<?>[].class is not valid syntax).
+  private final Class<?> type;
   private final T immutableDefaultValue;
   private final T mutableDefaultValue;
   private final BuilderSetter<T> builderSetter;
@@ -28,7 +32,7 @@ public final class SettingSchema<T> {
    */
   public SettingSchema(
       String name,
-      Class<T> type,
+      Class<?> type,
       T immutableDefaultValue,
       T mutableDefaultValue,
       BuilderSetter<T> builderSetter
@@ -50,8 +54,19 @@ public final class SettingSchema<T> {
   /**
    * @return the setting type.
    */
-  public Class<T> getType() {
+  public Class<?> getType() {
     return this.type;
+  }
+
+  /**
+   * @return the generic type.
+   */
+  @SuppressWarnings("unchecked")
+  public Class<T> getGenericType() {
+    // This is not considered safe, and doesn't do what is expected if we were to consider this
+    // on a deeper reflective level, but this bodge allows de-referencing arrays of generics
+    // correctly while working around other JVM constraints, so I don't care too much.
+    return (Class<T>) this.type;
   }
 
   /**

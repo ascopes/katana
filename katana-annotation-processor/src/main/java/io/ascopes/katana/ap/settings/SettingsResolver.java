@@ -121,7 +121,7 @@ public final class SettingsResolver {
 
       T actualValue = possibleAnnotationValue
           .ifOkMap(AnnotationValue::getValue)
-          .ifOkMap(schema.getType()::cast)
+          .ifOkMap(schema.getGenericType()::cast)
           .unwrap();
 
       String description = "setting '" + schema.getName() + "' wit"

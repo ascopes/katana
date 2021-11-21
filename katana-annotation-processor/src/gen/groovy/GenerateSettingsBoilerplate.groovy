@@ -14,7 +14,6 @@
  * @since 0.0.1
  */
 import com.squareup.javapoet.AnnotationSpec
-import com.squareup.javapoet.ArrayTypeName
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec
@@ -43,17 +42,17 @@ import java.util.stream.Stream
 
 class CodegenSettingSchema {
   String name
-  Class<?> type
+  TypeName genericType
+  Class<?> rawType
   CodeBlock immutableDefaultValue
   CodeBlock mutableDefaultValue
-  CodeBlock inheritedValue
-  CodeBlock equalityFunction
 }
 
 CodegenSettingSchema buildSchemaFor(Method method) {
   return new CodegenSettingSchema(
       name: method.name,
-      type: method.returnType,
+      genericType: TypeName.get(method.genericReturnType).box(),
+      rawType: method.returnType,
       immutableDefaultValue: getDefaultValueFor(method, ImmutableDefaultSetting),
       mutableDefaultValue: getDefaultValueFor(method, MutableDefaultSetting),
   )
@@ -203,10 +202,8 @@ JavaFile buildSettingsCollectionClass(
   settings.forEach {
     // The type may be primitive. If this is the case, we will need to box it first
     // (e.g. int -> java.lang.Integer; boolean -> java.lang.Boolean; etc)
-    TypeName settingInnerType = TypeName.get(it.type).box()
-
     ParameterizedTypeName settingType = ParameterizedTypeName
-        .get(settingTypeName, settingInnerType)
+        .get(settingTypeName, it.genericType)
 
     FieldSpec field = FieldSpec.builder(settingType, it.name, Modifier.PRIVATE).build()
     ParameterSpec param = ParameterSpec.builder(settingType, it.name).build()
@@ -262,15 +259,14 @@ JavaFile buildSchemaConstants(
 ) {
   ClassName builderType = ClassName.get(packageName, dataClass.name, dataClass.typeSpecs.get(0).name)
   ClassName settingsSchema = ClassName.get(settingSchemaPackageName, settingSchemaClassName)
-
   CodeBlock schemaDescriptors = schemas
       .stream()
       .map {
         CodeBlock.builder()
-            .add('new $T<>(\n', settingsSchema)
+            .add('new $T<$T>(\n', settingsSchema, it.genericType)
             .indent()
             .add('$S', it.name).add(",\n")
-            .add('$T.class', it.type).add(",\n")
+            .add('$T.class', it.rawType).add(",\n")
             .add(it.immutableDefaultValue).add(",\n")
             .add(it.mutableDefaultValue).add(",\n")
             .add('$T::$N', builderType, it.name).add("\n")

@@ -251,9 +251,7 @@ public final class MethodClassifier {
   ) {
     Setting<String> booleanGetterPrefix = settings.getBooleanGetterPrefix();
     Setting<String> getterPrefix = settings.getGetterPrefix();
-    // XXX: fix build script to handle generics properly
-    @SuppressWarnings("rawtypes")
-    Setting<Class[]> booleanTypes = settings.getBooleanTypes();
+    Setting<Class<?>[]> booleanTypes = settings.getBooleanTypes();
 
     String message = this.diagnosticTemplates
         .template("nonBooleanGetter")
