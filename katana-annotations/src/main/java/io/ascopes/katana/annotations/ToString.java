@@ -14,11 +14,6 @@ import java.lang.annotation.Target;
  */
 public enum ToString {
   /**
-   * Inherit the settings to use.
-   */
-  INHERITED,
-
-  /**
    * Do not generate a toString method.
    */
   DISABLED,

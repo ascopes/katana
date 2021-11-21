@@ -110,29 +110,22 @@ public final class SettingsResolver {
       boolean mutable,
       List<SettingsAnnotation> annotations
   ) {
-    EqualityFunction<T> equalityFunction = schema.getEqualityCheck();
-    T inheritedValue = schema.getInheritedValue();
-
     for (SettingsAnnotation annotation : annotations) {
-      Result<? extends AnnotationValue> possibleValue = AnnotationUtils
+      Result<? extends AnnotationValue> possibleAnnotationValue = AnnotationUtils
           .getValue(annotation.mirror, schema.getName());
 
-      if (!possibleValue.isOk()) {
-        // Ignore attributes that haven't been explicitly defined by the user.
+      if (!possibleAnnotationValue.isOk()) {
+        // Attributes left unspecified are assumed to be inherited.
         continue;
       }
 
-      T actualValue = possibleValue
+      T actualValue = possibleAnnotationValue
           .ifOkMap(AnnotationValue::getValue)
           .ifOkMap(schema.getType()::cast)
-          .elseReturn(inheritedValue);
+          .unwrap();
 
-      if (equalityFunction.test(inheritedValue, actualValue)) {
-        // Ignore inherited default values explicitly defined by the user.
-        continue;
-      }
-
-      String description = "setting '" + schema.getName() + "' with value '" + actualValue + "'"
+      String description = "setting '" + schema.getName() + "' wit"
+          + " value '" + actualValue + "'"
           + ", from " + annotation.description;
 
       // We found the setting, so return it.
@@ -140,7 +133,7 @@ public final class SettingsResolver {
           actualValue,
           annotation.declaringElement,
           annotation.mirror,
-          possibleValue.unwrap()
+          possibleAnnotationValue.unwrap()
       );
 
       return new Setting<>(

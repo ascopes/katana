@@ -18,11 +18,6 @@ import java.lang.annotation.Target;
  */
 public enum Setters {
   /**
-   * Inherit the setting.
-   */
-  INHERITED,
-
-  /**
    * Disable generation of setters entirely.
    */
   DISABLED,

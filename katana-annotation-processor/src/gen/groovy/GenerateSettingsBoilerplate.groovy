@@ -27,7 +27,6 @@ import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.WildcardTypeName
 import io.ascopes.katana.annotations.Generated
 import io.ascopes.katana.annotations.Settings
-import io.ascopes.katana.annotations.internal.DefaultSetting
 import io.ascopes.katana.annotations.internal.ImmutableDefaultSetting
 import io.ascopes.katana.annotations.internal.MutableDefaultSetting
 
@@ -52,31 +51,24 @@ class CodegenSettingSchema {
 }
 
 CodegenSettingSchema buildSchemaFor(Method method) {
-  List<String> rawImmutableDefaultValue = getDefaultValueFor(method, ImmutableDefaultSetting)
-  List<String> rawMutableDefaultValue = getDefaultValueFor(method, MutableDefaultSetting)
-
   return new CodegenSettingSchema(
       name: method.name,
       type: method.returnType,
-      immutableDefaultValue: parseDefaultValue(rawImmutableDefaultValue, method.returnType),
-      mutableDefaultValue: parseDefaultValue(rawMutableDefaultValue, method.returnType),
-      inheritedValue: parseInheritedValue(method.defaultValue),
-      equalityFunction: buildEqualityMethod(method.returnType),
+      immutableDefaultValue: getDefaultValueFor(method, ImmutableDefaultSetting),
+      mutableDefaultValue: getDefaultValueFor(method, MutableDefaultSetting),
   )
 }
 
-List<String> getDefaultValueFor(Method method, Class<Annotation> annotation) {
+CodeBlock getDefaultValueFor(Method method, Class<Annotation> annotation) {
   Annotation annotationInstance = method.getAnnotation(annotation)
   String[] defaultValue
   if (annotationInstance == null) {
-    DefaultSetting defaultInstance = method.getAnnotation(DefaultSetting)
-    assert defaultInstance: "Missing @$DefaultSetting.simpleName on Setting $method.name"
-    defaultValue = (String[]) DefaultSetting.getMethod("value").invoke(defaultInstance)
+    assert method.defaultValue != null : "No default value for $method.name provided!"
+    return stringifyDefaultValue(method.defaultValue)
   } else {
     defaultValue = (String[]) annotation.getMethod("value").invoke(annotationInstance)
+    return parseDefaultValue(Arrays.asList(defaultValue), method.returnType)
   }
-
-  return [*defaultValue]
 }
 
 CodeBlock parseDefaultValue(List<String> exprs, Class<?> targetType) {
@@ -127,13 +119,13 @@ CodeBlock parseDefaultValue(List<String> exprs, Class<?> targetType) {
   return CodeBlock.of('$S', expr)
 }
 
-CodeBlock parseInheritedValue(Object value) {
+CodeBlock stringifyDefaultValue(Object value) {
   if (value.class.isArray()) {
     String dimensionName = value.class.componentType.canonicalName
     // XXX: how do I make multiple dimensions work? Do I even care?
     return Stream
         .of((Object[]) value)
-        .map { parseInheritedValue(it) }
+        .map { stringifyDefaultValue(it) }
         .collect(CodeBlock.joining(", ", "new $dimensionName[]{", "}"))
   }
 
@@ -150,14 +142,6 @@ CodeBlock parseInheritedValue(Object value) {
   }
 
   return CodeBlock.of('$L', value)
-}
-
-CodeBlock buildEqualityMethod(Class<?> targetType) {
-  if (targetType.isArray()) {
-    return CodeBlock.of('(a, b) -> $1T.deepEquals(($2T[]) a, ($2T[]) b)', Arrays.class, Object.class)
-  }
-
-  return CodeBlock.of('$T::equals', Objects)
 }
 
 AnnotationSpec buildGeneratedAnnotation() {
@@ -217,9 +201,9 @@ JavaFile buildSettingsCollectionClass(
       .addParameter(builderTypeName, "builder")
 
   settings.forEach {
-    TypeName settingInnerType = it.type.isArray()
-        ? ArrayTypeName.of(ClassName.get(it.type.componentType))
-        : ClassName.get(it.type)
+    // The type may be primitive. If this is the case, we will need to box it first
+    // (e.g. int -> java.lang.Integer; boolean -> java.lang.Boolean; etc)
+    TypeName settingInnerType = TypeName.get(it.type).box()
 
     ParameterizedTypeName settingType = ParameterizedTypeName
         .get(settingTypeName, settingInnerType)
@@ -287,10 +271,8 @@ JavaFile buildSchemaConstants(
             .indent()
             .add('$S', it.name).add(",\n")
             .add('$T.class', it.type).add(",\n")
-            .add(it.inheritedValue).add(",\n")
             .add(it.immutableDefaultValue).add(",\n")
             .add(it.mutableDefaultValue).add(",\n")
-            .add(it.equalityFunction).add(",\n")
             .add('$T::$N', builderType, it.name).add("\n")
             .unindent()
             .add(")")

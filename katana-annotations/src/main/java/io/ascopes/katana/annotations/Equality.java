@@ -15,11 +15,6 @@ import java.lang.annotation.Target;
  */
 public enum Equality {
   /**
-   * Inherit the setting.
-   */
-  INHERITED,
-
-  /**
    * Disable generation of equality and identity methods explicitly.
    */
   DISABLED,

@@ -14,38 +14,29 @@ public final class SettingSchema<T> {
 
   private final String name;
   private final Class<T> type;
-  private final T inheritedValue;
   private final T immutableDefaultValue;
   private final T mutableDefaultValue;
-  private final EqualityFunction<T> equalityCheck;
   private final BuilderSetter<T> builderSetter;
 
   /**
    * @param name                  the name of the setting.
    * @param type                  the type of the setting.
-   * @param inheritedValue        the value to imply as inherited for the setting.
    * @param immutableDefaultValue the default value for immutable types for the setting.
    * @param mutableDefaultValue   the default value for mutable types for the setting.
-   * @param equalityCheck         an equality function to determine if two instances of the setting
-   *                              type are equal.
    * @param builderSetter         a method to set a setting derived from this schema on a
    *                              SettingsCollection builder.
    */
   public SettingSchema(
       String name,
       Class<T> type,
-      T inheritedValue,
       T immutableDefaultValue,
       T mutableDefaultValue,
-      EqualityFunction<T> equalityCheck,
       BuilderSetter<T> builderSetter
   ) {
     this.name = Objects.requireNonNull(name);
     this.type = Objects.requireNonNull(type);
-    this.inheritedValue = Objects.requireNonNull(inheritedValue);
     this.immutableDefaultValue = Objects.requireNonNull(immutableDefaultValue);
     this.mutableDefaultValue = Objects.requireNonNull(mutableDefaultValue);
-    this.equalityCheck = Objects.requireNonNull(equalityCheck);
     this.builderSetter = Objects.requireNonNull(builderSetter);
   }
 
@@ -64,13 +55,6 @@ public final class SettingSchema<T> {
   }
 
   /**
-   * @return the value to imply as inherited on the setting.
-   */
-  public T getInheritedValue() {
-    return this.inheritedValue;
-  }
-
-  /**
    * @return the default value for immutable types for the setting.
    */
   public T getImmutableDefaultValue() {
@@ -82,13 +66,6 @@ public final class SettingSchema<T> {
    */
   public T getMutableDefaultValue() {
     return this.mutableDefaultValue;
-  }
-
-  /**
-   * @return an equality function to determine if two instances of the setting type are equal.
-   */
-  public EqualityFunction<T> getEqualityCheck() {
-    return this.equalityCheck;
   }
 
   /**
