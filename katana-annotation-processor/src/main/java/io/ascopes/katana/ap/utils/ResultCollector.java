@@ -1,15 +1,15 @@
 package io.ascopes.katana.ap.utils;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 /**
  * A collector for results that aggregates the result state. A combiner is provided to combine a
@@ -26,7 +26,7 @@ import java.util.stream.Collector;
  * @since 0.0.1
  */
 public final class ResultCollector<T, C>
-    implements Collector<Result<T>, Result<Collection<T>>, Result<C>> {
+    implements Collector<Result<T>, ResultCollector<T, C>.State, Result<C>> {
 
   private final Collector<T, ?, C> finalCollector;
 
@@ -38,38 +38,54 @@ public final class ResultCollector<T, C>
    * {@inheritDoc}
    */
   @Override
-  public Supplier<Result<Collection<T>>> supplier() {
-    return () -> Result.ok(new ArrayList<>());
+  public Supplier<ResultCollector<T, C>.State> supplier() {
+    return State::new;
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public BiConsumer<Result<Collection<T>>, Result<T>> accumulator() {
-    return (listResult, next) -> listResult
-        .ifOkThen(list -> next
-            .ifOkThen(list::add));
+  public BiConsumer<ResultCollector<T, C>.State, Result<T>> accumulator() {
+    return (state, next) -> {
+      if (state.failed.get()) {
+        return;
+      }
+      if (next.isFailed()) {
+        state.failed.set(true);
+        return;
+      }
+      if (!next.isIgnored()) {
+        state.builder.add(next.unwrap());
+      }
+    };
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public BinaryOperator<Result<Collection<T>>> combiner() {
-    return (firstResult, secondResult) -> firstResult
-        .ifOkThen(first -> secondResult
-            .ifOkThen(first::addAll));
+  public BinaryOperator<ResultCollector<T, C>.State> combiner() {
+    return (firstState, secondState) -> {
+      if (!firstState.failed.get()) {
+        if (secondState.failed.get()) {
+          firstState.failed.set(true);
+        } else {
+          secondState.builder.build().forEach(firstState.builder);
+        }
+      }
+      return firstState;
+    };
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public Function<Result<Collection<T>>, Result<C>> finisher() {
-    return listResult -> listResult
-        .ifOkMap(Collection::stream)
-        .ifOkMap(stream -> stream.collect(this.finalCollector));
+  public Function<ResultCollector<T, C>.State, Result<C>> finisher() {
+    return state -> state.failed.get()
+        ? Result.fail()
+        : Result.ok(state.builder.build().collect(this.finalCollector));
   }
 
   /**
@@ -87,5 +103,15 @@ public final class ResultCollector<T, C>
    */
   public static <T, C> ResultCollector<T, C> aggregating(Collector<T, ?, C> collector) {
     return new ResultCollector<>(collector);
+  }
+
+  public final class State {
+
+    private final Stream.Builder<T> builder = Stream.builder();
+    private final AtomicBoolean failed = new AtomicBoolean();
+
+    private State() {
+      // Internal detail only.
+    }
   }
 }
