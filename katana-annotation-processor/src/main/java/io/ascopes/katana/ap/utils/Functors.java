@@ -77,12 +77,13 @@ public abstract class Functors {
 
   /**
    * Collector that collects keys and values to a sorted map.
-   * @param keyMapper the key mapper.
-   * @param valueMapper the value mapper.
+   *
+   * @param keyMapper     the key mapper.
+   * @param valueMapper   the value mapper.
    * @param keyComparator the algorithm to sort the keys with.
-   * @param <T> the input type.
-   * @param <K> the key type.
-   * @param <V> the value type.
+   * @param <T>           the input type.
+   * @param <K>           the key type.
+   * @param <V>           the value type.
    * @return the collector.
    */
   public static <T, K, V> Collector<T, ?, SortedMap<K, V>> toSortedMap(

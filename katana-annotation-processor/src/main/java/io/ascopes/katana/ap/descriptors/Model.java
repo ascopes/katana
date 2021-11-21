@@ -40,6 +40,23 @@ public final class Model {
     this.attributes = Objects.requireNonNull(builder.attributes);
   }
 
+  /**
+   * @return the package name for the model.
+   */
+  public String getPackageName() {
+    return this.packageName;
+  }
+
+  /**
+   * @return the class name for the model.
+   */
+  public String getClassName() {
+    return this.className;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String toString() {
     return "Model{" +
