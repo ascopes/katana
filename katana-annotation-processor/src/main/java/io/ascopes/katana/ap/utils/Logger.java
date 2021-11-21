@@ -28,7 +28,23 @@ public final class Logger {
     // Frame 0 = getStackTrace()
     // Frame 1 = Logger::<init>()
     // Frame 2 = callee
-    this.name = Thread.currentThread().getStackTrace()[2].getClassName();
+    this(Thread.currentThread().getStackTrace()[2].getClassName());
+  }
+
+  /**
+   * Initialize a logger from a given class.
+   *
+   * @param thisClass the class to initialize the name from.
+   */
+  public Logger(Class<?> thisClass) {
+    this(thisClass.getCanonicalName());
+  }
+
+  /**
+   * @param name the name to give this logger.
+   */
+  private Logger(String name) {
+    this.name = name;
   }
 
   /**

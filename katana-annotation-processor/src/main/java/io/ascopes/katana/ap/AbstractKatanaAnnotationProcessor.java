@@ -28,7 +28,7 @@ public abstract class AbstractKatanaAnnotationProcessor extends AbstractProcesso
   protected final Logger logger;
 
   public AbstractKatanaAnnotationProcessor() {
-    this.logger = new Logger();
+    this.logger = new Logger(this.getClass());
   }
 
   /**
