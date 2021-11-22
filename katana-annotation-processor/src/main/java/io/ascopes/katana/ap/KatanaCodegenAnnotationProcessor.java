@@ -4,6 +4,7 @@ import com.squareup.javapoet.JavaFile;
 import io.ascopes.katana.ap.codegen.JavaFileWriter;
 import io.ascopes.katana.ap.codegen.SourceFileFactory;
 import io.ascopes.katana.ap.descriptors.AttributeFactory;
+import io.ascopes.katana.ap.descriptors.AttributeFeatureInclusionManager;
 import io.ascopes.katana.ap.descriptors.InterfaceSearcher;
 import io.ascopes.katana.ap.descriptors.MethodClassifier;
 import io.ascopes.katana.ap.descriptors.Model;
@@ -54,10 +55,17 @@ public final class KatanaCodegenAnnotationProcessor extends AbstractKatanaAnnota
         this.processingEnv.getMessager()
     );
 
+    AttributeFeatureInclusionManager attributeFeatureInclusionManager =
+        new AttributeFeatureInclusionManager(
+            diagnosticTemplates,
+            this.processingEnv.getElementUtils(),
+            this.processingEnv.getMessager()
+        );
+
     AttributeFactory attributeFactory = new AttributeFactory(
         diagnosticTemplates,
-        this.processingEnv.getMessager(),
-        this.processingEnv.getElementUtils()
+        attributeFeatureInclusionManager,
+        this.processingEnv.getMessager()
     );
 
     ModelFactory modelFactory = new ModelFactory(

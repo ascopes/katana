@@ -1,22 +1,17 @@
 package io.ascopes.katana.ap.descriptors;
 
-import io.ascopes.katana.annotations.Setters;
 import io.ascopes.katana.ap.descriptors.Attribute.Builder;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
-import io.ascopes.katana.ap.utils.AnnotationUtils;
 import io.ascopes.katana.ap.utils.DiagnosticTemplates;
 import io.ascopes.katana.ap.utils.Functors;
 import io.ascopes.katana.ap.utils.Result;
 import io.ascopes.katana.ap.utils.ResultCollector;
-import java.util.Objects;
 import java.util.SortedMap;
 import java.util.function.Function;
 import javax.annotation.processing.Messager;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic.Kind;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Factory for inspecting and generating attributes to apply to models.
@@ -26,18 +21,18 @@ import javax.tools.Diagnostic.Kind;
  */
 public final class AttributeFactory {
 
-  private final Elements elementUtils;
   private final Messager messager;
   private final DiagnosticTemplates diagnosticTemplates;
+  private final AttributeFeatureInclusionManager attributeFeatureInclusionManager;
 
   public AttributeFactory(
       DiagnosticTemplates diagnosticTemplates,
-      Messager messager,
-      Elements elementUtils
+      AttributeFeatureInclusionManager attributeFeatureInclusionManager,
+      Messager messager
   ) {
-    this.diagnosticTemplates = Objects.requireNonNull(diagnosticTemplates);
-    this.messager = Objects.requireNonNull(messager);
-    this.elementUtils = Objects.requireNonNull(elementUtils);
+    this.diagnosticTemplates = diagnosticTemplates;
+    this.attributeFeatureInclusionManager = attributeFeatureInclusionManager;
+    this.messager = messager;
   }
 
   /**
@@ -72,15 +67,14 @@ public final class AttributeFactory {
       ClassifiedMethods classifiedMethods,
       SettingsCollection settings
   ) {
-    ExecutableElement getter = classifiedMethods.getGetters().get(attributeName);
-
-    Attribute.Builder builder = Attribute
-        .builder()
-        .name(attributeName)
-        .getterToOverride(getter);
-
-    return this
-        .processSetter(builder, classifiedMethods, settings)
+    return Result
+        .ok(Attribute
+            .builder()
+            .name(attributeName)
+            .getterToOverride(classifiedMethods.getGetters().get(attributeName)))
+        .ifOkFlatMap(builder -> this.processSetter(builder, classifiedMethods, settings))
+        .ifOkFlatMap(builder -> this.processToString(builder, settings))
+        .ifOkFlatMap(builder -> this.processEqualsAndHashCode(builder, settings))
         .ifOkMap(Builder::build);
   }
 
@@ -89,59 +83,42 @@ public final class AttributeFactory {
       ClassifiedMethods classifiedMethods,
       SettingsCollection settings
   ) {
-    Setters setterMode = settings.getSetters().getValue();
+    @Nullable
+    ExecutableElement setter = classifiedMethods.getSetters().get(builder.getName());
 
-    if (setterMode == Setters.DISABLED) {
-      // Do not bother to do anything, it is not enabled anywhere.
-      return Result.ok(builder.setterEnabled(false));
-    }
+    return this.attributeFeatureInclusionManager
+        .check(builder.getName(), settings.getSetters(), builder.getGetterToOverride())
+        .ifOkThen(builder::setterEnabled)
+        .ifOkFlatMap(enabled -> {
+          if (setter != null) {
+            if (enabled) {
+              builder.setterToOverride(setter);
+            } else {
+              this.failExcludedExplicitSetter(builder.getName(), setter);
+              return Result.fail();
+            }
+          }
+          return Result.ok(enabled);
+        })
+        .ifOkReplace(() -> Result.ok(builder));
+  }
 
-    ExecutableElement getter = builder.getGetterToOverride();
-    ExecutableElement explicitSetter = classifiedMethods.getSetters().get(builder.getName());
+  private Result<Attribute.Builder> processToString(
+      Attribute.Builder builder,
+      SettingsCollection settings
+  ) {
+    return this.attributeFeatureInclusionManager
+        .check(builder.getName(), settings.getToStringMethod(), builder.getGetterToOverride())
+        .ifOkMap(builder::includeInToString);
+  }
 
-    TypeElement includeAnnotation = this.elementUtils
-        .getTypeElement(Setters.Include.class.getCanonicalName());
-    TypeElement excludeAnnotation = this.elementUtils
-        .getTypeElement(Setters.Exclude.class.getCanonicalName());
-
-    Result<? extends AnnotationMirror> include = AnnotationUtils
-        .findAnnotationMirror(getter, includeAnnotation);
-    Result<? extends AnnotationMirror> exclude = AnnotationUtils
-        .findAnnotationMirror(getter, excludeAnnotation);
-
-    if (explicitSetter != null && exclude.isOk()) {
-      this.failExcludedExplicitSetter(builder.getName(), explicitSetter, exclude.unwrap());
-      return Result.fail();
-    }
-
-    if (include.isOk() && exclude.isOk()) {
-      this.failIncludedAndExcluded(
-          "setter",
-          builder.getName(),
-          getter,
-          include.unwrap(),
-          exclude.unwrap()
-      );
-      return Result.fail();
-    }
-
-    if (setterMode == Setters.INCLUDE_ALL && exclude.isOk()) {
-      // Manually opted-out.
-      builder.setterEnabled(false);
-    } else if (setterMode == Setters.EXCLUDE_ALL && include.isOk()) {
-      // Manually opted-in.
-      builder.setterEnabled(true);
-    } else {
-      // Enable if include all is defaulted.
-      builder.setterEnabled(setterMode == Setters.INCLUDE_ALL);
-    }
-
-    if (explicitSetter != null) {
-      // Explicit setter provided.
-      return Result.ok(builder.setterToOverride(explicitSetter));
-    }
-
-    return Result.ok(builder);
+  private Result<Attribute.Builder> processEqualsAndHashCode(
+      Attribute.Builder builder,
+      SettingsCollection settings
+  ) {
+    return this.attributeFeatureInclusionManager
+        .check(builder.getName(), settings.getEqualsAndHashCode(), builder.getGetterToOverride())
+        .ifOkMap(builder::includeInEqualsAndHashCode);
   }
 
   private Result<ClassifiedMethods> ensureNoOrphans(ClassifiedMethods classifiedMethods) {
@@ -180,46 +157,18 @@ public final class AttributeFactory {
 
   private void failExcludedExplicitSetter(
       String attributeName,
-      ExecutableElement explicitSetter,
-      AnnotationMirror exclusionAnnotation
+      ExecutableElement explicitSetter
   ) {
     String message = this.diagnosticTemplates
         .template("excludedExplicitSetter")
         .placeholder("attributeName", attributeName)
         .placeholder("explicitSetter", explicitSetter)
-        .placeholder("exclusionAnnotation", exclusionAnnotation)
         .build();
 
     this.messager.printMessage(
         Kind.ERROR,
         message,
-        explicitSetter,
-        exclusionAnnotation
+        explicitSetter
     );
   }
-
-  private void failIncludedAndExcluded(
-      @SuppressWarnings("SameParameterValue") String category,
-      String attributeName,
-      ExecutableElement getter,
-      AnnotationMirror inclusionAnnotation,
-      AnnotationMirror exclusionAnnotation
-  ) {
-    String message = this.diagnosticTemplates
-        .template("includedAndExcluded")
-        .placeholder("attributeName", attributeName)
-        .placeholder("category", category)
-        .placeholder("getter", getter)
-        .placeholder("includeAnnotation", inclusionAnnotation)
-        .placeholder("excludeAnnotation", exclusionAnnotation)
-        .build();
-
-    this.messager.printMessage(
-        Kind.ERROR,
-        message,
-        getter,
-        inclusionAnnotation
-    );
-  }
-
 }

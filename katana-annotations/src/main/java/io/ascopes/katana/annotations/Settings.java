@@ -1,7 +1,7 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.internal.ImmutableDefaultSetting;
-import io.ascopes.katana.annotations.internal.MutableDefaultSetting;
+import io.ascopes.katana.annotations.internal.ImmutableDefaultAdvice;
+import io.ascopes.katana.annotations.internal.MutableDefaultAdvice;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -68,8 +68,8 @@ public @interface Settings {
    * Return the pattern to use for class names. An asterisk "{@code *}" can be used to substitute
    * the interface name (e.g. {@code "*Impl"} or {@code "Immutable*Impl"}).
    */
-  @ImmutableDefaultSetting("Immutable*")
-  @MutableDefaultSetting("Mutable*")
+  @ImmutableDefaultAdvice("Immutable*")
+  @MutableDefaultAdvice("Mutable*")
   String className() default "";
 
   //////////////////////////////////////////////////
@@ -133,8 +133,8 @@ public @interface Settings {
   /**
    * Return the name for setter methods.
    */
-  @ImmutableDefaultSetting("with")
-  @MutableDefaultSetting("set")
+  @ImmutableDefaultAdvice("with")
+  @MutableDefaultAdvice("set")
   String setterPrefix() default "";
 
   /////////////////////////////////////////////////

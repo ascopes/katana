@@ -26,8 +26,8 @@ import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.WildcardTypeName
 import io.ascopes.katana.annotations.Generated
 import io.ascopes.katana.annotations.Settings
-import io.ascopes.katana.annotations.internal.ImmutableDefaultSetting
-import io.ascopes.katana.annotations.internal.MutableDefaultSetting
+import io.ascopes.katana.annotations.internal.ImmutableDefaultAdvice
+import io.ascopes.katana.annotations.internal.MutableDefaultAdvice
 
 import javax.lang.model.element.Modifier
 import java.lang.annotation.Annotation
@@ -53,8 +53,8 @@ CodegenSettingSchema buildSchemaFor(Method method) {
       name: method.name,
       genericType: TypeName.get(method.genericReturnType).box(),
       rawType: method.returnType,
-      immutableDefaultValue: getDefaultValueFor(method, ImmutableDefaultSetting),
-      mutableDefaultValue: getDefaultValueFor(method, MutableDefaultSetting),
+      immutableDefaultValue: getDefaultValueFor(method, ImmutableDefaultAdvice),
+      mutableDefaultValue: getDefaultValueFor(method, MutableDefaultAdvice),
   )
 }
 
@@ -63,7 +63,7 @@ CodeBlock getDefaultValueFor(Method method, Class<Annotation> annotation) {
   String[] defaultValue
   if (annotationInstance == null) {
     assert method.defaultValue != null : "No default value for $method.name provided!"
-    return stringifyDefaultValue(method.defaultValue)
+    return stringifyDefaultValue(method.defaultValue, method.returnType)
   } else {
     defaultValue = (String[]) annotation.getMethod("value").invoke(annotationInstance)
     return parseDefaultValue(Arrays.asList(defaultValue), method.returnType)
@@ -84,7 +84,7 @@ CodeBlock parseDefaultValue(List<String> exprs, Class<?> targetType) {
 
   if (targetType.isEnum()) {
     Enum enumValue = Enum.valueOf((Class) targetType, expr)
-    return CodeBlock.of('$T.$L', targetType, enumValue.name())
+    return CodeBlock.of('$N', enumValue)
   }
   if (Class.isAssignableFrom(targetType)) {
     return CodeBlock.of('$L.class', expr)
@@ -118,18 +118,30 @@ CodeBlock parseDefaultValue(List<String> exprs, Class<?> targetType) {
   return CodeBlock.of('$S', expr)
 }
 
-CodeBlock stringifyDefaultValue(Object value) {
+CodeBlock stringifyDefaultValue(Object value, Class<?> targetType) {
+  // Important note:
+  // When we have a case such as
+  //    enum Foo implements Runnable {
+  //        BAR {
+  //            @Override
+  //            public void run() { ... }
+  //        };
+  //    }
+  // ... then the enum member Foo.BAR is actually an anonymous subclass of Foo, so
+  // we cant use the literal Foo.BAR alone to determine it's value. That is why we still pass
+  // the type around here.
+
   if (value.class.isArray()) {
     String dimensionName = value.class.componentType.canonicalName
     // XXX: how do I make multiple dimensions work? Do I even care?
     return Stream
         .of((Object[]) value)
-        .map { stringifyDefaultValue(it) }
+        .map { stringifyDefaultValue(it, targetType.getComponentType()) }
         .collect(CodeBlock.joining(", ", "new $dimensionName[]{", "}"))
   }
 
   if (value instanceof Enum) {
-    return CodeBlock.of('$T.$L', value.class, value.name())
+    return CodeBlock.of('$T.$L', targetType, value.name())
   }
 
   if (value instanceof Class<?>) {

@@ -15,14 +15,13 @@ import java.lang.annotation.Target;
  * users.
  *
  * @author Ashley Scopes
- * @see DefaultSetting
- * @see MutableDefaultSetting
+ * @see MutableDefaultAdvice
  * @since 0.0.1
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface ImmutableDefaultSetting {
+public @interface ImmutableDefaultAdvice {
 
   /**
    * The raw values to parse as the global default settings for immutable types, should nothing

@@ -73,6 +73,10 @@ public final class Setting<T> {
     return this.valueHolder.getAnnotationValue();
   }
 
+  public Class<T> getType() {
+    return this.settingSchema.getGenericType();
+  }
+
   /**
    * @return the schema data for the setting.
    */

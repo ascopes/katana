@@ -1,5 +1,8 @@
 package io.ascopes.katana.annotations;
 
+import io.ascopes.katana.annotations.internal.CustomizableAttributeFeature;
+import io.ascopes.katana.annotations.internal.ExclusionAdvice;
+import io.ascopes.katana.annotations.internal.InclusionAdvice;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,25 +16,44 @@ import java.lang.annotation.Target;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public enum Equality {
+@ExclusionAdvice(Equality.Exclude.class)
+@InclusionAdvice(Equality.Include.class)
+public enum Equality implements CustomizableAttributeFeature {
   /**
-   * Disable generation of equality and identity methods explicitly.
+   * Use the identity of the object for comparison. This prevents the methods being overridden in
+   * the implementation, instead deferring to {@link Object#equals(Object)} and {@link
+   * Object#hashCode()}.
    */
-  DISABLED,
+  DISABLE {
+    @Override
+    public boolean isDisabled() {
+      return true;
+    }
+  },
 
   /**
    * Generate default {@link #equals(Object)} and {@link #hashCode()} methods that compare defined
    * attributes. All attributes will be considered in these methods unless explicitly marked with
    * {@link Exclude} (i.e. {@literal @Exclude(Equality.class)}).
    */
-  INCLUDE_ALL,
+  INCLUDE_ALL {
+    @Override
+    public boolean isIncludeAll() {
+      return true;
+    }
+  },
 
   /**
    * Generate default {@link #equals(Object)} and {@link #hashCode()} methods that compare defined
    * attributes. No attributes will be considered in these methods unless explicitly marked with
    * {@link Include} (i.e. {@literal @Include(Equality.class)}).
    */
-  EXCLUDE_ALL,
+  EXCLUDE_ALL {
+    @Override
+    public boolean isExcludeAll() {
+      return true;
+    }
+  },
 
   /**
    * Use custom implementations for equality and identity. This requires two static methods to be
@@ -46,7 +68,12 @@ public enum Equality {
    * <p>
    * Not specifying these methods is an error.
    */
-  CUSTOM;
+  CUSTOM {
+    @Override
+    public boolean isCustomImpl() {
+      return true;
+    }
+  };
 
   /**
    * Annotation to explicitly enable checking for an attribute.

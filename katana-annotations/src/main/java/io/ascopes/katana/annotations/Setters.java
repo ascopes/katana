@@ -1,10 +1,14 @@
 package io.ascopes.katana.annotations;
 
+import io.ascopes.katana.annotations.internal.AttributeFeature;
+import io.ascopes.katana.annotations.internal.ExclusionAdvice;
+import io.ascopes.katana.annotations.internal.InclusionAdvice;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Set;
 
 /**
  * Policy for generating setter methods on mutable models, and "wither" methods on immutable
@@ -16,23 +20,40 @@ import java.lang.annotation.Target;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public enum Setters {
+@ExclusionAdvice(Setters.Exclude.class)
+@InclusionAdvice(Setters.Include.class)
+public enum Setters implements AttributeFeature {
   /**
    * Disable generation of setters entirely.
    */
-  DISABLED,
+  DISABLED {
+    @Override
+    public boolean isDisabled() {
+      return true;
+    }
+  },
 
   /**
    * Generate setter methods for all attributes that are not excluded with {@link Exclude} (i.e.
    * {@literal @Exclude(Setters.class)}).
    */
-  INCLUDE_ALL,
+  INCLUDE_ALL {
+    @Override
+    public boolean isIncludeAll() {
+      return true;
+    }
+  },
 
   /**
    * Generate setter methods for no attributes except those included with {@link Include} (i.e.
    * {@literal @Include(Setters.class)}).
    */
-  EXCLUDE_ALL;
+  EXCLUDE_ALL {
+    @Override
+    public boolean isExcludeAll() {
+      return true;
+    }
+  };
 
   /**
    * Annotation to explicitly enable checking for an attribute.

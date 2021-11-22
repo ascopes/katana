@@ -18,16 +18,18 @@ public final class Attribute {
 
   private final String name;
   private final ExecutableElement getterToOverride;
-
   private final @Nullable ExecutableElement setterToOverride;
-
   private final boolean setterEnabled;
+  private final boolean includeInToString;
+  private final boolean includeInEqualsAndHashCode;
 
   private Attribute(Builder builder) {
     this.name = Objects.requireNonNull(builder.name);
     this.getterToOverride = Objects.requireNonNull(builder.getterToOverride);
     this.setterToOverride = builder.setterToOverride;
     this.setterEnabled = Objects.requireNonNull(builder.setterEnabled);
+    this.includeInToString = Objects.requireNonNull(builder.includeInToString);
+    this.includeInEqualsAndHashCode = Objects.requireNonNull(builder.includeInEqualsAndHashCode);
   }
 
   /**
@@ -66,12 +68,15 @@ public final class Attribute {
     return new Builder();
   }
 
+  @SuppressWarnings("UnusedReturnValue")
   public static final class Builder extends ObjectBuilder<Attribute> {
 
     private @MonotonicNonNull String name;
     private @MonotonicNonNull ExecutableElement getterToOverride;
     private @Nullable ExecutableElement setterToOverride;
     private @MonotonicNonNull Boolean setterEnabled;
+    private @MonotonicNonNull Boolean includeInToString;
+    private @MonotonicNonNull Boolean includeInEqualsAndHashCode;
 
     private Builder() {
     }
@@ -101,6 +106,16 @@ public final class Attribute {
 
     public Builder setterEnabled(boolean setterEnabled) {
       this.setterEnabled = setterEnabled;
+      return this;
+    }
+
+    public Builder includeInToString(boolean includeInToString) {
+      this.includeInToString = includeInToString;
+      return this;
+    }
+
+    public Builder includeInEqualsAndHashCode(boolean includeInEqualsAndHashCode) {
+      this.includeInEqualsAndHashCode = includeInEqualsAndHashCode;
       return this;
     }
 
