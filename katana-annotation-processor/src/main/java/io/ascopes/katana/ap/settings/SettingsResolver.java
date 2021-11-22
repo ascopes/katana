@@ -124,7 +124,7 @@ public final class SettingsResolver {
           .ifOkMap(schema.getGenericType()::cast)
           .unwrap();
 
-      String description = "setting '" + schema.getName() + "' wit"
+      String description = "setting '" + schema.getName() + "' with"
           + " value '" + actualValue + "'"
           + ", from " + annotation.description;
 
