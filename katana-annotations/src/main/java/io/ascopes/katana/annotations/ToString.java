@@ -1,6 +1,8 @@
 package io.ascopes.katana.annotations;
 
 import io.ascopes.katana.annotations.internal.CustomizableAttributeFeature;
+import io.ascopes.katana.annotations.internal.ExclusionAdvice;
+import io.ascopes.katana.annotations.internal.InclusionAdvice;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,6 +15,8 @@ import java.lang.annotation.Target;
  * @author Ashley Scopes
  * @since 0.0.1
  */
+@ExclusionAdvice(ToString.Exclude.class)
+@InclusionAdvice(ToString.Include.class)
 public enum ToString implements CustomizableAttributeFeature {
   /**
    * Do not generate a toString method. The {@link Object#toString()} method will be used instead.
