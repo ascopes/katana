@@ -4,6 +4,7 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import io.ascopes.katana.annotations.Generated;
+import io.ascopes.katana.ap.codegen.init.InitTrackerFactory;
 import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.Result;
@@ -22,9 +23,11 @@ public final class SourceFileFactory {
 
   private final Logger logger;
   private final AnnotationSpec generatedAnnotation;
+  private final InitTrackerFactory initTrackerFactory;
 
   public SourceFileFactory() {
     this.logger = new Logger();
+    this.initTrackerFactory = new InitTrackerFactory();
 
     OffsetDateTime now = OffsetDateTime.now(Clock.systemDefaultZone());
     String nowString = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(now);
