@@ -1,4 +1,4 @@
-name: Ensure the commit builds
+name: Build Commit
 
 on:
   - push
