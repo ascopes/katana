@@ -18,7 +18,6 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
-import org.checkerframework.checker.units.qual.A;
 
 /**
  * Factory for inspecting and generating attributes to apply to models.

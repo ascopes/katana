@@ -4,7 +4,6 @@ import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.util.report.qual.ReportCreation;
 import org.checkerframework.common.util.report.qual.ReportInherit;
-import org.checkerframework.common.value.qual.StaticallyExecutable;
 
 /**
  * Helper methods for handlebars templates.

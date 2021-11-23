@@ -1,26 +1,14 @@
 #!/usr/bin/env groovy
 //file:noinspection GrMethodMayBeStatic
 
-/*
- * Build script which looks at the @Settings annotation in katana-annotations and will generate
- * the boilerplate SettingsCollection definition, as well as the list of SettingSchema objects
- * that define how to initialize and parse each setting.
- *
- * This should be able to automatically handle new settings with no further logic changes in
- * katana-annotation-processor, so should improve maintainability as we add more and more
- * settings going forwards.
- *
- * @author Ashley Scopes
- * @since 0.0.1
- */
 import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.ParameterSpec
+import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.WildcardTypeName
@@ -39,6 +27,19 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.stream.Collectors
 import java.util.stream.Stream
+
+/*
+ * Build script which looks at the @Settings annotation in katana-annotations and will generate
+ * the boilerplate SettingsCollection definition, as well as the list of SettingSchema objects
+ * that define how to initialize and parse each setting.
+ *
+ * This should be able to automatically handle new settings with no further logic changes in
+ * katana-annotation-processor, so should improve maintainability as we add more and more
+ * settings going forwards.
+ *
+ * @author Ashley Scopes
+ * @since 0.0.1
+ */
 
 class CodegenSettingSchema {
   String name
