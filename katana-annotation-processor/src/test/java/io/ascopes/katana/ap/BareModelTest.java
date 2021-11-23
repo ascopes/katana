@@ -39,12 +39,13 @@ class BareModelTest {
                 "@MutableModel",
                 "@ImmutableModel",
                 "public interface BareModel {",
-                "  void getNothing();",
                 "  String getFoo();",
                 "  int getBar();",
                 "  AtomicBoolean isBaz();",
                 "  boolean isBork();",
                 "  Boolean isQux();",
+
+                "  @Deprecated",
                 "  boolean getQuxx();",
                 "}"
             )

@@ -6,17 +6,19 @@ import io.ascopes.katana.annotations.Visibility;
 import io.ascopes.katana.ap.descriptors.Attribute.Builder;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
-import io.ascopes.katana.ap.utils.Functors;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
 import io.ascopes.katana.ap.utils.ResultCollector;
+import java.util.Comparator;
 import java.util.Objects;
-import java.util.SortedMap;
-import java.util.function.Function;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
+import org.checkerframework.checker.units.qual.A;
 
 /**
  * Factory for inspecting and generating attributes to apply to models.
@@ -42,9 +44,10 @@ public final class AttributeFactory {
    *
    * @param classifiedMethods the classified methods to consider.
    * @param settings          the settings to consider.
-   * @return the map of successful attributes, mapping each attribute name to their descriptor.
+   * @return the sorted set of successfully created attributes, sorted by name, or the error if any
+   * failed to be parsed.
    */
-  public Result<SortedMap<String, Attribute>> buildFor(
+  public Result<SortedSet<Attribute>> buildFor(
       ClassifiedMethods classifiedMethods,
       SettingsCollection settings
   ) {
@@ -54,7 +57,7 @@ public final class AttributeFactory {
         .stream()
         .map(attr -> this.buildFor(attr, classifiedMethods, settings))
         .collect(ResultCollector.aggregating(
-            Functors.toSortedMap(Attribute::getIdentifier, Function.identity(), String::compareTo)
+            Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(Attribute::getName)))
         ));
   }
 
@@ -84,6 +87,7 @@ public final class AttributeFactory {
         .ifOkFlatMap(builder -> this.processSetter(builder, settings))
         .ifOkFlatMap(builder -> this.processToString(builder, settings))
         .ifOkFlatMap(builder -> this.processEqualsAndHashCode(builder, settings))
+        .ifOkFlatMap(this::processAttributeLevelDeprecation)
         .ifOkMap(Builder::build);
   }
 
@@ -150,5 +154,15 @@ public final class AttributeFactory {
     return this.attributeFeatureInclusionManager
         .check(builder.getName(), settings.getEqualsAndHashCode(), builder.getGetterToOverride())
         .ifOkMap(builder::includeInEqualsAndHashCode);
+  }
+
+  private Result<Attribute.Builder> processAttributeLevelDeprecation(Attribute.Builder builder) {
+    TypeElement deprecatedAnnotation = this.elementUtils
+        .getTypeElement(Deprecated.class.getCanonicalName());
+
+    return AnnotationUtils
+        .findAnnotationMirror(builder.getGetterToOverride(), deprecatedAnnotation)
+        .ifOkMap(builder::deprecatedAnnotation)
+        .ifIgnoredReplace(builder);
   }
 }

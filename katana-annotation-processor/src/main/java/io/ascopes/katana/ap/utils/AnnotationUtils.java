@@ -28,7 +28,7 @@ public abstract class AnnotationUtils {
    *
    * @param annotatedElement the element to look for annotations on.
    * @param annotationType   the annotation class to look for.
-   * @return a result holding the desired annotation mirror, or a failure result if not present.
+   * @return a result holding the desired annotation mirror, or an ignored result if not found.
    */
   public static Result<? extends AnnotationMirror> findAnnotationMirror(
       Element annotatedElement,
@@ -47,7 +47,7 @@ public abstract class AnnotationUtils {
             .contentEquals(annotationType.getSimpleName()))
         .findAny()
         .map(Result::ok)
-        .orElseGet(Result::fail);
+        .orElseGet(Result::ignore);
   }
 
   /**

@@ -74,7 +74,7 @@ public final class ModelFactory {
 
     Model.Builder builder = Model
         .builder()
-        .modelInterface(modelInterface)
+        .superInterface(modelInterface)
         .annotationMirror(annotationMirror)
         .mutable(mutable);
 
@@ -83,6 +83,7 @@ public final class ModelFactory {
         .ifOkFlatMap(this::determineClassName)
         .ifOkFlatMap(this::classifyMethods)
         .ifOkFlatMap(this::generateAttributes)
+        .ifOkFlatMap(this::processModelLevelDeprecation)
         .ifOkMap(Model.Builder::build);
   }
 
@@ -95,7 +96,7 @@ public final class ModelFactory {
   private Result<Model.Builder> parseSettings(Model.Builder builder) {
     return this.settingsResolver
         .parseSettings(
-            builder.getModelInterface(),
+            builder.getSuperInterface(),
             builder.getAnnotationMirror(),
             builder.isMutable()
         )
@@ -108,7 +109,7 @@ public final class ModelFactory {
         .getPackageName();
 
     String packageName = packageNameSetting.getValue()
-        .replace("*", this.elementUtils.getPackageOf(builder.getModelInterface()).toString());
+        .replace("*", this.elementUtils.getPackageOf(builder.getSuperInterface()).toString());
 
     try {
       NamingUtils.validatePackageName(packageName);
@@ -117,7 +118,7 @@ public final class ModelFactory {
           Kind.ERROR,
           ex.getMessage() + " (package name was determined from "
               + packageNameSetting.getDescription() + ")",
-          packageNameSetting.getDeclaringElement().orElseGet(builder::getModelInterface),
+          packageNameSetting.getDeclaringElement().orElseGet(builder::getSuperInterface),
           packageNameSetting.getAnnotationMirror().orElseGet(builder::getAnnotationMirror),
           packageNameSetting.getAnnotationValue().orElse(null)
       );
@@ -135,7 +136,7 @@ public final class ModelFactory {
         .getClassName();
 
     String className = classNameSetting.getValue()
-        .replace("*", builder.getModelInterface().getSimpleName().toString());
+        .replace("*", builder.getSuperInterface().getSimpleName().toString());
 
     try {
       NamingUtils.validateClassName(className);
@@ -144,7 +145,7 @@ public final class ModelFactory {
           Kind.ERROR,
           ex.getMessage() + " (class name was determined from "
               + classNameSetting.getDescription() + ")",
-          classNameSetting.getDeclaringElement().orElseGet(builder::getModelInterface),
+          classNameSetting.getDeclaringElement().orElseGet(builder::getSuperInterface),
           classNameSetting.getAnnotationMirror().orElseGet(builder::getAnnotationMirror),
           classNameSetting.getAnnotationValue().orElse(null)
       );
@@ -158,8 +159,18 @@ public final class ModelFactory {
 
   private Result<Model.Builder> classifyMethods(Model.Builder builder) {
     return this.methodClassifier
-        .classifyMethods(builder.getModelInterface(), builder.getSettingsCollection())
+        .classifyMethods(builder.getSuperInterface(), builder.getSettingsCollection())
         .ifOkMap(builder::methods);
+  }
+
+  private Result<Model.Builder> processModelLevelDeprecation(Model.Builder builder) {
+    TypeElement deprecatedAnnotation = this.elementUtils
+        .getTypeElement(Deprecated.class.getCanonicalName());
+
+    return AnnotationUtils
+        .findAnnotationMirror(builder.getSuperInterface(), deprecatedAnnotation)
+        .ifOkMap(builder::deprecatedAnnotation)
+        .ifIgnoredReplace(builder);
   }
 
   private Result<Model.Builder> generateAttributes(Model.Builder builder) {

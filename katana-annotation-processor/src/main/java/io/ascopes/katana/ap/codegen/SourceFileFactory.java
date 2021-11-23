@@ -3,17 +3,19 @@ package io.ascopes.katana.ap.codegen;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import io.ascopes.katana.annotations.Generated;
 import io.ascopes.katana.annotations.Visibility;
 import io.ascopes.katana.ap.codegen.init.InitTrackerFactory;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.Model;
+import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.Logger;
+import io.ascopes.katana.ap.utils.NamingUtils;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 /**
@@ -26,6 +28,7 @@ public final class SourceFileFactory {
 
   private final Logger logger;
   private final AnnotationSpec generatedAnnotation;
+  private final AnnotationSpec overrideAnnotation;
   private final InitTrackerFactory initTrackerFactory;
 
   public SourceFileFactory() {
@@ -39,6 +42,10 @@ public final class SourceFileFactory {
         .builder(Generated.class)
         .addMember("name", "$S", "Katana Annotation Processor")
         .addMember("date", "$S", nowString)
+        .build();
+
+    this.overrideAnnotation = AnnotationSpec
+        .builder(Override.class)
         .build();
   }
 
@@ -64,21 +71,34 @@ public final class SourceFileFactory {
   }
 
   private TypeSpec buildModelTypeSpecFrom(Model model) {
-    return TypeSpec
+    TypeSpec.Builder builder = TypeSpec
         .classBuilder(model.getClassName())
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-        .addAnnotation(this.generatedAnnotation)
-        .addFields(this.addAttributes(model))
-        .build();
+        .addSuperinterface(model.getSuperInterface().asType())
+        .addAnnotation(this.generatedAnnotation);
+
+    model
+        .getDeprecatedAnnotation()
+        .map(AnnotationSpec::get)
+        .ifPresent(builder::addAnnotation);
+
+    this.applyAttributes(builder, model);
+
+    return builder.build();
   }
 
-  private Iterable<FieldSpec> addAttributes(Model model) {
-    return model
-        .getAttributes()
-        .values()
-        .stream()
-        .map(this::fieldFor)
-        .collect(Collectors.toList());
+  private void applyAttributes(TypeSpec.Builder typeSpecBuilder, Model model) {
+    SettingsCollection settings = model.getSettingsCollection();
+
+    for (Attribute attribute : model.getAttributes()) {
+      typeSpecBuilder
+          .addField(this.fieldFor(attribute))
+          .addMethod(this.getterFor(attribute, settings));
+
+      if (model.isMutable()) {
+        typeSpecBuilder.addMethod(this.setterFor(attribute, settings));
+      }
+    }
   }
 
   private FieldSpec fieldFor(Attribute attribute) {
@@ -93,6 +113,46 @@ public final class SourceFileFactory {
     if (attribute.isTransient()) {
       builder.addModifiers(Modifier.TRANSIENT);
     }
+
+    return builder.build();
+  }
+
+  private MethodSpec getterFor(Attribute attribute, SettingsCollection settings) {
+    MethodSpec.Builder builder = MethodSpec
+        .overriding(attribute.getGetterToOverride())
+        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+        .addJavadoc("@return the value of the {@code $L} attribute.", attribute.getName())
+        .addStatement("return this.$L", attribute.getIdentifier());
+
+    attribute
+        .getDeprecatedAnnotation()
+        .map(AnnotationSpec::get)
+        .ifPresent(builder::addAnnotation);
+
+    return builder.build();
+  }
+
+  private MethodSpec setterFor(Attribute attribute, SettingsCollection settings) {
+    String setterName = NamingUtils.addPrefixCamelCase(
+        settings.getSetterPrefix().getValue(),
+        attribute.getName()
+    );
+
+    MethodSpec.Builder builder = MethodSpec
+        .methodBuilder(setterName)
+        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+        .addParameter(attribute.getType(), attribute.getIdentifier(), Modifier.FINAL)
+        .addJavadoc(
+            "@param $L the value to set for the {@code $L} attribute",
+            attribute.getIdentifier(),
+            attribute.getName()
+        )
+        .addStatement("this.$1L = $1L", attribute.getIdentifier());
+
+    attribute
+        .getDeprecatedAnnotation()
+        .map(AnnotationSpec::get)
+        .ifPresent(builder::addAnnotation);
 
     return builder.build();
   }

@@ -45,7 +45,7 @@ class AnnotationUtilsTest {
   }
 
   @Test
-  void getAnnotationMirror_returns_fail_if_not_found() {
+  void getAnnotationMirror_returns_ignored_if_not_found() {
     // Given
     MockAnnotationMirrorHolder fooBarBaz = mockAnnotationMirrorType("FooBarBaz");
     MockAnnotationMirrorHolder doRayMe = mockAnnotationMirrorType("DoRayMe");
@@ -68,7 +68,7 @@ class AnnotationUtilsTest {
         .findAnnotationMirror(annotatedElement, notFoundElement);
 
     // Then
-    BDDAssertions.then(result.isFailed())
+    BDDAssertions.then(result.isIgnored())
         .isTrue();
   }
 

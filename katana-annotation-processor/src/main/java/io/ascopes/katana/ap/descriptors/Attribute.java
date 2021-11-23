@@ -4,10 +4,11 @@ import com.squareup.javapoet.TypeName;
 import io.ascopes.katana.annotations.Visibility;
 import io.ascopes.katana.ap.utils.ObjectBuilder;
 import java.util.Objects;
-import java.util.Set;
+import java.util.Optional;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Representation of an attribute within a model.
@@ -28,6 +29,10 @@ public final class Attribute {
   private final boolean includeInToString;
   private final boolean includeInEqualsAndHashCode;
 
+  // Nullable fields
+  private final @Nullable AnnotationMirror deprecatedAnnotation;
+
+
   private Attribute(Builder builder) {
     this.name = Objects.requireNonNull(builder.name);
     this.identifier = Objects.requireNonNull(builder.identifier);
@@ -39,6 +44,9 @@ public final class Attribute {
     this.setterEnabled = Objects.requireNonNull(builder.setterEnabled);
     this.includeInToString = Objects.requireNonNull(builder.includeInToString);
     this.includeInEqualsAndHashCode = Objects.requireNonNull(builder.includeInEqualsAndHashCode);
+
+    // Nullable fields
+    this.deprecatedAnnotation = builder.deprecatedAnnotation;
   }
 
   /**
@@ -83,6 +91,20 @@ public final class Attribute {
     return this.transient_;
   }
 
+  /**
+   * @return the accessor to override.
+   */
+  public ExecutableElement getGetterToOverride() {
+    return this.getterToOverride;
+  }
+
+  /**
+   * @return the deprecated annotation to add to generated logic, if provided.
+   */
+  public Optional<AnnotationMirror> getDeprecatedAnnotation() {
+    return Optional.ofNullable(this.deprecatedAnnotation);
+  }
+
   @Override
   public String toString() {
     return "Attribute{" +
@@ -109,6 +131,9 @@ public final class Attribute {
     private @MonotonicNonNull Boolean setterEnabled;
     private @MonotonicNonNull Boolean includeInToString;
     private @MonotonicNonNull Boolean includeInEqualsAndHashCode;
+
+    // Nullable fields
+    private @Nullable AnnotationMirror deprecatedAnnotation;
 
     private Builder() {
     }
@@ -168,6 +193,11 @@ public final class Attribute {
 
     public Builder includeInEqualsAndHashCode(Boolean includeInEqualsAndHashCode) {
       this.includeInEqualsAndHashCode = Objects.requireNonNull(includeInEqualsAndHashCode);
+      return this;
+    }
+
+    public Builder deprecatedAnnotation(@Nullable AnnotationMirror deprecatedAnnotation) {
+      this.deprecatedAnnotation = deprecatedAnnotation;
       return this;
     }
 

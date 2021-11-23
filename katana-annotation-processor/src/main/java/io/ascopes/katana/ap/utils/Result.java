@@ -3,9 +3,7 @@ package io.ascopes.katana.ap.utils;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.function.ToIntFunction;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 
 /**
@@ -133,6 +131,17 @@ public final class Result<T> {
     return this.isOk()
         ? Objects.requireNonNull(then.get())
         : castFailedOrIgnored(this);
+  }
+
+  /**
+   * If the result is ignored, replace it with an OK result holding the given value.
+   *
+   * @param then the result value to replace with.
+   * @return the result.
+   */
+  // TODO(ascopes): unit tests
+  public Result<T> ifIgnoredReplace(T then) {
+    return this.ifIgnoredReplace(() -> Result.ok(then));
   }
 
   /**

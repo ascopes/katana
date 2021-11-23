@@ -4,6 +4,7 @@ import io.ascopes.katana.ap.iterators.AvailableMethodsIterator;
 import io.ascopes.katana.ap.settings.Setting;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.DiagnosticTemplates;
+import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Messager;
@@ -94,7 +95,7 @@ public final class MethodClassifier {
       return Result.ignore();
     }
 
-    return this
+    return NamingUtils
         .removePrefixCamelCase(method, booleanGetterPrefix)
         .ifOkFlatMap(attrName -> {
           if (!this.isBooleanReturnType(method, settings)) {
@@ -104,11 +105,11 @@ public final class MethodClassifier {
             return Result.ok(attrName);
           }
         })
-        .ifIgnoredReplace(() -> this.removePrefixCamelCase(method, getterPrefix))
+        .ifIgnoredReplace(() -> NamingUtils.removePrefixCamelCase(method, getterPrefix))
         .ifOkFlatMap(attributeName -> {
           ExecutableElement existingMethod = builder.getGetters().get(attributeName);
           if (existingMethod != null) {
-            this.failMethodAlreadyExists( existingMethod, method);
+            this.failMethodAlreadyExists(existingMethod, method);
             return Result.fail();
           }
           return Result.ok(attributeName);
@@ -121,6 +122,8 @@ public final class MethodClassifier {
       ClassifiedMethods.Builder builder,
       ExecutableElement method
   ) {
+    // TODO(ascopes): error if we don't know how to implement this method.
+    // ... this would prevent cryptic compilation errors later on.
     if (method.getModifiers().contains(Modifier.STATIC)) {
       return Result.ignore();
     }
@@ -141,20 +144,6 @@ public final class MethodClassifier {
 
     builder.staticMethod(method);
     return Result.ok();
-  }
-
-  private Result<String> removePrefixCamelCase(ExecutableElement method, String prefix) {
-    String name = method.getSimpleName().toString();
-    int prefixLength = prefix.length();
-
-    // The prefix may be empty if we are using fluent naming.
-    if (name.length() - prefixLength <= 0 || !name.startsWith(prefix)) {
-      return Result.ignore();
-    }
-
-    String unprefixed = name.substring(prefixLength);
-    char firstChar = Character.toLowerCase(unprefixed.charAt(0));
-    return Result.ok(firstChar + unprefixed.substring(1));
   }
 
   private String signatureOf(ExecutableElement element) {
