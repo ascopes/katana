@@ -20,13 +20,11 @@ import javax.lang.model.element.ExecutableElement;
 public final class ClassifiedMethods {
 
   private final SortedMap<String, ExecutableElement> getters;
-  private final SortedMap<String, ExecutableElement> setters;
   private final SortedMap<String, Set<ExecutableElement>> otherInstanceMethods;
   private final SortedMap<String, Set<ExecutableElement>> staticMethods;
 
   private ClassifiedMethods(Builder builder) {
     this.getters = unmodifiableSortedMap(builder.getGetters());
-    this.setters = unmodifiableSortedMap(builder.getSetters());
     this.otherInstanceMethods = deepImmutableOverloads(builder.getOtherInstanceMethods());
     this.staticMethods = deepImmutableOverloads(builder.getStaticMethods());
   }
@@ -39,22 +37,11 @@ public final class ClassifiedMethods {
   }
 
   /**
-   * @return the setters, mapping the raw attribute name to the setter element.
-   */
-  public SortedMap<String, ExecutableElement> getSetters() {
-    return this.setters;
-  }
-
-  /**
    * @return a string representation of this collection.
    */
   @Override
   public String toString() {
     String getters = this.getters
-        .values()
-        .toString();
-
-    String setters = this.setters
         .values()
         .toString();
 
@@ -74,7 +61,6 @@ public final class ClassifiedMethods {
 
     return "Methods{" +
         "getters=" + getters + ", " +
-        "setters=" + setters + ", " +
         "otherInstanceMethods=" + otherInstanceMethods + ", " +
         "staticMethods=" + staticMethods +
         '}';
@@ -117,13 +103,11 @@ public final class ClassifiedMethods {
   public static final class Builder extends ObjectBuilder<ClassifiedMethods> {
 
     private final SortedMap<String, ExecutableElement> getters;
-    private final SortedMap<String, ExecutableElement> setters;
     private final SortedMap<String, Set<ExecutableElement>> otherInstanceMethods;
     private final SortedMap<String, Set<ExecutableElement>> staticMethods;
 
     private Builder() {
       this.getters = new MethodNameMap<>();
-      this.setters = new MethodNameMap<>();
       this.otherInstanceMethods = new MethodNameMap<>();
       this.staticMethods = new MethodNameMap<>();
     }
@@ -133,13 +117,6 @@ public final class ClassifiedMethods {
      */
     public SortedMap<String, ExecutableElement> getGetters() {
       return this.getters;
-    }
-
-    /**
-     * @return all setters in the builder.
-     */
-    public SortedMap<String, ExecutableElement> getSetters() {
-      return this.setters;
     }
 
     /**
@@ -165,17 +142,6 @@ public final class ClassifiedMethods {
      */
     public Builder getter(String attributeName, ExecutableElement method) {
       return this.put(this.getters, attributeName, method);
-    }
-
-    /**
-     * Add a setter.
-     *
-     * @param attributeName the attribute name that the setter applies to.
-     * @param method        the setter definition.
-     * @return this builder.
-     */
-    public Builder setter(String attributeName, ExecutableElement method) {
-      return this.put(this.setters, attributeName, method);
     }
 
     /**

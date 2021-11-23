@@ -1,12 +1,13 @@
 package io.ascopes.katana.ap.descriptors;
 
-import io.ascopes.katana.ap.utils.NamingUtils;
+import com.squareup.javapoet.TypeName;
+import io.ascopes.katana.annotations.Visibility;
 import io.ascopes.katana.ap.utils.ObjectBuilder;
 import java.util.Objects;
+import java.util.Set;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.TypeMirror;
+import javax.lang.model.element.Modifier;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Representation of an attribute within a model.
@@ -17,23 +18,31 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public final class Attribute {
 
   private final String name;
+  private final String identifier;
+  private final TypeName type;
+  private final Visibility fieldVisibility;
+  private final boolean final_;
+  private final boolean transient_;
   private final ExecutableElement getterToOverride;
-  private final @Nullable ExecutableElement setterToOverride;
   private final boolean setterEnabled;
   private final boolean includeInToString;
   private final boolean includeInEqualsAndHashCode;
 
   private Attribute(Builder builder) {
     this.name = Objects.requireNonNull(builder.name);
+    this.identifier = Objects.requireNonNull(builder.identifier);
+    this.type = Objects.requireNonNull(builder.type);
+    this.fieldVisibility = Objects.requireNonNull(builder.fieldVisibility);
+    this.final_ = Objects.requireNonNull(builder.final_);
+    this.transient_ = Objects.requireNonNull(builder.transient_);
     this.getterToOverride = Objects.requireNonNull(builder.getterToOverride);
-    this.setterToOverride = builder.setterToOverride;
     this.setterEnabled = Objects.requireNonNull(builder.setterEnabled);
     this.includeInToString = Objects.requireNonNull(builder.includeInToString);
     this.includeInEqualsAndHashCode = Objects.requireNonNull(builder.includeInEqualsAndHashCode);
   }
 
   /**
-   * @return the attribute name.
+   * @return the raw name of the attribute. This may not be safe for use in actual identifiers.
    */
   public String getName() {
     return this.name;
@@ -42,23 +51,42 @@ public final class Attribute {
   /**
    * @return the attribute name, modified where appropriate to avoid name clashes with keywords.
    */
-  // TODO: remove suppression later
-  @SuppressWarnings("unused")
-  public String getIdentifierName() {
-    return NamingUtils.transmogrifyIdentifier(this.name);
+  public String getIdentifier() {
+    return this.identifier;
   }
 
   /**
    * @return the attribute type.
    */
-  public TypeMirror getType() {
-    return this.getterToOverride.getReturnType();
+  public TypeName getType() {
+    return this.type;
+  }
+
+  /**
+   * @return the field visibility to use.
+   */
+  public Visibility getFieldVisibility() {
+    return Objects.requireNonNull(this.fieldVisibility);
+  }
+
+  /**
+   * @return true if the field is final, or false if it is non-final.
+   */
+  public boolean isFinal() {
+    return this.final_;
+  }
+
+  /**
+   * @return true if the field is marked as transient, or false if non-transient.
+   */
+  public boolean isTransient() {
+    return this.transient_;
   }
 
   @Override
   public String toString() {
     return "Attribute{" +
-        "name='" + this.name + "', " +
+        "identifier='" + this.identifier + "', " +
         "type='" + this.getterToOverride.getReturnType() + "', " +
         "get=true, set=" + this.setterEnabled +
         '}';
@@ -72,8 +100,12 @@ public final class Attribute {
   public static final class Builder extends ObjectBuilder<Attribute> {
 
     private @MonotonicNonNull String name;
+    private @MonotonicNonNull String identifier;
+    private @MonotonicNonNull TypeName type;
+    private @MonotonicNonNull Visibility fieldVisibility;
+    private @MonotonicNonNull Boolean final_;
+    private @MonotonicNonNull Boolean transient_;
     private @MonotonicNonNull ExecutableElement getterToOverride;
-    private @Nullable ExecutableElement setterToOverride;
     private @MonotonicNonNull Boolean setterEnabled;
     private @MonotonicNonNull Boolean includeInToString;
     private @MonotonicNonNull Boolean includeInEqualsAndHashCode;
@@ -81,16 +113,41 @@ public final class Attribute {
     private Builder() {
     }
 
-    String getName() {
-      return Objects.requireNonNull(this.name);
-    }
-
     ExecutableElement getGetterToOverride() {
       return Objects.requireNonNull(this.getterToOverride);
     }
 
+    String getName() {
+      return Objects.requireNonNull(this.name);
+    }
+
     public Builder name(String name) {
       this.name = Objects.requireNonNull(name);
+      return this;
+    }
+
+    public Builder identifier(String identifier) {
+      this.identifier = Objects.requireNonNull(identifier);
+      return this;
+    }
+
+    public Builder type(TypeName type) {
+      this.type = Objects.requireNonNull(type);
+      return this;
+    }
+
+    public Builder fieldVisibility(Visibility fieldVisibility) {
+      this.fieldVisibility = Objects.requireNonNull(fieldVisibility);
+      return this;
+    }
+
+    public Builder final_(Boolean final_) {
+      this.final_ = Objects.requireNonNull(final_);
+      return this;
+    }
+
+    public Builder transient_(Boolean transient_) {
+      this.transient_ = Objects.requireNonNull(transient_);
       return this;
     }
 
@@ -99,23 +156,18 @@ public final class Attribute {
       return this;
     }
 
-    public Builder setterToOverride(ExecutableElement setterToOverride) {
-      this.setterToOverride = Objects.requireNonNull(setterToOverride);
+    public Builder setterEnabled(Boolean setterEnabled) {
+      this.setterEnabled = Objects.requireNonNull(setterEnabled);
       return this;
     }
 
-    public Builder setterEnabled(boolean setterEnabled) {
-      this.setterEnabled = setterEnabled;
+    public Builder includeInToString(Boolean includeInToString) {
+      this.includeInToString = Objects.requireNonNull(includeInToString);
       return this;
     }
 
-    public Builder includeInToString(boolean includeInToString) {
-      this.includeInToString = includeInToString;
-      return this;
-    }
-
-    public Builder includeInEqualsAndHashCode(boolean includeInEqualsAndHashCode) {
-      this.includeInEqualsAndHashCode = includeInEqualsAndHashCode;
+    public Builder includeInEqualsAndHashCode(Boolean includeInEqualsAndHashCode) {
+      this.includeInEqualsAndHashCode = Objects.requireNonNull(includeInEqualsAndHashCode);
       return this;
     }
 

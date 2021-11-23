@@ -55,6 +55,13 @@ public final class Model {
   }
 
   /**
+   * @return the attributes for the model.
+   */
+  public SortedMap<String, Attribute> getAttributes() {
+    return this.attributes;
+  }
+
+  /**
    * {@inheritDoc}
    */
   @Override
@@ -117,9 +124,9 @@ public final class Model {
       return this;
     }
 
-    public Builder mutable(boolean mutable) {
+    public Builder mutable(Boolean mutable) {
       // Box to enable us to error later if it was not explicitly set.
-      this.mutable = mutable;
+      this.mutable = Objects.requireNonNull(mutable);
       return this;
     }
 

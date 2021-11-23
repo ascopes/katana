@@ -129,13 +129,15 @@ public class AttributeFeatureInclusionManager {
     String message = this.diagnosticTemplates
         .template("includedAndExcluded")
         .placeholder("attributeName", attributeName)
+        // TODO(ascopes): should I make this more specific somehow?
         .placeholder("category", featureClass.getSimpleName())
         .placeholder("getter", getter)
         .placeholder("includeAnnotation", includeAnnotation)
         .placeholder("excludeAnnotation", excludeAnnotation)
         .build();
 
-    TypeElement annotationType = this.elementUtils.getTypeElement(includeAnnotation.getCanonicalName());
+    TypeElement annotationType = this.elementUtils
+        .getTypeElement(includeAnnotation.getCanonicalName());
 
     @Nullable
     AnnotationMirror mirror = AnnotationUtils

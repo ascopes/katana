@@ -17,6 +17,7 @@ import java.lang.annotation.Target;
  */
 @ExclusionAdvice(ToString.Exclude.class)
 @InclusionAdvice(ToString.Include.class)
+@SuppressWarnings("unused")
 public enum ToString implements CustomizableAttributeFeature {
   /**
    * Do not generate a toString method. The {@link Object#toString()} method will be used instead.
@@ -74,7 +75,7 @@ public enum ToString implements CustomizableAttributeFeature {
   @Retention(RetentionPolicy.SOURCE)
   @Target(ElementType.METHOD)
   public @interface Include {
-
+    // Marker annotation only.
   }
 
   /**
@@ -84,6 +85,6 @@ public enum ToString implements CustomizableAttributeFeature {
   @Retention(RetentionPolicy.SOURCE)
   @Target(ElementType.METHOD)
   public @interface Exclude {
-
+    // Marker annotation only.
   }
 }

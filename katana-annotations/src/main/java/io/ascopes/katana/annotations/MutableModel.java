@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 public @interface MutableModel {
 
   /**
-   * Return custom overrides for code-generation settings.
+   * @return custom overrides for code-generation settings.
    * <p>
    * Anything not overridden here will be inherited from any {@link Settings} annotation on the
    * interface itself, and then from any {@link Settings} annotation applied on a package level.

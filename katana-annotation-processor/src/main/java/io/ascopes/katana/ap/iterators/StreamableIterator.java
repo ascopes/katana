@@ -51,7 +51,7 @@ public interface StreamableIterator<E> extends Iterator<E> {
   }
 
   /**
-   * Return an exception that complains about no more remaining elements.
+   * @return an exception that complains about no more remaining elements.
    *
    * @param name the name of the thing being iterated over, pluralised.
    * @return the exception to throw.

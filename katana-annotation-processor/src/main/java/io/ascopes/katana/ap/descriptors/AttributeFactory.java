@@ -1,17 +1,22 @@
 package io.ascopes.katana.ap.descriptors;
 
+import com.squareup.javapoet.TypeName;
+import io.ascopes.katana.annotations.FieldVisibility;
+import io.ascopes.katana.annotations.Visibility;
 import io.ascopes.katana.ap.descriptors.Attribute.Builder;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
-import io.ascopes.katana.ap.utils.DiagnosticTemplates;
+import io.ascopes.katana.ap.utils.AnnotationUtils;
 import io.ascopes.katana.ap.utils.Functors;
+import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
 import io.ascopes.katana.ap.utils.ResultCollector;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.function.Function;
-import javax.annotation.processing.Messager;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
-import javax.tools.Diagnostic.Kind;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
 
 /**
  * Factory for inspecting and generating attributes to apply to models.
@@ -21,18 +26,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public final class AttributeFactory {
 
-  private final Messager messager;
-  private final DiagnosticTemplates diagnosticTemplates;
   private final AttributeFeatureInclusionManager attributeFeatureInclusionManager;
+  private final Elements elementUtils;
 
   public AttributeFactory(
-      DiagnosticTemplates diagnosticTemplates,
       AttributeFeatureInclusionManager attributeFeatureInclusionManager,
-      Messager messager
+      Elements elementUtils
   ) {
-    this.diagnosticTemplates = diagnosticTemplates;
     this.attributeFeatureInclusionManager = attributeFeatureInclusionManager;
-    this.messager = messager;
+    this.elementUtils = elementUtils;
   }
 
   /**
@@ -46,20 +48,14 @@ public final class AttributeFactory {
       ClassifiedMethods classifiedMethods,
       SettingsCollection settings
   ) {
-    Result<SortedMap<String, Attribute>> attributes = classifiedMethods
+    return classifiedMethods
         .getGetters()
         .keySet()
         .stream()
         .map(attr -> this.buildFor(attr, classifiedMethods, settings))
         .collect(ResultCollector.aggregating(
-            Functors.toSortedMap(Attribute::getName, Function.identity(), String::compareTo)
+            Functors.toSortedMap(Attribute::getIdentifier, Function.identity(), String::compareTo)
         ));
-
-    // Give up if we have orphan methods. Do this after processing attributes though so that
-    // we can provide a meaningful set of error messages for those as well.
-    return this
-        .ensureNoOrphans(classifiedMethods)
-        .ifOkReplace(() -> attributes);
   }
 
   private Result<Attribute> buildFor(
@@ -67,39 +63,74 @@ public final class AttributeFactory {
       ClassifiedMethods classifiedMethods,
       SettingsCollection settings
   ) {
+    // Expect this to always be present.
+    ExecutableElement getter = Objects
+        .requireNonNull(classifiedMethods.getGetters().get(attributeName));
+    TypeName typeName = TypeName.get(getter.getReturnType());
+
+    // Ensure we have a valid identifier.
+    String identifierName = NamingUtils.transmogrifyIdentifier(attributeName);
+
     return Result
         .ok(Attribute
             .builder()
             .name(attributeName)
-            .getterToOverride(classifiedMethods.getGetters().get(attributeName)))
-        .ifOkFlatMap(builder -> this.processSetter(builder, classifiedMethods, settings))
+            .identifier(identifierName)
+            .type(typeName)
+            .getterToOverride(getter))
+        .ifOkFlatMap(builder -> this.processFinal(builder, settings))
+        .ifOkFlatMap(builder -> this.processTransience(builder, settings))
+        .ifOkFlatMap(builder -> this.processFieldVisibility(builder, settings))
+        .ifOkFlatMap(builder -> this.processSetter(builder, settings))
         .ifOkFlatMap(builder -> this.processToString(builder, settings))
         .ifOkFlatMap(builder -> this.processEqualsAndHashCode(builder, settings))
         .ifOkMap(Builder::build);
   }
 
-  private Result<Attribute.Builder> processSetter(
+  private Result<Attribute.Builder> processFinal(
       Attribute.Builder builder,
-      ClassifiedMethods classifiedMethods,
+      // TODO(ascopes): handle final
+      @SuppressWarnings("unused") SettingsCollection settings
+  ) {
+    return Result.ok(false)
+        .ifOkMap(builder::final_);
+  }
+
+  private Result<Attribute.Builder> processTransience(
+      Attribute.Builder builder,
       SettingsCollection settings
   ) {
-    @Nullable
-    ExecutableElement setter = classifiedMethods.getSetters().get(builder.getName());
+    return this.attributeFeatureInclusionManager
+        .check(builder.getName(), settings.getFieldTransience(), builder.getGetterToOverride())
+        .ifOkMap(builder::transient_);
+  }
 
+  private Result<Attribute.Builder> processFieldVisibility(
+      Attribute.Builder builder,
+      SettingsCollection settings
+  ) {
+    TypeElement visibilityAnnotationType = this.elementUtils
+        .getTypeElement(FieldVisibility.class.getCanonicalName());
+
+    Visibility visibility = AnnotationUtils
+        .findAnnotationMirror(builder.getGetterToOverride(), visibilityAnnotationType)
+        .ifOkFlatMap(mirror -> AnnotationUtils.getValue(mirror, "value"))
+        .ifOkMap(AnnotationValue::getValue)
+        .ifOkMap(Visibility.class::cast)
+        .elseGet(() -> settings.getFieldVisibility().getValue());
+
+    return Result
+        .ok(builder.fieldVisibility(visibility));
+  }
+
+  private Result<Attribute.Builder> processSetter(
+      Attribute.Builder builder,
+      SettingsCollection settings
+  ) {
     return this.attributeFeatureInclusionManager
         .check(builder.getName(), settings.getSetters(), builder.getGetterToOverride())
         .ifOkThen(builder::setterEnabled)
-        .ifOkFlatMap(enabled -> {
-          if (setter != null) {
-            if (enabled) {
-              builder.setterToOverride(setter);
-            } else {
-              this.failExcludedExplicitSetter(builder.getName(), setter);
-              return Result.fail();
-            }
-          }
-          return Result.ok(enabled);
-        })
+        // TODO(ascopes): allow overriding explicitly defined setters in the future
         .ifOkReplace(() -> Result.ok(builder));
   }
 
@@ -119,56 +150,5 @@ public final class AttributeFactory {
     return this.attributeFeatureInclusionManager
         .check(builder.getName(), settings.getEqualsAndHashCode(), builder.getGetterToOverride())
         .ifOkMap(builder::includeInEqualsAndHashCode);
-  }
-
-  private Result<ClassifiedMethods> ensureNoOrphans(ClassifiedMethods classifiedMethods) {
-    for (String attributeName : classifiedMethods.getSetters().keySet()) {
-      if (!classifiedMethods.getGetters().containsKey(attributeName)) {
-        this.failMissingGetter(
-            "setter",
-            attributeName,
-            classifiedMethods.getSetters().get(attributeName)
-        );
-        return Result.fail();
-      }
-    }
-
-    return Result.ok(classifiedMethods);
-  }
-
-  private void failMissingGetter(
-      @SuppressWarnings("SameParameterValue") String category,
-      String attributeName,
-      ExecutableElement definedMethod
-  ) {
-    String message = this.diagnosticTemplates
-        .template("missingGetter")
-        .placeholder("category", category)
-        .placeholder("attributeName", attributeName)
-        .placeholder("definedMethod", definedMethod.toString())
-        .build();
-
-    this.messager.printMessage(
-        Kind.ERROR,
-        message,
-        definedMethod
-    );
-  }
-
-  private void failExcludedExplicitSetter(
-      String attributeName,
-      ExecutableElement explicitSetter
-  ) {
-    String message = this.diagnosticTemplates
-        .template("excludedExplicitSetter")
-        .placeholder("attributeName", attributeName)
-        .placeholder("explicitSetter", explicitSetter)
-        .build();
-
-    this.messager.printMessage(
-        Kind.ERROR,
-        message,
-        explicitSetter
-    );
   }
 }

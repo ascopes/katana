@@ -47,7 +47,10 @@ public final class MethodClassifier {
    * @return the methods, or an empty optional if some error occurred and was reported to the
    * compiler.
    */
-  public Result<ClassifiedMethods> classifyMethods(TypeElement type, SettingsCollection settings) {
+  public Result<ClassifiedMethods> classifyMethods(
+      TypeElement type,
+      SettingsCollection settings
+  ) {
     ClassifiedMethods.Builder builder = ClassifiedMethods.builder();
 
     boolean failed = false;
@@ -59,7 +62,7 @@ public final class MethodClassifier {
       ExecutableElement method = it.next();
 
       failed |= this.processAsGetter(builder, method, settings)
-          .ifIgnoredReplace(() -> this.processAsSetter(builder, method, settings))
+          // TODO(ascopes): reimplement setter + wither types in the future.
           .ifIgnoredReplace(() -> this.processAsInstanceMethod(builder, method))
           .ifIgnoredReplace(() -> this.processAsStaticMethod(builder, method))
           .assertNotIgnored(() -> "No method processors consumed method " + method)
@@ -111,38 +114,6 @@ public final class MethodClassifier {
           return Result.ok(attributeName);
         })
         .ifOkThen(attributeName -> builder.getter(attributeName, method))
-        .thenDiscardValue();
-  }
-
-  private Result<Void> processAsSetter(
-      ClassifiedMethods.Builder builder,
-      ExecutableElement method,
-      SettingsCollection settings
-  ) {
-    if (method.getParameters().size() != 1) {
-      // XXX: receiver type params might be important here.
-      return Result.ignore();
-    }
-
-    if (method.getReturnType().getKind() != TypeKind.VOID) {
-      return Result.ignore();
-    }
-
-    if (method.getModifiers().contains(Modifier.STATIC)) {
-      return Result.ignore();
-    }
-
-    return this
-        .removePrefixCamelCase(method, settings.getSetterPrefix().getValue())
-        .ifOkFlatMap(attributeName -> {
-          ExecutableElement existingMethod = builder.getSetters().get(attributeName);
-          if (existingMethod != null) {
-            this.failMethodAlreadyExists(existingMethod, method);
-            return Result.fail();
-          }
-          return Result.ok(attributeName);
-        })
-        .ifOkThen(attributeName -> builder.setter(attributeName, method))
         .thenDiscardValue();
   }
 

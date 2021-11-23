@@ -18,6 +18,7 @@ import java.lang.annotation.Target;
  */
 @ExclusionAdvice(Equality.Exclude.class)
 @InclusionAdvice(Equality.Include.class)
+@SuppressWarnings("unused")
 public enum Equality implements CustomizableAttributeFeature {
   /**
    * Use the identity of the object for comparison. This prevents the methods being overridden in

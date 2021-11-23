@@ -59,35 +59,51 @@ public @interface Settings {
   //////////////////////////////
 
   /**
-   * Return the pattern to use for package names. An asterisk "{@code *}" can be used to substitute
+   * @return the pattern to use for package names. An asterisk "{@code *}" can be used to substitute
    * the interface package (e.g. {@code "*.impl"}).
    */
   String packageName() default "*.impl";
 
   /**
-   * Return the pattern to use for class names. An asterisk "{@code *}" can be used to substitute
+   * @return the pattern to use for class names. An asterisk "{@code *}" can be used to substitute
    * the interface name (e.g. {@code "*Impl"} or {@code "Immutable*Impl"}).
    */
   @ImmutableDefaultAdvice("Immutable*")
   @MutableDefaultAdvice("Mutable*")
   String className() default "";
 
+  ////////////////////////
+  //// Field settings ////
+  ////////////////////////
+
+  /**
+   * @return whether to make all internal fields transient by default, or whether to make them
+   *    non-transient by default.
+   */
+  Transient fieldTransience() default Transient.EXCLUDE_ALL;
+
+  /**
+   * @return the default visibility to give fields. This can be overridden per field using
+   *    the {@link FieldVisibility annotation} on a getter.
+   */
+  Visibility fieldVisibility() default Visibility.PRIVATE;
+
   //////////////////////////////////////////////////
   //// Construction and initialization settings ////
   //////////////////////////////////////////////////
 
   /**
-   * Return whether to generate an all-arguments constructor for models.
+   * @return whether to generate an all-arguments constructor for models.
    */
   boolean allArgsConstructor() default false;
 
   /**
-   * Return whether to generate a copy constructor for models.
+   * @return whether to generate a copy constructor for models.
    */
   boolean copyConstructor() default true;
 
   /**
-   * Return whether to generate a default constructor for models. This is the same as all-arguments
+   * @return whether to generate a default constructor for models. This is the same as all-arguments
    * for immutable types, and is a constructor for all non-null attributes on mutable types that
    * lack default values. If you do not have non-null attributes without default values on mutable
    * types, then this will generate a no-arguments constructor.
@@ -95,7 +111,7 @@ public @interface Settings {
   boolean defaultConstructor() default true;
 
   /**
-   * Return whether to generate an all-arguments constructor for immutable models.
+   * @return whether to generate an all-arguments constructor for immutable models.
    */
   boolean builder() default false;
 
@@ -104,18 +120,18 @@ public @interface Settings {
   ///////////////////////////
 
   /**
-   * Return the list of fully qualified class names to treat as boolean types. This will always
+   * @return the list of fully qualified class names to treat as boolean types. This will always
    * include the primitive type implicitly.
    */
   Class<?>[] booleanTypes() default {Boolean.class, AtomicBoolean.class};
 
   /**
-   * Return the name for boolean getter methods.
+   * @return the name for boolean getter methods.
    */
   String booleanGetterPrefix() default "is";
 
   /**
-   * Return the name for regular getter methods.
+   * @return the name for regular getter methods.
    */
   String getterPrefix() default "get";
 
@@ -123,15 +139,14 @@ public @interface Settings {
   //// Mutator settings ////
   //////////////////////////
 
-
   /**
-   * Return the policy for generating setter methods. On immutable types, this will be implemented
+   * @return the policy for generating setter methods. On immutable types, this will be implemented
    * as a "wither" method.
    */
   Setters setters() default Setters.INCLUDE_ALL;
 
   /**
-   * Return the name for setter methods.
+   * @return the name for setter methods.
    */
   @ImmutableDefaultAdvice("with")
   @MutableDefaultAdvice("set")
@@ -142,7 +157,7 @@ public @interface Settings {
   /////////////////////////////////////////////////
 
   /**
-   * Return the policy for generating {@link Object#equals} and {@link Object#hashCode()}
+   * @return the policy for generating {@link Object#equals} and {@link Object#hashCode()}
    * overrides.
    */
   Equality equalsAndHashCode() default Equality.INCLUDE_ALL;
@@ -152,7 +167,7 @@ public @interface Settings {
   //////////////////////////////////////
 
   /**
-   * Return the policy for generating a {@link Object#toString()} override.
+   * @return the policy for generating a {@link Object#toString()} override.
    */
   ToString toStringMethod() default ToString.INCLUDE_ALL;
 }

@@ -1,5 +1,6 @@
 package io.ascopes.katana.annotations;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -14,7 +15,9 @@ import java.lang.annotation.Target;
  * @author Ashley Scopes
  * @since 0.0.1
  */
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
+@SuppressWarnings("unused")
 @Target(ElementType.TYPE)
 public @interface Generated {
   /**

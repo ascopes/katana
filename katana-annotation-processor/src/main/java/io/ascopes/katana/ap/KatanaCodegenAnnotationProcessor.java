@@ -63,9 +63,8 @@ public final class KatanaCodegenAnnotationProcessor extends AbstractKatanaAnnota
         );
 
     AttributeFactory attributeFactory = new AttributeFactory(
-        diagnosticTemplates,
         attributeFeatureInclusionManager,
-        this.processingEnv.getMessager()
+        this.processingEnv.getElementUtils()
     );
 
     ModelFactory modelFactory = new ModelFactory(
@@ -152,9 +151,7 @@ public final class KatanaCodegenAnnotationProcessor extends AbstractKatanaAnnota
   }
 
   private Result<JavaFile> buildJavaFile(Model model) {
-    return this
-        .sourceFileFactory
-        .buildJavaFileFrom(model);
+    return Result.ok(this.sourceFileFactory.buildJavaFileFrom(model));
   }
 
   private Result<Void> writeJavaFile(JavaFile javaFile) {

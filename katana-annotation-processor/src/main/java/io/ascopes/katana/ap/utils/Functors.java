@@ -36,19 +36,6 @@ public abstract class Functors {
   }
 
   /**
-   * Flat map operation that applies to a stream of Result objects and returns a stream of all
-   * values that were OK. Any failed or ignored results get discarded.
-   *
-   * @param <T> the type within the results.
-   * @return the function to apply.
-   */
-  public static <T> Function<Result<T>, Stream<T>> removeNonOkResults() {
-    return opt -> opt
-        .ifOkMap(Stream::of)
-        .elseGet(Stream::empty);
-  }
-
-  /**
    * Flat map operation that flattens a stream of streams into a single stream.
    *
    * @param <T> the elements in each stream.

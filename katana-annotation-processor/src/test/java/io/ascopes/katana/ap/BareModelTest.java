@@ -5,6 +5,13 @@ import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import javax.tools.JavaFileObject;
+import javax.tools.JavaFileObject.Kind;
 import org.junit.jupiter.api.Test;
 
 class BareModelTest {
@@ -45,5 +52,32 @@ class BareModelTest {
 
     assertThat(result)
         .succeededWithoutWarnings();
+
+    result.generatedFiles()
+        .stream()
+        .filter(file -> file.getKind() == Kind.SOURCE)
+        .forEach(file -> System.err.printf(
+            "=================== Generated %s ===================%n%s%n",
+            file.getName(),
+            readStream(file)
+        ));
+  }
+
+  static String readStream(JavaFileObject file) {
+    try {
+      try (InputStream is = file.openInputStream()) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buff = new byte[1024];
+        int c;
+
+        while ((c = is.read(buff)) != -1) {
+          baos.write(buff, 0, c);
+        }
+
+        return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+      }
+    } catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
   }
 }

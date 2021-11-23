@@ -10,32 +10,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Policy for generating setter methods on mutable models, and "wither" methods on immutable
- * models.
- * <p>
- * Wither methods are setters that return a new instance of the object they apply to, rather than
- * mutating the current object. In this respect, they are threadsafe.
+ * Transient field marking policy. This determines whether internal fields are marked as {@code
+ * transient} or not.
  *
  * @author Ashley Scopes
  * @since 0.0.1
  */
-@ExclusionAdvice(Setters.Exclude.class)
-@InclusionAdvice(Setters.Include.class)
+@ExclusionAdvice(Transient.Exclude.class)
+@InclusionAdvice(Transient.Include.class)
 @SuppressWarnings("unused")
-public enum Setters implements AttributeFeature {
+public enum Transient implements AttributeFeature {
   /**
-   * Disable generation of setters entirely.
-   */
-  DISABLED {
-    @Override
-    public boolean isDisabled() {
-      return true;
-    }
-  },
-
-  /**
-   * Generate setter methods for all attributes that are not excluded with {@link Exclude} (i.e.
-   * {@literal @Exclude(Setters.class)}).
+   * Make attributes transient unless marked with {@link Transient.Exclude}.
    */
   INCLUDE_ALL {
     @Override
@@ -45,8 +31,7 @@ public enum Setters implements AttributeFeature {
   },
 
   /**
-   * Generate setter methods for no attributes except those included with {@link Include} (i.e.
-   * {@literal @Include(Setters.class)}).
+   * Do not make attributes transient unless marked with {@link Transient.Include}.
    */
   EXCLUDE_ALL {
     @Override
@@ -62,7 +47,7 @@ public enum Setters implements AttributeFeature {
   @Retention(RetentionPolicy.SOURCE)
   @Target(ElementType.METHOD)
   public @interface Include {
-    // Marker annotation only.
+
   }
 
   /**
@@ -72,6 +57,6 @@ public enum Setters implements AttributeFeature {
   @Retention(RetentionPolicy.SOURCE)
   @Target(ElementType.METHOD)
   public @interface Exclude {
-    // Marker annotation only.
+
   }
 }
