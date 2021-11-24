@@ -2,6 +2,7 @@ package io.ascopes.katana.ap.descriptors;
 
 import io.ascopes.katana.ap.utils.AnnotationUtils;
 import io.ascopes.katana.ap.utils.DiagnosticTemplates;
+import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.Result;
 import java.util.stream.Stream;
 import javax.annotation.processing.Messager;
@@ -22,6 +23,7 @@ import javax.tools.Diagnostic.Kind;
 public final class InterfaceSearcher {
 
   private final DiagnosticTemplates diagnosticTemplates;
+  private final Logger logger;
   private final Messager messager;
 
   /**
@@ -30,6 +32,7 @@ public final class InterfaceSearcher {
    */
   public InterfaceSearcher(DiagnosticTemplates diagnosticTemplates, Messager messager) {
     this.diagnosticTemplates = diagnosticTemplates;
+    this.logger = new Logger();
     this.messager = messager;
   }
 
@@ -41,7 +44,12 @@ public final class InterfaceSearcher {
 
     for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(annotationType)) {
       this.tryUpcastAnnotatedType(annotationType, annotatedElement)
-          .ifOkThen(interfaces);
+          .ifOkThen(interfaces)
+          .ifOkThen(interfaceType -> this.logger.trace(
+              "Found interface {} matching or ascending from {}-annotated interface",
+              interfaceType.getQualifiedName(),
+              annotationType.getQualifiedName()
+          ));
     }
 
     return interfaces.build();

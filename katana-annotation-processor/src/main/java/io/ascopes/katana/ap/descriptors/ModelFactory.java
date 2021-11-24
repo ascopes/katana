@@ -4,6 +4,8 @@ import io.ascopes.katana.annotations.MutableModel;
 import io.ascopes.katana.ap.settings.Setting;
 import io.ascopes.katana.ap.settings.SettingsResolver;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
+import io.ascopes.katana.ap.utils.DiagnosticTemplates;
+import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
 import javax.annotation.processing.Messager;
@@ -26,13 +28,14 @@ public final class ModelFactory {
   private final AttributeFactory attributeFactory;
   private final Elements elementUtils;
   private final Messager messager;
+  private final Logger logger;
 
   /**
-   * @param settingsResolver the settings resolver to use.
-   * @param methodClassifier the method classifier to use.
-   * @param attributeFactory the attribute factory to use.
-   * @param messager         the messager to use to report errors.
-   * @param elementUtils     the element utilities to use.
+   * @param settingsResolver    the settings resolver to use.
+   * @param methodClassifier    the method classifier to use.
+   * @param attributeFactory    the attribute factory to use.
+   * @param messager            the messager to use to report errors.
+   * @param elementUtils        the element utilities to use.
    */
   public ModelFactory(
       SettingsResolver settingsResolver,
@@ -46,6 +49,7 @@ public final class ModelFactory {
     this.attributeFactory = attributeFactory;
     this.elementUtils = elementUtils;
     this.messager = messager;
+    this.logger = new Logger();
   }
 
   /**
@@ -60,9 +64,18 @@ public final class ModelFactory {
       TypeElement modelAnnotation,
       TypeElement annotatedElement
   ) {
-    return AnnotationUtils
+    this.logger.debug(
+        "Building model for {} annotated with {}",
+        annotatedElement.getQualifiedName(),
+        modelAnnotation
+    );
+
+    Result<Model> result = AnnotationUtils
         .findAnnotationMirror(annotatedElement, modelAnnotation)
         .ifOkFlatMap(mirror -> this.buildFor(annotatedElement, modelAnnotation, mirror));
+
+    this.logger.debug("Model descriptor generation result = {}", result);
+    return result;
   }
 
   private Result<Model> buildFor(

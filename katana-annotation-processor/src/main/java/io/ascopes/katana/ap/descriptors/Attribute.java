@@ -40,7 +40,7 @@ public final class Attribute {
     this.fieldVisibility = Objects.requireNonNull(builder.fieldVisibility);
     this.final_ = Objects.requireNonNull(builder.final_);
     this.transient_ = Objects.requireNonNull(builder.transient_);
-    this.getterToOverride = Objects.requireNonNull(builder.getterToOverride);
+    this.getterToOverride = Objects.requireNonNull(builder.getter);
     this.setterEnabled = Objects.requireNonNull(builder.setterEnabled);
     this.includeInToString = Objects.requireNonNull(builder.includeInToString);
     this.includeInEqualsAndHashCode = Objects.requireNonNull(builder.includeInEqualsAndHashCode);
@@ -127,7 +127,7 @@ public final class Attribute {
     private @MonotonicNonNull Visibility fieldVisibility;
     private @MonotonicNonNull Boolean final_;
     private @MonotonicNonNull Boolean transient_;
-    private @MonotonicNonNull ExecutableElement getterToOverride;
+    private @MonotonicNonNull ExecutableElement getter;
     private @MonotonicNonNull Boolean setterEnabled;
     private @MonotonicNonNull Boolean includeInToString;
     private @MonotonicNonNull Boolean includeInEqualsAndHashCode;
@@ -138,8 +138,8 @@ public final class Attribute {
     private Builder() {
     }
 
-    ExecutableElement getGetterToOverride() {
-      return Objects.requireNonNull(this.getterToOverride);
+    ExecutableElement getGetter() {
+      return Objects.requireNonNull(this.getter);
     }
 
     String getName() {
@@ -176,8 +176,8 @@ public final class Attribute {
       return this;
     }
 
-    public Builder getterToOverride(ExecutableElement getterToOverride) {
-      this.getterToOverride = Objects.requireNonNull(getterToOverride);
+    public Builder getter(ExecutableElement getter) {
+      this.getter = Objects.requireNonNull(getter);
       return this;
     }
 

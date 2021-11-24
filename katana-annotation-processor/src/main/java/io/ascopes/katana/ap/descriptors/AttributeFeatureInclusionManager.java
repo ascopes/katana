@@ -88,7 +88,7 @@ public class AttributeFeatureInclusionManager {
     }
 
     if (value.isIncludeAll() && hasAnnotation(getter, excludeAnnotation)) {
-      this.logger.debug(
+      this.logger.trace(
           "Will explicitly exclude feature {} on attribute {}",
           featureClass.getCanonicalName(),
           getter
@@ -97,7 +97,7 @@ public class AttributeFeatureInclusionManager {
     }
 
     if (value.isExcludeAll() && hasAnnotation(getter, includeAnnotation)) {
-      this.logger.debug(
+      this.logger.trace(
           "Will explicitly include feature {} on attribute {}",
           featureClass.getCanonicalName(),
           getter
@@ -105,17 +105,30 @@ public class AttributeFeatureInclusionManager {
       return Result.ok(true);
     }
 
-    this.logger.debug("Using class-level inclusion mode for {}", getter);
-
     if (value.isIncludeAll()) {
+      this.logger.trace(
+          "Using class-level inclusion mode to include {} for feature {}",
+          getter,
+          featureClass.getCanonicalName()
+      );
       return Result.ok(true);
     }
 
     if (value.isExcludeAll()) {
+      this.logger.trace(
+          "Using class-level inclusion mode to exclude {} from feature {}",
+          getter,
+          featureClass.getCanonicalName()
+      );
       return Result.ok(false);
     }
 
     // Anything else isn't relevant here.
+    this.logger.trace(
+        "{} is being ignored for feature {}",
+        getter,
+        featureClass.getCanonicalName()
+    );
     return Result.ignore();
   }
 

@@ -19,33 +19,6 @@ public final class Logger {
 
   // TODO: make this default to OFF.
   private static volatile Level enabledLevel = Level.INFO;
-  private final String name;
-
-  /**
-   * Init a logger named after the class that initialized it.
-   */
-  public Logger() {
-    // Frame 0 = getStackTrace()
-    // Frame 1 = Logger::<init>()
-    // Frame 2 = callee
-    this(Thread.currentThread().getStackTrace()[2].getClassName());
-  }
-
-  /**
-   * Initialize a logger from a given class.
-   *
-   * @param thisClass the class to initialize the name from.
-   */
-  public Logger(Class<?> thisClass) {
-    this(thisClass.getCanonicalName());
-  }
-
-  /**
-   * @param name the name to give this logger.
-   */
-  private Logger(String name) {
-    this.name = name;
-  }
 
   /**
    * Log a message as an info log, if enabled.
@@ -67,9 +40,27 @@ public final class Logger {
     this.log(Level.DEBUG, template, args);
   }
 
+  /**
+   * Log a message as a trace log, if enabled.
+   *
+   * @param template the template string to use.
+   * @param args     the arguments to use.
+   */
+  public void trace(String template, Object @Nullable ... args) {
+    this.log(Level.TRACE, template, args);
+  }
+
+
   private void log(Level level, String template, Object... args) {
     if (level.ordinal() >= enabledLevel.ordinal()) {
-      STREAM.printf("%s - %s - %s - ", LocalDateTime.now(), level, this.name);
+      // Frame 0: getStackTrace
+      // Frame 1: log
+      // Frame 2: info/debug/trace/etc
+      // Frame 3: callee
+      StackTraceElement frame = Thread.currentThread().getStackTrace()[3];
+      String className = frame.getClassName();
+      int lineNumber = frame.getLineNumber();
+      STREAM.printf("%s - %s - %s:%d - ", LocalDateTime.now(), level, className, lineNumber);
       if (args.length > 0) {
         String formatString = TEMPLATE_PATTERN.matcher(template).replaceAll(TEMPLATE_PLACEHOLDER);
         STREAM.printf(formatString, args);
@@ -94,8 +85,17 @@ public final class Logger {
    */
   @SuppressWarnings("unused")
   public enum Level {
+    TRACE,
     DEBUG,
     INFO,
-    OFF,
+    OFF;
+
+    /**
+     * @return the finest logging level.
+     */
+    public static Level all() {
+      assert values().length > 0 : "No logger values!";
+      return values()[0];
+    }
   }
 }

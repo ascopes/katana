@@ -5,11 +5,15 @@ import io.ascopes.katana.ap.utils.ObjectBuilder;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.optional.qual.MaybePresent;
 
 /**
  * Holder for methods on an interface, collected by classification.
@@ -18,15 +22,23 @@ import javax.lang.model.element.ExecutableElement;
  * @since 0.0.1
  */
 public final class ClassifiedMethods {
-
   private final SortedMap<String, ExecutableElement> getters;
-  private final SortedMap<String, Set<ExecutableElement>> otherInstanceMethods;
   private final SortedMap<String, Set<ExecutableElement>> staticMethods;
 
+  // Nullable attributes
+  private final @Nullable ExecutableElement equalsImplementation;
+  private final @Nullable ExecutableElement hashCodeImplementation;
+  private final @Nullable ExecutableElement toStringImplementation;
+
+
   private ClassifiedMethods(Builder builder) {
-    this.getters = unmodifiableSortedMap(builder.getGetters());
-    this.otherInstanceMethods = deepImmutableOverloads(builder.getOtherInstanceMethods());
-    this.staticMethods = deepImmutableOverloads(builder.getStaticMethods());
+    this.getters = unmodifiableSortedMap(builder.getters);
+    this.staticMethods = deepImmutableOverloads(builder.staticMethods);
+
+    // Nullable attributes
+    this.equalsImplementation = builder.equalsImplementation;
+    this.hashCodeImplementation = builder.hashCodeImplementation;
+    this.toStringImplementation = builder.toStringImplementation;
   }
 
   /**
@@ -34,6 +46,30 @@ public final class ClassifiedMethods {
    */
   public SortedMap<String, ExecutableElement> getGetters() {
     return this.getters;
+  }
+
+  /**
+   * @return the custom static equality implementation to use, if provided.
+   */
+  @MaybePresent
+  public Optional<ExecutableElement> getEqualsImplementation() {
+    return Optional.ofNullable(this.equalsImplementation);
+  }
+
+  /**
+   * @return the custom static hashCode implementation to use, if provided.
+   */
+  @MaybePresent
+  public Optional<ExecutableElement> getHashCodeImplementation() {
+    return Optional.ofNullable(this.hashCodeImplementation);
+  }
+
+  /**
+   * @return the custom static toString implementation to use, if provided.
+   */
+  @MaybePresent
+  public Optional<ExecutableElement> getToStringImplementation() {
+    return Optional.ofNullable(this.toStringImplementation);
   }
 
   /**
@@ -45,13 +81,6 @@ public final class ClassifiedMethods {
         .values()
         .toString();
 
-    String otherInstanceMethods = this.otherInstanceMethods
-        .values()
-        .stream()
-        .flatMap(Functors.flattenCollection())
-        .collect(Collectors.toSet())
-        .toString();
-
     String staticMethods = this.staticMethods
         .values()
         .stream()
@@ -61,7 +90,9 @@ public final class ClassifiedMethods {
 
     return "Methods{" +
         "getters=" + getters + ", " +
-        "otherInstanceMethods=" + otherInstanceMethods + ", " +
+        "equalsImplementation=" + this.equalsImplementation + ", " +
+        "hashCodeImplementation=" + this.hashCodeImplementation + ", " +
+        "toStringImplementation=" + this.toStringImplementation + ", " +
         "staticMethods=" + staticMethods +
         '}';
   }
@@ -103,70 +134,45 @@ public final class ClassifiedMethods {
   public static final class Builder extends ObjectBuilder<ClassifiedMethods> {
 
     private final SortedMap<String, ExecutableElement> getters;
-    private final SortedMap<String, Set<ExecutableElement>> otherInstanceMethods;
     private final SortedMap<String, Set<ExecutableElement>> staticMethods;
+
+    private @Nullable ExecutableElement equalsImplementation;
+    private @Nullable ExecutableElement hashCodeImplementation;
+    private @Nullable ExecutableElement toStringImplementation;
 
     private Builder() {
       this.getters = new MethodNameMap<>();
-      this.otherInstanceMethods = new MethodNameMap<>();
       this.staticMethods = new MethodNameMap<>();
     }
 
-    /**
-     * @return all getters in the builder.
-     */
-    public SortedMap<String, ExecutableElement> getGetters() {
-      return this.getters;
+    @MaybePresent
+    public Optional<ExecutableElement> getExistingGetter(String attributeName) {
+      return Optional.ofNullable(this.getters.get(attributeName));
     }
 
-    /**
-     * @return all unclassified instance methods in the builder.
-     */
-    public SortedMap<String, Set<ExecutableElement>> getOtherInstanceMethods() {
-      return this.otherInstanceMethods;
-    }
-
-    /**
-     * @return all static methods in the builder.
-     */
-    public SortedMap<String, Set<ExecutableElement>> getStaticMethods() {
-      return this.staticMethods;
-    }
-
-    /**
-     * Add a getter.
-     *
-     * @param attributeName the attribute name that the getter applies to.
-     * @param method        the getter definition.
-     * @return this builder.
-     */
     public Builder getter(String attributeName, ExecutableElement method) {
       return this.put(this.getters, attributeName, method);
     }
 
-    /**
-     * Add an unclassified instance method.
-     *
-     * @param method the method definition.
-     * @return this builder.
-     */
-    public Builder instanceMethod(ExecutableElement method) {
-      return this.put(this.otherInstanceMethods, method);
-    }
-
-    /**
-     * Add a static method.
-     *
-     * @param method the method definition.
-     * @return this builder.
-     */
     public Builder staticMethod(ExecutableElement method) {
       return this.put(this.staticMethods, method);
     }
 
-    /**
-     * Build the method classification and return it.
-     */
+    public Builder equalsImplementation(@Nullable ExecutableElement equalsImplementation) {
+      this.equalsImplementation = equalsImplementation;
+      return this;
+    }
+
+    public Builder hashCodeImplementation(@Nullable ExecutableElement hashCodeImplementation) {
+      this.hashCodeImplementation = hashCodeImplementation;
+      return this;
+    }
+
+    public Builder toStringImplementation(@Nullable ExecutableElement toStringImplementation) {
+      this.toStringImplementation = toStringImplementation;
+      return this;
+    }
+
     public ClassifiedMethods build() {
       return new ClassifiedMethods(this);
     }

@@ -5,6 +5,7 @@ import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
+import io.ascopes.katana.ap.utils.Logger.Level;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,9 +13,18 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class BareModelTest {
+
+  KatanaCodegenAnnotationProcessor processor;
+
+  @BeforeEach
+  void setUp() {
+    this.processor = new KatanaCodegenAnnotationProcessor();
+    this.processor.setLoggingLevel(Level.all());
+  }
 
   @Test
   void test_bare_model() {
@@ -24,7 +34,7 @@ class BareModelTest {
         .compile(
             forSourceLines(
                 "test.package-info",
-                "@ImmutableModel(@Settings(className=\"Unmodifiable*\"))",
+                "@ImmutableModel",
                 "package test;",
                 "import io.ascopes.katana.annotations.ImmutableModel;",
                 "import io.ascopes.katana.annotations.Settings;"
@@ -44,7 +54,6 @@ class BareModelTest {
                 "  AtomicBoolean isBaz();",
                 "  boolean isBork();",
                 "  Boolean isQux();",
-
                 "  @Deprecated",
                 "  boolean getQuxx();",
                 "}"

@@ -47,6 +47,7 @@ public final class KatanaCodegenAnnotationProcessor extends AbstractKatanaAnnota
     MethodClassifier methodClassifier = new MethodClassifier(
         diagnosticTemplates,
         this.processingEnv.getMessager(),
+        this.processingEnv.getElementUtils(),
         this.processingEnv.getTypeUtils()
     );
 
@@ -108,8 +109,8 @@ public final class KatanaCodegenAnnotationProcessor extends AbstractKatanaAnnota
 
     this.logger.info("Running annotation processor");
 
-    AtomicInteger successes = new AtomicInteger();
-    AtomicInteger failures = new AtomicInteger();
+    AtomicInteger processed = new AtomicInteger();
+    AtomicInteger failed = new AtomicInteger();
     long start = System.nanoTime();
 
     annotationTypes
@@ -118,23 +119,21 @@ public final class KatanaCodegenAnnotationProcessor extends AbstractKatanaAnnota
         .map(model -> model.ifOkFlatMap(this::buildJavaFile))
         .map(file -> file.ifOkFlatMap(this::writeJavaFile))
         .forEach(result -> {
-          if (result.isOk()) {
-            successes.incrementAndGet();
-          } else if (roundEnv.errorRaised()) {
-            failures.incrementAndGet();
-          } else {
-            // Should never happen.
-            throw new RuntimeException("Error raised but nothing was logged. This is a bug!");
+          if (result.isNotOk()) {
+            failed.incrementAndGet();
+          } else if (result.isIgnored()) {
+            throw new RuntimeException("Ignored result came from somewhere. This is a bug!");
           }
+          processed.incrementAndGet();
         });
 
     long delta = System.nanoTime() - start;
 
     this.logger.info(
-        "Had {} successful results and {} failures in approx {}ms",
-        successes,
-        failures,
-        Math.round(delta / 1_000_000.0)
+        "Processed {} model definitions in approx {}ms ({} failures)",
+        processed.get(),
+        Math.round(delta / 1_000_000.0),
+        failed.get()
     );
 
     return true;

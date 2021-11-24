@@ -5,6 +5,7 @@ import io.ascopes.katana.annotations.MutableModel;
 import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.Logger.Level;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,7 +29,7 @@ public abstract class AbstractKatanaAnnotationProcessor extends AbstractProcesso
   protected final Logger logger;
 
   public AbstractKatanaAnnotationProcessor() {
-    this.logger = new Logger(this.getClass());
+    this.logger = new Logger();
   }
 
   /**
@@ -67,9 +68,14 @@ public abstract class AbstractKatanaAnnotationProcessor extends AbstractProcesso
     Optional
         .ofNullable(processingEnv.getOptions().get(LOGGING_LEVEL))
         .map(Level::valueOf)
-        .ifPresent(Logger::setGlobalLevel);
+        .ifPresent(this::setLoggingLevel);
 
     this.doInit();
+  }
+
+  public final void setLoggingLevel(Level level) {
+    Objects.requireNonNull(level);
+    Logger.setGlobalLevel(level);
   }
 
   /**

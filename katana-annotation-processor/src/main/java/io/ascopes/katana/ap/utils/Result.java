@@ -134,6 +134,20 @@ public final class Result<T> {
   }
 
   /**
+   * Run some logic if the result is ignored.
+   *
+   * @param toRun logic to run if ignored.
+   * @return this result.
+   */
+  // TODO(ascopes): unit tests
+  public Result<T> ifIgnoredThen(Runnable toRun) {
+    if (this.isIgnored()) {
+      toRun.run();
+    }
+    return this;
+  }
+
+  /**
    * If the result is ignored, replace it with an OK result holding the given value.
    *
    * @param then the result value to replace with.

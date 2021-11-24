@@ -79,7 +79,7 @@ public final class AttributeFactory {
             .name(attributeName)
             .identifier(identifierName)
             .type(typeName)
-            .getterToOverride(getter))
+            .getter(getter))
         .ifOkFlatMap(builder -> this.processFinal(builder, settings))
         .ifOkFlatMap(builder -> this.processTransience(builder, settings))
         .ifOkFlatMap(builder -> this.processFieldVisibility(builder, settings))
@@ -104,7 +104,7 @@ public final class AttributeFactory {
       SettingsCollection settings
   ) {
     return this.attributeFeatureInclusionManager
-        .check(builder.getName(), settings.getFieldTransience(), builder.getGetterToOverride())
+        .check(builder.getName(), settings.getFieldTransience(), builder.getGetter())
         .ifOkMap(builder::transient_);
   }
 
@@ -116,7 +116,7 @@ public final class AttributeFactory {
         .getTypeElement(FieldVisibility.class.getCanonicalName());
 
     Visibility visibility = AnnotationUtils
-        .findAnnotationMirror(builder.getGetterToOverride(), visibilityAnnotationType)
+        .findAnnotationMirror(builder.getGetter(), visibilityAnnotationType)
         .ifOkFlatMap(mirror -> AnnotationUtils.getValue(mirror, "value"))
         .ifOkMap(AnnotationValue::getValue)
         .ifOkMap(Visibility.class::cast)
@@ -131,7 +131,7 @@ public final class AttributeFactory {
       SettingsCollection settings
   ) {
     return this.attributeFeatureInclusionManager
-        .check(builder.getName(), settings.getSetters(), builder.getGetterToOverride())
+        .check(builder.getName(), settings.getSetters(), builder.getGetter())
         .ifOkThen(builder::setterEnabled)
         // TODO(ascopes): allow overriding explicitly defined setters in the future
         .ifOkReplace(() -> Result.ok(builder));
@@ -142,7 +142,7 @@ public final class AttributeFactory {
       SettingsCollection settings
   ) {
     return this.attributeFeatureInclusionManager
-        .check(builder.getName(), settings.getToStringMethod(), builder.getGetterToOverride())
+        .check(builder.getName(), settings.getToStringMode(), builder.getGetter())
         .ifOkMap(builder::includeInToString);
   }
 
@@ -151,7 +151,7 @@ public final class AttributeFactory {
       SettingsCollection settings
   ) {
     return this.attributeFeatureInclusionManager
-        .check(builder.getName(), settings.getEqualsAndHashCode(), builder.getGetterToOverride())
+        .check(builder.getName(), settings.getEqualityMode(), builder.getGetter())
         .ifOkMap(builder::includeInEqualsAndHashCode);
   }
 
@@ -160,7 +160,7 @@ public final class AttributeFactory {
         .getTypeElement(Deprecated.class.getCanonicalName());
 
     return AnnotationUtils
-        .findAnnotationMirror(builder.getGetterToOverride(), deprecatedAnnotation)
+        .findAnnotationMirror(builder.getGetter(), deprecatedAnnotation)
         .ifOkMap(builder::deprecatedAnnotation)
         .ifIgnoredReplace(builder);
   }

@@ -78,13 +78,13 @@ public @interface Settings {
 
   /**
    * @return whether to make all internal fields transient by default, or whether to make them
-   *    non-transient by default.
+   * non-transient by default.
    */
   Transient fieldTransience() default Transient.EXCLUDE_ALL;
 
   /**
-   * @return the default visibility to give fields. This can be overridden per field using
-   *    the {@link FieldVisibility annotation} on a getter.
+   * @return the default visibility to give fields. This can be overridden per field using the
+   * {@link FieldVisibility annotation} on a getter.
    */
   Visibility fieldVisibility() default Visibility.PRIVATE;
 
@@ -160,7 +160,24 @@ public @interface Settings {
    * @return the policy for generating {@link Object#equals} and {@link Object#hashCode()}
    * overrides.
    */
-  Equality equalsAndHashCode() default Equality.INCLUDE_ALL;
+  Equality equalityMode() default Equality.INCLUDE_ALL;
+
+  /**
+   * @return the name of the static equals method name to look for if {@link
+   * #equalityMode()} is set to {@link Equality#CUSTOM}. The method must have the
+   * signature {@code static boolean isEqualTo(ThisInterface self, Object other)}, such that "{@code
+   * isEqualTo}" is the value of this setting, and {@code ThisInterface} is the interface you
+   * annotated.
+   */
+  String equalsMethodName() default "isEqualTo";
+
+  /**
+   * @return the name of the static hashCode method name to look for if {@link
+   * #equalityMode()} is set to {@link Equality#CUSTOM}. The method must have the
+   * signature {@code static int hashCodeOf(ThisInterface self)}, such that "{@code hashCodeOf}" is
+   * the value of this setting, and {@code ThisInterface} is the interface you annotated.
+   */
+  String hashCodeMethodName() default "hashCodeOf";
 
   //////////////////////////////////////
   //// toString generation settings ////
@@ -169,5 +186,13 @@ public @interface Settings {
   /**
    * @return the policy for generating a {@link Object#toString()} override.
    */
-  ToString toStringMethod() default ToString.INCLUDE_ALL;
+  ToString toStringMode() default ToString.INCLUDE_ALL;
+
+  /**
+   * @return the name of the static toString method name to look for if {@link #toStringMode()} is
+   * set to {@link ToString#CUSTOM}. The method must have the signature {@code static String
+   * asString(ThisInterface self)}, such that "{@code asString}" is the value of this setting, and
+   * {@code ThisInterface} is the interface you annotated.
+   */
+  String toStringMethodName() default "asString";
 }
