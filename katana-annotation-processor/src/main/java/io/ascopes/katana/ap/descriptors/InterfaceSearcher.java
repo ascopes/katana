@@ -1,11 +1,10 @@
 package io.ascopes.katana.ap.descriptors;
 
 import io.ascopes.katana.ap.utils.AnnotationUtils;
-import io.ascopes.katana.ap.utils.DiagnosticTemplates;
+import io.ascopes.katana.ap.utils.Diagnostics;
 import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.Result;
 import java.util.stream.Stream;
-import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -22,18 +21,15 @@ import javax.tools.Diagnostic.Kind;
  */
 public final class InterfaceSearcher {
 
-  private final DiagnosticTemplates diagnosticTemplates;
+  private final Diagnostics diagnostics;
   private final Logger logger;
-  private final Messager messager;
 
   /**
-   * @param diagnosticTemplates diagnostics templates to use.
-   * @param messager            the messager to use.
+   * @param diagnostics diagnostics templates to use.
    */
-  public InterfaceSearcher(DiagnosticTemplates diagnosticTemplates, Messager messager) {
-    this.diagnosticTemplates = diagnosticTemplates;
+  public InterfaceSearcher(Diagnostics diagnostics) {
+    this.diagnostics = diagnostics;
     this.logger = new Logger();
-    this.messager = messager;
   }
 
   public Stream<TypeElement> findAnnotatedInterfacesFor(
@@ -87,14 +83,16 @@ public final class InterfaceSearcher {
         .findAnnotationMirror(annotatedElement, annotationType)
         .elseReturn(null);
 
-    String message = this.diagnosticTemplates
+    this.diagnostics
+        .builder()
+        .kind(Kind.ERROR)
+        .element(annotatedElement)
+        .annotationMirror(mirror)
         .template("notAnInterfaceOrPackage")
-        .placeholder("annotationName", annotationType.getSimpleName())
-        .placeholder("erroneousElementName", annotatedElement.getSimpleName())
-        .placeholder("erroneousElementKind", annotatedElement.getKind())
-        .build();
-
-    this.messager.printMessage(Kind.ERROR, message, annotatedElement, mirror);
+        .param("annotationName", annotationType.getSimpleName())
+        .param("erroneousElementName", annotatedElement.getSimpleName())
+        .param("erroneousElementKind", annotatedElement.getKind())
+        .log();
   }
 
   private void failUnexpectedElement(TypeElement annotationType, Element annotatedElement) {
@@ -104,13 +102,15 @@ public final class InterfaceSearcher {
         .findAnnotationMirror(annotatedElement, annotationType)
         .elseReturn(null);
 
-    String message = this.diagnosticTemplates
+    this.diagnostics
+        .builder()
+        .kind(Kind.ERROR)
+        .element(annotatedElement)
+        .annotationMirror(mirror)
         .template("unexpectedElement")
-        .placeholder("annotationName", annotationType.getSimpleName())
-        .placeholder("erroneousElementName", annotatedElement.getSimpleName())
-        .placeholder("erroneousElementKind", annotatedElement.getKind())
-        .build();
-
-    this.messager.printMessage(Kind.ERROR, message, annotatedElement, mirror);
+        .param("annotationName", annotationType.getSimpleName())
+        .param("erroneousElementName", annotatedElement.getSimpleName())
+        .param("erroneousElementKind", annotatedElement.getKind())
+        .log();
   }
 }

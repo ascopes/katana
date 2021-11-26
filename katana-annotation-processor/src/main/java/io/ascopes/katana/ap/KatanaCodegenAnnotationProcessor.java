@@ -10,7 +10,7 @@ import io.ascopes.katana.ap.descriptors.MethodClassificationFactory;
 import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.descriptors.ModelFactory;
 import io.ascopes.katana.ap.settings.SettingsResolver;
-import io.ascopes.katana.ap.utils.DiagnosticTemplates;
+import io.ascopes.katana.ap.utils.Diagnostics;
 import io.ascopes.katana.ap.utils.Result;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,7 +37,9 @@ public final class KatanaCodegenAnnotationProcessor extends AbstractKatanaAnnota
    */
   @Override
   protected void doInit() {
-    DiagnosticTemplates diagnosticTemplates = new DiagnosticTemplates();
+    Diagnostics diagnostics = new Diagnostics(
+        this.processingEnv.getMessager()
+    );
 
     SettingsResolver settingsResolver = new SettingsResolver(
         this.processingEnv.getElementUtils(),
@@ -45,22 +47,17 @@ public final class KatanaCodegenAnnotationProcessor extends AbstractKatanaAnnota
     );
 
     MethodClassificationFactory methodClassifier = new MethodClassificationFactory(
-        diagnosticTemplates,
-        this.processingEnv.getMessager(),
+        diagnostics,
         this.processingEnv.getElementUtils(),
         this.processingEnv.getTypeUtils()
     );
 
-    InterfaceSearcher interfaceSearcher = new InterfaceSearcher(
-        diagnosticTemplates,
-        this.processingEnv.getMessager()
-    );
+    InterfaceSearcher interfaceSearcher = new InterfaceSearcher(diagnostics);
 
     AttributeFeatureInclusionManager attributeFeatureInclusionManager =
         new AttributeFeatureInclusionManager(
-            diagnosticTemplates,
-            this.processingEnv.getElementUtils(),
-            this.processingEnv.getMessager()
+            diagnostics,
+            this.processingEnv.getElementUtils()
         );
 
     AttributeFactory attributeFactory = new AttributeFactory(
@@ -72,7 +69,7 @@ public final class KatanaCodegenAnnotationProcessor extends AbstractKatanaAnnota
         settingsResolver,
         methodClassifier,
         attributeFactory,
-        this.processingEnv.getMessager(),
+        diagnostics,
         this.processingEnv.getElementUtils()
     );
 
@@ -80,8 +77,7 @@ public final class KatanaCodegenAnnotationProcessor extends AbstractKatanaAnnota
 
     JavaFileWriter javaFileWriter = new JavaFileWriter(
         this.processingEnv.getFiler(),
-        this.processingEnv.getMessager(),
-        diagnosticTemplates
+        diagnostics
     );
 
     this.interfaceSearcher = interfaceSearcher;

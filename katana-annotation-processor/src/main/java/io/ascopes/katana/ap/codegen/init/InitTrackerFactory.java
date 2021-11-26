@@ -11,6 +11,7 @@ import java.util.SortedSet;
  * @since 0.0.1
  */
 public class InitTrackerFactory {
+
   private final Logger logger;
 
   public InitTrackerFactory() {

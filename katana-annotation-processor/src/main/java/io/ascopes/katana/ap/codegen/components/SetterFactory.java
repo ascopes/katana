@@ -16,6 +16,7 @@ import javax.lang.model.element.Modifier;
  * @since 0.0.1
  */
 public final class SetterFactory {
+
   private final Logger logger;
 
   public SetterFactory() {
@@ -26,7 +27,7 @@ public final class SetterFactory {
    * Create a mutator for a given attribute and settings.
    *
    * @param attribute the attribute.
-   * @param settings the settings for the model.
+   * @param settings  the settings for the model.
    * @return the setter method.
    */
   public MethodSpec create(Attribute attribute, SettingsCollection settings) {

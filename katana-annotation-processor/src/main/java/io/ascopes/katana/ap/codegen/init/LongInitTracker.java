@@ -13,6 +13,7 @@ import java.util.SortedSet;
  * @since 0.0.1
  */
 class LongInitTracker extends AbstractInitTracker {
+
   LongInitTracker(SortedSet<Attribute> attributeSet) {
     super(attributeSet);
   }

@@ -11,7 +11,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.optional.qual.MaybePresent;
 
@@ -22,6 +21,7 @@ import org.checkerframework.checker.optional.qual.MaybePresent;
  * @since 0.0.1
  */
 public final class ClassifiedMethods {
+
   private final SortedMap<String, ExecutableElement> getters;
   private final SortedMap<String, Set<ExecutableElement>> staticMethods;
 

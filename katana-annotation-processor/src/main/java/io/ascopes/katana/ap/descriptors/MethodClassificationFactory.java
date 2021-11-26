@@ -5,12 +5,11 @@ import io.ascopes.katana.annotations.ToString;
 import io.ascopes.katana.ap.iterators.AvailableMethodsIterator;
 import io.ascopes.katana.ap.settings.Setting;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
-import io.ascopes.katana.ap.utils.DiagnosticTemplates;
+import io.ascopes.katana.ap.utils.Diagnostics;
 import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
 import java.util.stream.Collectors;
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -30,26 +29,22 @@ import javax.tools.Diagnostic.Kind;
  */
 public final class MethodClassificationFactory {
 
-  private final DiagnosticTemplates diagnosticTemplates;
-  private final Messager messager;
+  private final Diagnostics diagnostics;
   private final Logger logger;
   private final Elements elementUtils;
   private final Types typeUtils;
 
   /**
-   * @param diagnosticTemplates the message templating support to use.
-   * @param messager            the messager to report errors with.
-   * @param elementUtils        the element utilities to use.
-   * @param typeUtils           the type utilities to use.
+   * @param diagnostics  the message templating support to use.
+   * @param elementUtils the element utilities to use.
+   * @param typeUtils    the type utilities to use.
    */
   public MethodClassificationFactory(
-      DiagnosticTemplates diagnosticTemplates,
-      Messager messager,
+      Diagnostics diagnostics,
       Elements elementUtils,
       Types typeUtils
   ) {
-    this.diagnosticTemplates = diagnosticTemplates;
-    this.messager = messager;
+    this.diagnostics = diagnostics;
     this.logger = new Logger();
     this.elementUtils = elementUtils;
     this.typeUtils = typeUtils;
@@ -332,15 +327,16 @@ public final class MethodClassificationFactory {
     String newTypeName = newType.getQualifiedName().toString();
     String newMethodSignature = this.signatureOf(newMethod);
 
-    String message = this.diagnosticTemplates
+    this.diagnostics
+        .builder()
+        .kind(Kind.ERROR)
+        .element(newMethod)
         .template("overloadedMethodForAttribute")
-        .placeholder("existingTypeName", existingTypeName)
-        .placeholder("existingMethodSignature", existingMethodSignature)
-        .placeholder("newTypeName", newTypeName)
-        .placeholder("newMethodSignature", newMethodSignature)
-        .build();
-
-    this.messager.printMessage(Kind.ERROR, message, newMethod);
+        .param("existingTypeName", existingTypeName)
+        .param("existingMethodSignature", existingMethodSignature)
+        .param("newTypeName", newTypeName)
+        .param("newMethodSignature", newMethodSignature)
+        .log();
   }
 
   private void failNonBooleanGetter(
@@ -351,27 +347,29 @@ public final class MethodClassificationFactory {
     Setting<String> getterPrefix = settings.getGetterPrefix();
     Setting<Class<?>[]> booleanTypes = settings.getBooleanTypes();
 
-    String message = this.diagnosticTemplates
+    this.diagnostics
+        .builder()
+        .kind(Kind.ERROR)
+        .element(method)
         .template("nonBooleanGetter")
-        .placeholder("method", method.toString())
-        .placeholder("booleanGetterPrefix", booleanGetterPrefix.getValue())
-        .placeholder("booleanGetterPrefixProperty", booleanGetterPrefix.getDescription())
-        .placeholder("getterPrefix", getterPrefix.getValue())
-        .placeholder("getterPrefixProperty", getterPrefix.getDescription())
-        .placeholder("booleanTypes", booleanTypes.getValue())
-        .placeholder("booleanTypesProperty", booleanTypes.getDescription())
-        .build();
-
-    this.messager.printMessage(Kind.ERROR, message, method);
+        .param("method", method.toString())
+        .param("booleanGetterPrefix", booleanGetterPrefix.getValue())
+        .param("booleanGetterPrefixProperty", booleanGetterPrefix.getDescription())
+        .param("getterPrefix", getterPrefix.getValue())
+        .param("getterPrefixProperty", getterPrefix.getDescription())
+        .param("booleanTypes", booleanTypes.getValue())
+        .param("booleanTypesProperty", booleanTypes.getDescription())
+        .log();
   }
 
   private void failUnimplementableMethods(TypeElement selfType, ExecutableElement method) {
-    String message = this.diagnosticTemplates
+    this.diagnostics
+        .builder()
+        .kind(Kind.ERROR)
+        .element(method)
         .template("unimplementableMethods")
-        .placeholder("type", selfType.getQualifiedName())
-        .placeholder("method", method)
-        .build();
-
-    this.messager.printMessage(Kind.ERROR, message, method);
+        .param("type", selfType.getQualifiedName())
+        .param("method", method)
+        .log();
   }
 }

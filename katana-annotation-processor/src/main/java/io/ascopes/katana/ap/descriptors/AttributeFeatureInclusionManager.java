@@ -5,13 +5,12 @@ import io.ascopes.katana.annotations.internal.ExclusionAdvice;
 import io.ascopes.katana.annotations.internal.InclusionAdvice;
 import io.ascopes.katana.ap.settings.Setting;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
-import io.ascopes.katana.ap.utils.DiagnosticTemplates;
+import io.ascopes.katana.ap.utils.Diagnostics;
 import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.Result;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 import java.util.function.Supplier;
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -28,24 +27,20 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class AttributeFeatureInclusionManager {
 
   private final Logger logger;
-  private final DiagnosticTemplates diagnosticTemplates;
+  private final Diagnostics diagnostics;
   private final Elements elementUtils;
-  private final Messager messager;
 
   /**
-   * @param messager            messager to report errors with.
-   * @param elementUtils        element utilities to use.
-   * @param diagnosticTemplates diagnostic templates to use for error messages.
+   * @param diagnostics  diagnostics to use to report compiler errors.
+   * @param elementUtils element utilities to use.
    */
   public AttributeFeatureInclusionManager(
-      DiagnosticTemplates diagnosticTemplates,
-      Elements elementUtils,
-      Messager messager
+      Diagnostics diagnostics,
+      Elements elementUtils
   ) {
     this.logger = new Logger();
-    this.diagnosticTemplates = diagnosticTemplates;
+    this.diagnostics = diagnostics;
     this.elementUtils = elementUtils;
-    this.messager = messager;
   }
 
   /**
@@ -139,16 +134,6 @@ public class AttributeFeatureInclusionManager {
       Class<? extends Annotation> includeAnnotation,
       Class<? extends Annotation> excludeAnnotation
   ) {
-    String message = this.diagnosticTemplates
-        .template("includedAndExcluded")
-        .placeholder("attributeName", attributeName)
-        // TODO(ascopes): should I make this more specific somehow?
-        .placeholder("category", featureClass.getSimpleName())
-        .placeholder("getter", getter)
-        .placeholder("includeAnnotation", includeAnnotation)
-        .placeholder("excludeAnnotation", excludeAnnotation)
-        .build();
-
     TypeElement annotationType = this.elementUtils
         .getTypeElement(includeAnnotation.getCanonicalName());
 
@@ -157,12 +142,19 @@ public class AttributeFeatureInclusionManager {
         .findAnnotationMirror(getter, annotationType)
         .elseReturn(null);
 
-    this.messager.printMessage(
-        Kind.ERROR,
-        message,
-        getter,
-        mirror
-    );
+    this.diagnostics
+        .builder()
+        .kind(Kind.ERROR)
+        .element(getter)
+        .annotationMirror(mirror)
+        .template("includedAndExcluded")
+        .param("attributeName", attributeName)
+        // TODO(ascopes): should I make this more specific somehow?
+        .param("category", featureClass.getSimpleName())
+        .param("getter", getter)
+        .param("includeAnnotation", includeAnnotation)
+        .param("excludeAnnotation", excludeAnnotation)
+        .log();
   }
 
   private static boolean hasAnnotation(

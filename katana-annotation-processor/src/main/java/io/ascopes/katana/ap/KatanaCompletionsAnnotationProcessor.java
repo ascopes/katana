@@ -16,6 +16,7 @@ import javax.lang.model.element.TypeElement;
  * @since 0.0.1
  */
 public final class KatanaCompletionsAnnotationProcessor extends AbstractKatanaAnnotationProcessor {
+
   @Override
   protected void doInit() {
     // Do nothing.

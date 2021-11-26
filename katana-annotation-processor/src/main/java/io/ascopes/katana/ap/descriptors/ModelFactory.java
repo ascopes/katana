@@ -4,14 +4,17 @@ import io.ascopes.katana.annotations.MutableModel;
 import io.ascopes.katana.ap.settings.Setting;
 import io.ascopes.katana.ap.settings.SettingsResolver;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
+import io.ascopes.katana.ap.utils.Diagnostics;
 import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic.Kind;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Mapper to read in the AST data from the compiler and produce meaningful information for other
@@ -25,29 +28,29 @@ public final class ModelFactory {
   private final SettingsResolver settingsResolver;
   private final MethodClassificationFactory methodClassifier;
   private final AttributeFactory attributeFactory;
+  private final Diagnostics diagnostics;
   private final Elements elementUtils;
-  private final Messager messager;
   private final Logger logger;
 
   /**
-   * @param settingsResolver    the settings resolver to use.
-   * @param methodClassifier    the method classifier to use.
-   * @param attributeFactory    the attribute factory to use.
-   * @param messager            the messager to use to report errors.
-   * @param elementUtils        the element utilities to use.
+   * @param settingsResolver the settings resolver to use.
+   * @param methodClassifier the method classifier to use.
+   * @param attributeFactory the attribute factory to use.
+   * @param diagnostics      the diagnostics to report compiler errors with.
+   * @param elementUtils     the element utilities to use.
    */
   public ModelFactory(
       SettingsResolver settingsResolver,
       MethodClassificationFactory methodClassifier,
       AttributeFactory attributeFactory,
-      Messager messager,
+      Diagnostics diagnostics,
       Elements elementUtils
   ) {
     this.settingsResolver = settingsResolver;
     this.methodClassifier = methodClassifier;
     this.attributeFactory = attributeFactory;
     this.elementUtils = elementUtils;
-    this.messager = messager;
+    this.diagnostics = diagnostics;
     this.logger = new Logger();
   }
 
@@ -126,14 +129,14 @@ public final class ModelFactory {
     try {
       NamingUtils.validatePackageName(packageName);
     } catch (IllegalArgumentException ex) {
-      this.messager.printMessage(
-          Kind.ERROR,
-          ex.getMessage() + " (package name was determined from "
-              + packageNameSetting.getDescription() + ")",
+      this.failIllegalPackageName(
+          ex.getMessage(),
+          packageNameSetting,
           packageNameSetting.getDeclaringElement().orElseGet(builder::getSuperInterface),
           packageNameSetting.getAnnotationMirror().orElseGet(builder::getAnnotationMirror),
           packageNameSetting.getAnnotationValue().orElse(null)
       );
+
       return Result.fail();
     }
 
@@ -153,14 +156,14 @@ public final class ModelFactory {
     try {
       NamingUtils.validateClassName(className);
     } catch (IllegalArgumentException ex) {
-      this.messager.printMessage(
-          Kind.ERROR,
-          ex.getMessage() + " (class name was determined from "
-              + classNameSetting.getDescription() + ")",
+      this.failIllegalClassName(
+          ex.getMessage(),
+          classNameSetting,
           classNameSetting.getDeclaringElement().orElseGet(builder::getSuperInterface),
           classNameSetting.getAnnotationMirror().orElseGet(builder::getAnnotationMirror),
           classNameSetting.getAnnotationValue().orElse(null)
       );
+
       return Result.fail();
     }
 
@@ -189,5 +192,44 @@ public final class ModelFactory {
     return this.attributeFactory
         .create(builder.getMethods(), builder.getSettingsCollection())
         .ifOkMap(builder::attributes);
+  }
+
+  private void failIllegalPackageName(
+      String message,
+      Setting<?> packageNameSetting,
+      @Nullable Element element,
+      @Nullable AnnotationMirror annotationMirror,
+      @Nullable AnnotationValue annotationValue
+  ) {
+    this.diagnostics
+        .builder()
+        .kind(Kind.ERROR)
+        .element(element)
+        .annotationMirror(annotationMirror)
+        .annotationValue(annotationValue)
+        .template("illegalPackageName")
+        .param("message", message)
+        .param("settingDescription", packageNameSetting.getDescription())
+        .log();
+  }
+
+
+  private void failIllegalClassName(
+      String message,
+      Setting<?> classNameSetting,
+      @Nullable Element element,
+      @Nullable AnnotationMirror annotationMirror,
+      @Nullable AnnotationValue annotationValue
+  ) {
+    this.diagnostics
+        .builder()
+        .kind(Kind.ERROR)
+        .element(element)
+        .annotationMirror(annotationMirror)
+        .annotationValue(annotationValue)
+        .template("illegalClassName")
+        .param("message", message)
+        .param("settingDescription", classNameSetting.getDescription())
+        .log();
   }
 }

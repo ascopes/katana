@@ -62,7 +62,6 @@ public abstract class CodeGenUtils {
 
   /**
    * @param modelInterface the model interface used to create the annotation.
-   *
    * @return a {@link Generated} annotation spec to annotate generated types with.
    */
   public static AnnotationSpec generated(TypeElement modelInterface) {

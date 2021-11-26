@@ -1,14 +1,13 @@
 package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.JavaFile;
-import io.ascopes.katana.ap.utils.DiagnosticTemplates;
+import io.ascopes.katana.ap.utils.Diagnostics;
 import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.Result;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
 import javax.tools.Diagnostic.Kind;
 
 /**
@@ -21,19 +20,16 @@ public final class JavaFileWriter {
 
   private final Logger logger;
   private final Filer filer;
-  private final Messager messager;
-  private final DiagnosticTemplates diagnosticTemplates;
+  private final Diagnostics diagnostics;
 
   /**
-   * @param filer               the filer to use to write out source code.
-   * @param messager            the messager to use.
-   * @param diagnosticTemplates the diagnostic templates to use to report errors.
+   * @param filer       the filer to use to write out source code.
+   * @param diagnostics the diagnostic templates to use to report errors.
    */
-  public JavaFileWriter(Filer filer, Messager messager, DiagnosticTemplates diagnosticTemplates) {
+  public JavaFileWriter(Filer filer, Diagnostics diagnostics) {
     this.logger = new Logger();
     this.filer = filer;
-    this.messager = messager;
-    this.diagnosticTemplates = diagnosticTemplates;
+    this.diagnostics = diagnostics;
   }
 
   /**
@@ -57,13 +53,14 @@ public final class JavaFileWriter {
       PrintWriter printWriter = new PrintWriter(stringWriter);
       ex.printStackTrace(printWriter);
 
-      String errorMessage = this.diagnosticTemplates
+      this.diagnostics
+          .builder()
+          .kind(Kind.ERROR)
           .template("ioException")
-          .placeholder("fileName", fileName)
-          .placeholder("stacktrace", stringWriter.toString())
-          .build();
+          .param("fileName", fileName)
+          .param("stacktrace", stringWriter.toString())
+          .log();
 
-      this.messager.printMessage(Kind.ERROR, errorMessage);
       return Result.fail();
     }
   }

@@ -21,6 +21,16 @@ public final class Logger {
   private static volatile Level enabledLevel = Level.INFO;
 
   /**
+   * Log a message as an error log, if enabled.
+   *
+   * @param template the template string to use.
+   * @param args     the arguments to use.
+   */
+  public void error(String template, Object @Nullable ... args) {
+    this.log(Level.ERROR, template, args);
+  }
+
+  /**
    * Log a message as an info log, if enabled.
    *
    * @param template the template string to use.
@@ -88,6 +98,7 @@ public final class Logger {
     TRACE,
     DEBUG,
     INFO,
+    ERROR,
     OFF;
 
     /**
