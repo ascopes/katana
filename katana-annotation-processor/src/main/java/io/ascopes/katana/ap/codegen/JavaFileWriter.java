@@ -28,14 +28,11 @@ public final class JavaFileWriter {
     this.diagnostics = diagnostics;
   }
 
-  public Result<Void> writeOutFile(JavaFile javaFile) {
-    // TODO: does this have much overhead?
-    String fileName = javaFile.toJavaFileObject().getName();
-
+  public Result<Void> writeOutFile(String name, JavaFile javaFile) {
     try {
-      this.logger.info("Writing out generated source for {}", fileName);
+      this.logger.info("Writing out generated source for {}", name);
       javaFile.writeTo(this.filer);
-      this.logger.info("Written out generated source for {} successfully!", fileName);
+      this.logger.info("Written out generated source for {} successfully!", name);
       return Result.ok();
 
     } catch (IOException ex) {
@@ -47,7 +44,7 @@ public final class JavaFileWriter {
           .builder()
           .kind(Kind.ERROR)
           .template("ioException")
-          .param("fileName", fileName)
+          .param("fileName", name)
           .param("stacktrace", stringWriter.toString())
           .log();
 

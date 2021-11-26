@@ -54,6 +54,12 @@ public final class Model {
     return this.className;
   }
 
+  public String getQualifiedName() {
+    return this.packageName.isEmpty()
+        ? this.className
+        : String.join(".", this.packageName, this.className);
+  }
+
   public boolean isMutable() {
     return this.mutable;
   }

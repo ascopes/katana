@@ -170,7 +170,6 @@ public final class KatanaProcessor extends AbstractProcessor {
         .stream()
         .flatMap(annotationType -> this.generateModelsForAnnotation(annotationType, roundEnv))
         .map(model -> model.ifOkFlatMap(this::buildJavaFile))
-        .map(file -> file.ifOkFlatMap(this::writeJavaFile))
         .forEach(result -> {
           if (result.isNotOk()) {
             failed.incrementAndGet();
@@ -202,13 +201,8 @@ public final class KatanaProcessor extends AbstractProcessor {
         .map(interfaceType -> this.modelFactory.create(annotationType, interfaceType));
   }
 
-  private Result<JavaFile> buildJavaFile(Model model) {
-    return Result.ok(this.javaModelFactory.create(model));
-  }
-
-  private Result<Void> writeJavaFile(JavaFile javaFile) {
-    return this
-        .javaFileWriter
-        .writeOutFile(javaFile);
+  private Result<Void> buildJavaFile(Model model) {
+    JavaFile file = this.javaModelFactory.create(model);
+    return this.javaFileWriter.writeOutFile(model.getQualifiedName(), file);
   }
 }
