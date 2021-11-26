@@ -34,11 +34,6 @@ public final class MethodClassificationFactory {
   private final Elements elementUtils;
   private final Types typeUtils;
 
-  /**
-   * @param diagnostics  the message templating support to use.
-   * @param elementUtils the element utilities to use.
-   * @param typeUtils    the type utilities to use.
-   */
   public MethodClassificationFactory(
       Diagnostics diagnostics,
       Elements elementUtils,
@@ -50,12 +45,6 @@ public final class MethodClassificationFactory {
     this.typeUtils = typeUtils;
   }
 
-  /**
-   * @param selfType the type to classify the methods on.
-   * @param settings the settings to use.
-   * @return the methods, or an empty optional if some error occurred and was reported to the
-   * compiler.
-   */
   public Result<ClassifiedMethods> create(
       TypeElement selfType,
       SettingsCollection settings

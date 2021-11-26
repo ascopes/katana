@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
+import org.checkerframework.checker.mustcall.qual.MustCall;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -49,58 +50,34 @@ public final class Attribute {
     this.deprecatedAnnotation = builder.deprecatedAnnotation;
   }
 
-  /**
-   * @return the raw name of the attribute. This may not be safe for use in actual identifiers.
-   */
   public String getName() {
     return this.name;
   }
 
-  /**
-   * @return the attribute name, modified where appropriate to avoid name clashes with keywords.
-   */
   public String getIdentifier() {
     return this.identifier;
   }
 
-  /**
-   * @return the attribute type.
-   */
   public TypeName getType() {
     return this.type;
   }
 
-  /**
-   * @return the field visibility to use.
-   */
   public Visibility getFieldVisibility() {
     return Objects.requireNonNull(this.fieldVisibility);
   }
 
-  /**
-   * @return true if the field is final, or false if it is non-final.
-   */
   public boolean isFinal() {
     return this.final_;
   }
 
-  /**
-   * @return true if the field is marked as transient, or false if non-transient.
-   */
   public boolean isTransient() {
     return this.transient_;
   }
 
-  /**
-   * @return the accessor to override.
-   */
   public ExecutableElement getGetterToOverride() {
     return this.getterToOverride;
   }
 
-  /**
-   * @return the deprecated annotation to add to generated logic, if provided.
-   */
   public Optional<AnnotationMirror> getDeprecatedAnnotation() {
     return Optional.ofNullable(this.deprecatedAnnotation);
   }
@@ -114,11 +91,13 @@ public final class Attribute {
         '}';
   }
 
+  @MustCall("build")
   public static Builder builder() {
     return new Builder();
   }
 
   @SuppressWarnings("UnusedReturnValue")
+  @MustCall("build")
   public static final class Builder implements ObjectBuilder<Attribute> {
 
     private @MonotonicNonNull String name;

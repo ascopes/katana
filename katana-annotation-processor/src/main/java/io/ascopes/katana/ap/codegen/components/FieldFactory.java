@@ -22,13 +22,6 @@ public final class FieldFactory {
     this.logger = new Logger();
   }
 
-  /**
-   * Create a field from a given attribute and the settings.
-   *
-   * @param attribute the attribute.
-   * @param settings  the model settings.
-   * @return the field.
-   */
   public FieldSpec create(Attribute attribute, SettingsCollection settings) {
     FieldSpec.Builder builder = FieldSpec
         .builder(attribute.getType(), attribute.getIdentifier())
@@ -36,7 +29,7 @@ public final class FieldFactory {
 
     attribute
         .getDeprecatedAnnotation()
-        .map(CodeGenUtils::deprecated)
+        .map(CodeGenUtils::copyDeprecatedFrom)
         .ifPresent(builder::addAnnotation);
 
     if (attribute.isFinal()) {

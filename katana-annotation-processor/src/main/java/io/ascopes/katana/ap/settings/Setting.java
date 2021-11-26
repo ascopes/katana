@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
+import org.checkerframework.checker.optional.qual.MaybePresent;
 
 
 /**
@@ -37,38 +38,24 @@ public final class Setting<T> {
     this.settingSchema = Objects.requireNonNull(settingSchema);
   }
 
-  /**
-   * @return the value of the setting.
-   */
   public T getValue() {
     return this.valueHolder.getValue();
   }
 
-  /**
-   * @return the name of the location this setting was defined at.
-   */
   public String getDescription() {
     return this.description;
   }
 
-  /**
-   * @return the element that the setting is declared on.
-   */
   public Optional<Element> getDeclaringElement() {
     return this.valueHolder.getDeclaringElement();
   }
 
-
-  /**
-   * @return annotation mirror that the setting came from, if known. Otherwise, an empty optional.
-   */
+  @MaybePresent
   public Optional<AnnotationMirror> getAnnotationMirror() {
     return this.valueHolder.getAnnotationMirror();
   }
 
-  /**
-   * @return annotation value that the setting came from, if known. Otherwise, an empty optional.
-   */
+  @MaybePresent
   public Optional<AnnotationValue> getAnnotationValue() {
     return this.valueHolder.getAnnotationValue();
   }
@@ -77,9 +64,6 @@ public final class Setting<T> {
     return this.settingSchema.getGenericType();
   }
 
-  /**
-   * @return the schema data for the setting.
-   */
   SettingSchema<T> getSettingSchema() {
     return this.settingSchema;
   }

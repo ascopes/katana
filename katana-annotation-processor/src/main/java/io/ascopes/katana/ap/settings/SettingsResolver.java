@@ -23,6 +23,7 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import org.checkerframework.checker.optional.qual.MaybePresent;
 
 /**
  * Resolver for processor settings. This contains a load of reflection evil to simplify the
@@ -36,25 +37,11 @@ public final class SettingsResolver {
   private final Elements elementUtils;
   private final Types typeUtils;
 
-  /**
-   * @param elementUtils the element utilities to use.
-   * @param typeUtils    the type utilities to use.
-   */
   public SettingsResolver(Elements elementUtils, Types typeUtils) {
     this.elementUtils = elementUtils;
     this.typeUtils = typeUtils;
   }
 
-  /**
-   * Parse all inherited settings for the given interface element and return a collection of the
-   * actual resolved settings to use, taking inheritance into account.
-   *
-   * @param interfaceElement the interface to compute the settings for.
-   * @param annotationMirror the model annotation that contains a {@code settings} member.
-   * @param mutable          true if the default mutable settings should be considered, or false if
-   *                         the default immutable settings should be considered.
-   * @return the computed settings, or an empty optional if an error occurred and was reported.
-   */
   public Result<SettingsCollection> parseSettings(
       TypeElement interfaceElement,
       AnnotationMirror annotationMirror,
@@ -152,6 +139,7 @@ public final class SettingsResolver {
     return new Setting<>(new SettingValueHolder<>(defaultValue), description, schema);
   }
 
+  @MaybePresent
   private Optional<SettingsAnnotation> findSettingsOnAnnotation(
       Element declaringElement,
       AnnotationMirror annotationMirror
@@ -176,6 +164,7 @@ public final class SettingsResolver {
             ));
   }
 
+  @MaybePresent
   private Optional<SettingsAnnotation> findSettingsOnTypeElement(TypeElement typeElement) {
     return this
         .findSettingsOn(
@@ -211,6 +200,7 @@ public final class SettingsResolver {
         .flatMap(Functors.removeEmpties());
   }
 
+  @MaybePresent
   private Optional<SettingsAnnotation> findSettingsOn(
       Element annotatedElement,
       String qualifiedName

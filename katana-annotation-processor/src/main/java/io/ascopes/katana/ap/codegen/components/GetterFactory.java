@@ -21,13 +21,6 @@ public final class GetterFactory {
     this.logger = new Logger();
   }
 
-  /**
-   * Create an accessor method from a given attribute and the corresponding settings.
-   *
-   * @param attribute the attribute.
-   * @param settings  the model settings.
-   * @return the getter method.
-   */
   public MethodSpec create(Attribute attribute, SettingsCollection settings) {
     MethodSpec.Builder builder = MethodSpec
         .overriding(attribute.getGetterToOverride())

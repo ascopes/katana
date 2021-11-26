@@ -30,10 +30,6 @@ public class AttributeFeatureInclusionManager {
   private final Diagnostics diagnostics;
   private final Elements elementUtils;
 
-  /**
-   * @param diagnostics  diagnostics to use to report compiler errors.
-   * @param elementUtils element utilities to use.
-   */
   public AttributeFeatureInclusionManager(
       Diagnostics diagnostics,
       Elements elementUtils

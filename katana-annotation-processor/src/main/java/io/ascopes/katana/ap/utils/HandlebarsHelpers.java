@@ -20,12 +20,6 @@ public abstract class HandlebarsHelpers {
     throw new UnsupportedOperationException("static-only class");
   }
 
-  /**
-   * Quote the string representation of some object.
-   *
-   * @param value the object to quote.
-   * @return the quoted representation.
-   */
   public static String quoted(@Nullable Object value) {
     String raw = Objects.toString(value);
     StringBuilder builder = new StringBuilder("\"");
@@ -49,12 +43,6 @@ public abstract class HandlebarsHelpers {
     return builder.append("\"").toString();
   }
 
-  /**
-   * Prefix a string with "an " if it starts with a vowel, or "a " otherwise.
-   *
-   * @param element the element to prefix.
-   * @return the full string.
-   */
   public static String a(@Nullable Object element) {
     if (element == null) {
       return "null";
@@ -78,9 +66,6 @@ public abstract class HandlebarsHelpers {
     }
   }
 
-  /**
-   * Alias for {@link #a}
-   */
   public static String an(@Nullable Object element) {
     return a(element);
   }

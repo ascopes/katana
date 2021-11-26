@@ -22,22 +22,12 @@ public final class JavaFileWriter {
   private final Filer filer;
   private final Diagnostics diagnostics;
 
-  /**
-   * @param filer       the filer to use to write out source code.
-   * @param diagnostics the diagnostic templates to use to report errors.
-   */
   public JavaFileWriter(Filer filer, Diagnostics diagnostics) {
     this.logger = new Logger();
     this.filer = filer;
     this.diagnostics = diagnostics;
   }
 
-  /**
-   * Write out the given source file.
-   *
-   * @param javaFile the Java file to write out.
-   * @return the result with no data inside.
-   */
   public Result<Void> writeOutFile(JavaFile javaFile) {
     // TODO: does this have much overhead?
     String fileName = javaFile.toJavaFileObject().getName();

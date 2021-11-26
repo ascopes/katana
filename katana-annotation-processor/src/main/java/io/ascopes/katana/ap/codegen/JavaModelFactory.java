@@ -32,12 +32,6 @@ public final class JavaModelFactory {
     this.setterFactory = new SetterFactory();
   }
 
-  /**
-   * Generate a Java source file from a model.
-   *
-   * @param model the model to generate from.
-   * @return the resultant file object.
-   */
   public JavaFile create(Model model) {
     this.logger.debug("Building Java file for {}", model);
 
@@ -61,7 +55,7 @@ public final class JavaModelFactory {
         .addAnnotation(CodeGenUtils.generated(model.getSuperInterface()));
 
     model.getDeprecatedAnnotation()
-        .map(CodeGenUtils::deprecated)
+        .map(CodeGenUtils::copyDeprecatedFrom)
         .ifPresent(builder::addAnnotation);
 
     this.applyAttributes(builder, model);

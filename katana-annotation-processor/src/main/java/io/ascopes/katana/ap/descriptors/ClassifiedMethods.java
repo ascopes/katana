@@ -11,6 +11,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
+import org.checkerframework.checker.mustcall.qual.MustCall;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.optional.qual.MaybePresent;
 
@@ -41,40 +42,25 @@ public final class ClassifiedMethods {
     this.toStringImplementation = builder.toStringImplementation;
   }
 
-  /**
-   * @return the getters, mapping the raw attribute name to the getter element.
-   */
   public SortedMap<String, ExecutableElement> getGetters() {
     return this.getters;
   }
 
-  /**
-   * @return the custom static equality implementation to use, if provided.
-   */
   @MaybePresent
   public Optional<ExecutableElement> getEqualsImplementation() {
     return Optional.ofNullable(this.equalsImplementation);
   }
 
-  /**
-   * @return the custom static hashCode implementation to use, if provided.
-   */
   @MaybePresent
   public Optional<ExecutableElement> getHashCodeImplementation() {
     return Optional.ofNullable(this.hashCodeImplementation);
   }
 
-  /**
-   * @return the custom static toString implementation to use, if provided.
-   */
   @MaybePresent
   public Optional<ExecutableElement> getToStringImplementation() {
     return Optional.ofNullable(this.toStringImplementation);
   }
 
-  /**
-   * @return a string representation of this collection.
-   */
   @Override
   public String toString() {
     String getters = this.getters
@@ -97,11 +83,7 @@ public final class ClassifiedMethods {
         '}';
   }
 
-  /**
-   * Initialize a builder for a method classification.
-   *
-   * @return the builder.
-   */
+  @MustCall("build")
   public static Builder builder() {
     return new Builder();
   }
@@ -127,10 +109,8 @@ public final class ClassifiedMethods {
     return Collections.unmodifiableSortedMap(map);
   }
 
-  /**
-   * Builder for method classifications.
-   */
   @SuppressWarnings("UnusedReturnValue")
+  @MustCall("build")
   public static final class Builder implements ObjectBuilder<ClassifiedMethods> {
 
     private final SortedMap<String, ExecutableElement> getters;

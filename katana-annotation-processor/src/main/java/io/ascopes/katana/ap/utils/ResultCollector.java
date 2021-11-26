@@ -34,17 +34,11 @@ public final class ResultCollector<T, C>
     this.finalCollector = Objects.requireNonNull(finalCollector);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Supplier<ResultCollector<T, C>.State> supplier() {
     return State::new;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public BiConsumer<ResultCollector<T, C>.State, Result<T>> accumulator() {
     return (state, next) -> {
@@ -61,9 +55,6 @@ public final class ResultCollector<T, C>
     };
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public BinaryOperator<ResultCollector<T, C>.State> combiner() {
     return (firstState, secondState) -> {
@@ -78,9 +69,6 @@ public final class ResultCollector<T, C>
     };
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Function<ResultCollector<T, C>.State, Result<C>> finisher() {
     return state -> state.failed.get()
@@ -88,19 +76,11 @@ public final class ResultCollector<T, C>
         : Result.ok(state.builder.build().collect(this.finalCollector));
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Set<Characteristics> characteristics() {
     return Collections.singleton(Characteristics.UNORDERED);
   }
 
-  /**
-   * Initialize a new collector instance.
-   *
-   * @param collector the collector to wrap.
-   */
   public static <T, C> ResultCollector<T, C> aggregating(Collector<T, ?, C> collector) {
     return new ResultCollector<>(collector);
   }

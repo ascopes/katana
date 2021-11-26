@@ -18,11 +18,11 @@ import org.junit.jupiter.api.Test;
 
 class BareModelTest {
 
-  KatanaCodegenAnnotationProcessor processor;
+  KatanaProcessor processor;
 
   @BeforeEach
   void setUp() {
-    this.processor = new KatanaCodegenAnnotationProcessor();
+    this.processor = new KatanaProcessor();
     this.processor.setLoggingLevel(Level.all());
   }
 
@@ -30,7 +30,7 @@ class BareModelTest {
   void test_bare_model() {
     Compilation result = Compiler
         .javac()
-        .withProcessors(new KatanaCodegenAnnotationProcessor())
+        .withProcessors(new KatanaProcessor())
         .compile(
             forSourceLines(
                 "test.package-info",

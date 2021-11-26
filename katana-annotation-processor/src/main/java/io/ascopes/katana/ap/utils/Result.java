@@ -12,6 +12,8 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
  * <p>
  * Used to chain sequences of ordered operations together that may "give up" at any point in the
  * process.
+ * <p>
+ * Due to the complex nature of this class, please keep methods documented.
  *
  * @param <T> the inner value type.
  * @author Ashley Scopes

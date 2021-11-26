@@ -21,16 +21,6 @@ public abstract class CodeGenUtils {
 
   private static final AnnotationSpec OVERRIDE = AnnotationSpec.builder(Override.class).build();
 
-  /**
-   * Convert a visibility enumeration to an array of modifiers that can be passed directly to
-   * JavaPoet.
-   * <p>
-   * An array is used to enable an arity of 0 or 1 (package-private has no actual modifier
-   * counterpart, remember).
-   *
-   * @param visibility the visibility to parse.
-   * @return the array of 0 or 1 modifiers.
-   */
   public static Modifier[] modifiers(Visibility visibility) {
     switch (visibility) {
       case PRIVATE:
@@ -46,24 +36,14 @@ public abstract class CodeGenUtils {
     }
   }
 
-  /**
-   * @return the {@link Override} annotation as an annotation spec.
-   */
   public static AnnotationSpec override() {
     return OVERRIDE;
   }
 
-  /**
-   * @return the {@link Deprecated} annotation from a corresponding annotation spec.
-   */
-  public static AnnotationSpec deprecated(AnnotationMirror annotationMirror) {
+  public static AnnotationSpec copyDeprecatedFrom(AnnotationMirror annotationMirror) {
     return AnnotationSpec.get(annotationMirror);
   }
 
-  /**
-   * @param modelInterface the model interface used to create the annotation.
-   * @return a {@link Generated} annotation spec to annotate generated types with.
-   */
   public static AnnotationSpec generated(TypeElement modelInterface) {
     OffsetDateTime now = OffsetDateTime.now(Clock.systemDefaultZone());
     String nowString = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(now);

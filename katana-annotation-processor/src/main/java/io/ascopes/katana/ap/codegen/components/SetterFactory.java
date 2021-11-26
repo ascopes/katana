@@ -23,13 +23,6 @@ public final class SetterFactory {
     this.logger = new Logger();
   }
 
-  /**
-   * Create a mutator for a given attribute and settings.
-   *
-   * @param attribute the attribute.
-   * @param settings  the settings for the model.
-   * @return the setter method.
-   */
   public MethodSpec create(Attribute attribute, SettingsCollection settings) {
     String setterName = NamingUtils.addPrefixCamelCase(
         settings.getSetterPrefix().getValue(),

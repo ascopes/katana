@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.SortedSet;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
+import org.checkerframework.checker.mustcall.qual.MustCall;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -31,9 +32,6 @@ public final class Model {
   // Nullable attributes
   private final @Nullable AnnotationMirror deprecatedAnnotation;
 
-  /**
-   * @param builder the model builder.
-   */
   private Model(Builder builder) {
     this.packageName = Objects.requireNonNull(builder.packageName);
     this.className = Objects.requireNonNull(builder.className);
@@ -48,52 +46,30 @@ public final class Model {
     this.deprecatedAnnotation = builder.deprecatedAnnotation;
   }
 
-  /**
-   * @return the package name for the model.
-   */
   public String getPackageName() {
     return this.packageName;
   }
 
-  /**
-   * @return the class name for the model.
-   */
   public String getClassName() {
     return this.className;
   }
 
-  /**
-   * @return true if the type is mutable, false if it is not mutable.
-   */
   public boolean isMutable() {
     return this.mutable;
   }
 
-  /**
-   * @return the superinterface to inherit from. This is the interface that the model was declared
-   * from.
-   */
   public TypeElement getSuperInterface() {
     return this.superInterface;
   }
 
-  /**
-   * @return the settings for the model.
-   */
   public SettingsCollection getSettingsCollection() {
     return this.settingsCollection;
   }
 
-  /**
-   * @return the attributes for the model.
-   */
   public SortedSet<Attribute> getAttributes() {
     return this.attributes;
   }
 
-  /**
-   * @return the deprecated annotation, if present.
-   */
   public Optional<AnnotationMirror> getDeprecatedAnnotation() {
     return Optional.ofNullable(this.deprecatedAnnotation);
   }
@@ -112,11 +88,13 @@ public final class Model {
         '}';
   }
 
+  @MustCall("build")
   public static Builder builder() {
     return new Builder();
   }
 
   @SuppressWarnings("UnusedReturnValue")
+  @MustCall("build")
   public static final class Builder implements ObjectBuilder<Model> {
 
     private @MonotonicNonNull String packageName;

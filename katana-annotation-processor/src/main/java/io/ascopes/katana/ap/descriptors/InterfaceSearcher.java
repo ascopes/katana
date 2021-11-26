@@ -24,9 +24,6 @@ public final class InterfaceSearcher {
   private final Diagnostics diagnostics;
   private final Logger logger;
 
-  /**
-   * @param diagnostics diagnostics templates to use.
-   */
   public InterfaceSearcher(Diagnostics diagnostics) {
     this.diagnostics = diagnostics;
     this.logger = new Logger();

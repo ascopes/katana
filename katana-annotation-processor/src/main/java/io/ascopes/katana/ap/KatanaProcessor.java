@@ -1,6 +1,8 @@
 package io.ascopes.katana.ap;
 
 import com.squareup.javapoet.JavaFile;
+import io.ascopes.katana.annotations.ImmutableModel;
+import io.ascopes.katana.annotations.MutableModel;
 import io.ascopes.katana.ap.codegen.JavaFileWriter;
 import io.ascopes.katana.ap.codegen.JavaModelFactory;
 import io.ascopes.katana.ap.descriptors.AttributeFactory;
@@ -11,11 +13,24 @@ import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.descriptors.ModelFactory;
 import io.ascopes.katana.ap.settings.SettingsResolver;
 import io.ascopes.katana.ap.utils.Diagnostics;
+import io.ascopes.katana.ap.utils.Logger;
+import io.ascopes.katana.ap.utils.Logger.Level;
 import io.ascopes.katana.ap.utils.Result;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Completion;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -25,18 +40,51 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class KatanaCodegenAnnotationProcessor extends AbstractKatanaAnnotationProcessor {
+public final class KatanaProcessor extends AbstractProcessor {
+
+  private static final Class<MutableModel> MUTABLE_ANNOTATION = MutableModel.class;
+  private static final Class<ImmutableModel> IMMUTABLE_ANNOTATION = ImmutableModel.class;
+  private static final String LOGGING_LEVEL = "logging.level";
 
   private @MonotonicNonNull InterfaceSearcher interfaceSearcher;
   private @MonotonicNonNull ModelFactory modelFactory;
   private @MonotonicNonNull JavaModelFactory javaModelFactory;
   private @MonotonicNonNull JavaFileWriter javaFileWriter;
+  private final Logger logger;
 
-  /**
-   * {@inheritDoc}
-   */
+  public KatanaProcessor() {
+    this.logger = new Logger();
+  }
+
   @Override
-  protected void doInit() {
+  public Set<String> getSupportedOptions() {
+    return Collections.singleton(LOGGING_LEVEL);
+  }
+
+  @Override
+  public Set<String> getSupportedAnnotationTypes() {
+    return Stream.of(MUTABLE_ANNOTATION, IMMUTABLE_ANNOTATION)
+        .map(Class::getCanonicalName)
+        .collect(Collectors.toSet());
+  }
+
+  @Override
+  public SourceVersion getSupportedSourceVersion() {
+    // We support up to JDK-17 at the time of writing, but we do not have access to that constant,
+    // so just bodge in the current compiler version and hope for the best.
+    return SourceVersion.latestSupported();
+  }
+
+  @Override
+  public synchronized void init(ProcessingEnvironment processingEnv) {
+    super.init(processingEnv);
+
+    // Init the loggers.
+    Optional
+        .ofNullable(processingEnv.getOptions().get(LOGGING_LEVEL))
+        .map(Level::valueOf)
+        .ifPresent(this::setLoggingLevel);
+
     Diagnostics diagnostics = new Diagnostics(
         this.processingEnv.getMessager()
     );
@@ -86,13 +134,22 @@ public final class KatanaCodegenAnnotationProcessor extends AbstractKatanaAnnota
     this.javaFileWriter = javaFileWriter;
   }
 
-  /**
-   * Invoke the processing pipeline.
-   *
-   * @param annotationTypes the annotation types to check out.
-   * @param roundEnv        the round environment.
-   * @return {@code true} if the processor ran.
-   */
+  public void setLoggingLevel(Level level) {
+    Objects.requireNonNull(level);
+    Logger.setGlobalLevel(level);
+  }
+
+  @Override
+  public Iterable<? extends Completion> getCompletions(
+      Element element,
+      AnnotationMirror annotation,
+      ExecutableElement member,
+      String userText
+  ) {
+    // TODO(ascopes): implement.
+    return Collections.emptySet();
+  }
+
   @Override
   public boolean process(
       Set<? extends TypeElement> annotationTypes,

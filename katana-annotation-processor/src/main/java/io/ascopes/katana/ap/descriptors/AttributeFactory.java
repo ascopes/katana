@@ -38,14 +38,6 @@ public final class AttributeFactory {
     this.elementUtils = elementUtils;
   }
 
-  /**
-   * Parse attribute specific metadata and return the results in a stream.
-   *
-   * @param classifiedMethods the classified methods to consider.
-   * @param settings          the settings to consider.
-   * @return the sorted set of successfully created attributes, sorted by name, or the error if any
-   * failed to be parsed.
-   */
   public Result<SortedSet<Attribute>> create(
       ClassifiedMethods classifiedMethods,
       SettingsCollection settings

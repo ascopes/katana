@@ -22,26 +22,16 @@ public final class PackageIterator implements StreamableIterator<PackageElement>
   @Nullable
   private PackageElement next;
 
-  /**
-   * @param elementUtils element utils to use for introspection.
-   * @param start        the element to start at.
-   */
   public PackageIterator(Elements elementUtils, Element start) {
     this.elementUtils = elementUtils;
     this.next = elementUtils.getPackageOf(start);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean hasNext() {
     return this.next != null;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public PackageElement next() throws NoSuchElementException {
     PackageElement current = this.next;
@@ -71,9 +61,6 @@ public final class PackageIterator implements StreamableIterator<PackageElement>
     return current;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public int characteristics() {
     return Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.ORDERED;

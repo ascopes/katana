@@ -32,13 +32,6 @@ public final class ModelFactory {
   private final Elements elementUtils;
   private final Logger logger;
 
-  /**
-   * @param settingsResolver the settings resolver to use.
-   * @param methodClassifier the method classifier to use.
-   * @param attributeFactory the attribute factory to use.
-   * @param diagnostics      the diagnostics to report compiler errors with.
-   * @param elementUtils     the element utilities to use.
-   */
   public ModelFactory(
       SettingsResolver settingsResolver,
       MethodClassificationFactory methodClassifier,
@@ -54,14 +47,6 @@ public final class ModelFactory {
     this.logger = new Logger();
   }
 
-  /**
-   * Build a descriptor for an immutable model.
-   *
-   * @param modelAnnotation  the model annotation (ImmutableModel or MutableModel).
-   * @param annotatedElement the annotated interface.
-   * @return an optional containing the model if successful, or an empty optional if something
-   * failed and an error was reported to the compiler.
-   */
   public Result<Model> create(
       TypeElement modelAnnotation,
       TypeElement annotatedElement
