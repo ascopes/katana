@@ -20,6 +20,7 @@ import java.lang.annotation.Target;
 @SuppressWarnings("unused")
 @Target(ElementType.TYPE)
 public @interface Generated {
+
   /**
    * The name of the generator.
    *
@@ -28,12 +29,16 @@ public @interface Generated {
   String name();
 
   /**
-   * Date when the source was generated. The date element must follow the ISO
-   * 8601 standard. For example the date element would have the following
-   * value 2017-07-04T12:08:56.235-0700 which represents 2017-07-04 12:08:56
-   * local time in the U.S. Pacific Time time zone.
+   * Date when the source was generated. The date element must follow the ISO 8601 standard. For
+   * example the date element would have the following value 2017-07-04T12:08:56.235-0700 which
+   * represents 2017-07-04 12:08:56 local time in the U.S. Pacific Time timezone.
    *
    * @return The date the source was generated
    */
   String date();
+
+  /**
+   * @return the interface that the model was created from.
+   */
+  Class<?> from();
 }

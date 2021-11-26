@@ -4,7 +4,6 @@ import io.ascopes.katana.annotations.MutableModel;
 import io.ascopes.katana.ap.settings.Setting;
 import io.ascopes.katana.ap.settings.SettingsResolver;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
-import io.ascopes.katana.ap.utils.DiagnosticTemplates;
 import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
@@ -24,7 +23,7 @@ import javax.tools.Diagnostic.Kind;
 public final class ModelFactory {
 
   private final SettingsResolver settingsResolver;
-  private final MethodClassifier methodClassifier;
+  private final MethodClassificationFactory methodClassifier;
   private final AttributeFactory attributeFactory;
   private final Elements elementUtils;
   private final Messager messager;
@@ -39,7 +38,7 @@ public final class ModelFactory {
    */
   public ModelFactory(
       SettingsResolver settingsResolver,
-      MethodClassifier methodClassifier,
+      MethodClassificationFactory methodClassifier,
       AttributeFactory attributeFactory,
       Messager messager,
       Elements elementUtils
@@ -60,7 +59,7 @@ public final class ModelFactory {
    * @return an optional containing the model if successful, or an empty optional if something
    * failed and an error was reported to the compiler.
    */
-  public Result<Model> buildFor(
+  public Result<Model> create(
       TypeElement modelAnnotation,
       TypeElement annotatedElement
   ) {
@@ -172,7 +171,7 @@ public final class ModelFactory {
 
   private Result<Model.Builder> classifyMethods(Model.Builder builder) {
     return this.methodClassifier
-        .classifyMethods(builder.getSuperInterface(), builder.getSettingsCollection())
+        .create(builder.getSuperInterface(), builder.getSettingsCollection())
         .ifOkMap(builder::methods);
   }
 
@@ -188,7 +187,7 @@ public final class ModelFactory {
 
   private Result<Model.Builder> generateAttributes(Model.Builder builder) {
     return this.attributeFactory
-        .buildFor(builder.getMethods(), builder.getSettingsCollection())
+        .create(builder.getMethods(), builder.getSettingsCollection())
         .ifOkMap(builder::attributes);
   }
 }

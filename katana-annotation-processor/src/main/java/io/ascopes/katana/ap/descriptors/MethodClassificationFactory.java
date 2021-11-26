@@ -28,7 +28,7 @@ import javax.tools.Diagnostic.Kind;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class MethodClassifier {
+public final class MethodClassificationFactory {
 
   private final DiagnosticTemplates diagnosticTemplates;
   private final Messager messager;
@@ -42,7 +42,7 @@ public final class MethodClassifier {
    * @param elementUtils        the element utilities to use.
    * @param typeUtils           the type utilities to use.
    */
-  public MethodClassifier(
+  public MethodClassificationFactory(
       DiagnosticTemplates diagnosticTemplates,
       Messager messager,
       Elements elementUtils,
@@ -61,7 +61,7 @@ public final class MethodClassifier {
    * @return the methods, or an empty optional if some error occurred and was reported to the
    * compiler.
    */
-  public Result<ClassifiedMethods> classifyMethods(
+  public Result<ClassifiedMethods> create(
       TypeElement selfType,
       SettingsCollection settings
   ) {

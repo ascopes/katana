@@ -131,7 +131,7 @@ public final class ClassifiedMethods {
    * Builder for method classifications.
    */
   @SuppressWarnings("UnusedReturnValue")
-  public static final class Builder extends ObjectBuilder<ClassifiedMethods> {
+  public static final class Builder implements ObjectBuilder<ClassifiedMethods> {
 
     private final SortedMap<String, ExecutableElement> getters;
     private final SortedMap<String, Set<ExecutableElement>> staticMethods;

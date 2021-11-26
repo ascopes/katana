@@ -81,7 +81,7 @@ public final class DiagnosticTemplates {
   /**
    * Builder helper for templates.
    */
-  public static class MessageBuilder extends ObjectBuilder<String> {
+  public static class MessageBuilder implements ObjectBuilder<String> {
 
     private final Template template;
     private final Map<String, @Nullable Object> args;

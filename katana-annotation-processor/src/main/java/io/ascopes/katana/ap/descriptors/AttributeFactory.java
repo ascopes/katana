@@ -46,7 +46,7 @@ public final class AttributeFactory {
    * @return the sorted set of successfully created attributes, sorted by name, or the error if any
    * failed to be parsed.
    */
-  public Result<SortedSet<Attribute>> buildFor(
+  public Result<SortedSet<Attribute>> create(
       ClassifiedMethods classifiedMethods,
       SettingsCollection settings
   ) {

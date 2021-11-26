@@ -117,7 +117,7 @@ public final class Model {
   }
 
   @SuppressWarnings("UnusedReturnValue")
-  public static final class Builder extends ObjectBuilder<Model> {
+  public static final class Builder implements ObjectBuilder<Model> {
 
     private @MonotonicNonNull String packageName;
     private @MonotonicNonNull String className;

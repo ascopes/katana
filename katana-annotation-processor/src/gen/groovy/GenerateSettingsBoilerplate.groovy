@@ -1,7 +1,6 @@
 #!/usr/bin/env groovy
 //file:noinspection GrMethodMayBeStatic
 
-import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec
@@ -12,7 +11,6 @@ import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.WildcardTypeName
-import io.ascopes.katana.annotations.Generated
 import io.ascopes.katana.annotations.Settings
 import io.ascopes.katana.annotations.internal.ImmutableDefaultAdvice
 import io.ascopes.katana.annotations.internal.MutableDefaultAdvice
@@ -22,9 +20,6 @@ import java.lang.annotation.Annotation
 import java.lang.reflect.Method
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.time.Clock
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
@@ -156,17 +151,6 @@ CodeBlock stringifyDefaultValue(Object value, Class<?> targetType) {
   return CodeBlock.of('$L', value)
 }
 
-AnnotationSpec buildGeneratedAnnotation() {
-  OffsetDateTime now = OffsetDateTime.now(Clock.systemDefaultZone())
-  String nowString = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(now)
-
-  return AnnotationSpec
-      .builder(Generated)
-      .addMember("name", '$S', "katana-annotation-processor build scripts")
-      .addMember("date", '$S', nowString)
-      .build()
-}
-
 JavaFile buildSettingsCollectionClass(
     String packageName,
     String settingPackageName,
@@ -251,7 +235,6 @@ JavaFile buildSettingsCollectionClass(
   TypeSpec settingsCollectionType = type
       .addMethod(typeConstructor.build())
       .addType(typeBuilder.build())
-      .addAnnotation(buildGeneratedAnnotation())
       .build()
 
   return JavaFile
@@ -319,7 +302,6 @@ JavaFile buildSchemaConstants(
   TypeSpec type = TypeSpec
       .classBuilder("SettingsSchemas")
       .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-      .addAnnotation(buildGeneratedAnnotation())
       .addMethod(deadConstructor)
       .addMethod(schemaSupplier)
       .build()

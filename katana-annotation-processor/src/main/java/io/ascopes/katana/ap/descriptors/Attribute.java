@@ -119,7 +119,7 @@ public final class Attribute {
   }
 
   @SuppressWarnings("UnusedReturnValue")
-  public static final class Builder extends ObjectBuilder<Attribute> {
+  public static final class Builder implements ObjectBuilder<Attribute> {
 
     private @MonotonicNonNull String name;
     private @MonotonicNonNull String identifier;
