@@ -45,11 +45,11 @@ public final class MethodClassificationFactory {
     this.typeUtils = typeUtils;
   }
 
-  public Result<ClassifiedMethods> create(
+  public Result<MethodClassification> create(
       TypeElement selfType,
       SettingsCollection settings
   ) {
-    ClassifiedMethods.Builder builder = ClassifiedMethods.builder();
+    MethodClassification.Builder builder = MethodClassification.builder();
 
     boolean failed = false;
 
@@ -79,7 +79,7 @@ public final class MethodClassificationFactory {
   }
 
   private Result<Void> processAsGetter(
-      ClassifiedMethods.Builder builder,
+      MethodClassification.Builder builder,
       ExecutableElement method,
       SettingsCollection settings
   ) {
@@ -129,7 +129,7 @@ public final class MethodClassificationFactory {
   }
 
   private Result<Void> processEquals(
-      ClassifiedMethods.Builder builder,
+      MethodClassification.Builder builder,
       ExecutableElement method,
       SettingsCollection settings,
       TypeElement interfaceTypeElement
@@ -170,7 +170,7 @@ public final class MethodClassificationFactory {
   }
 
   private Result<Void> processHashCode(
-      ClassifiedMethods.Builder builder,
+      MethodClassification.Builder builder,
       ExecutableElement method,
       SettingsCollection settings,
       TypeElement interfaceTypeElement
@@ -206,7 +206,7 @@ public final class MethodClassificationFactory {
   }
 
   private Result<Void> processToString(
-      ClassifiedMethods.Builder builder,
+      MethodClassification.Builder builder,
       ExecutableElement method,
       SettingsCollection settings,
       TypeElement interfaceTypeElement
@@ -245,7 +245,7 @@ public final class MethodClassificationFactory {
   }
 
   private Result<Void> processAsStaticMethod(
-      ClassifiedMethods.Builder builder,
+      MethodClassification.Builder builder,
       ExecutableElement method
   ) {
     // I know that this never occurs, but this keeps the interface consistent if I choose to

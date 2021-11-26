@@ -21,7 +21,7 @@ import org.checkerframework.checker.optional.qual.MaybePresent;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class ClassifiedMethods {
+public final class MethodClassification {
 
   private final SortedMap<String, ExecutableElement> getters;
   private final SortedMap<String, Set<ExecutableElement>> staticMethods;
@@ -32,7 +32,7 @@ public final class ClassifiedMethods {
   private final @Nullable ExecutableElement toStringImplementation;
 
 
-  private ClassifiedMethods(Builder builder) {
+  private MethodClassification(Builder builder) {
     this.getters = CollectionUtils.freeze(builder.getters);
     this.staticMethods = CollectionUtils.deepFreeze(builder.staticMethods);
 
@@ -90,7 +90,7 @@ public final class ClassifiedMethods {
 
   @SuppressWarnings("UnusedReturnValue")
   @MustCall("build")
-  public static final class Builder implements ObjectBuilder<ClassifiedMethods> {
+  public static final class Builder implements ObjectBuilder<MethodClassification> {
 
     private final SortedMap<String, ExecutableElement> getters;
     private final SortedMap<String, Set<ExecutableElement>> staticMethods;
@@ -138,8 +138,8 @@ public final class ClassifiedMethods {
       return this;
     }
 
-    public ClassifiedMethods build() {
-      return new ClassifiedMethods(this);
+    public MethodClassification build() {
+      return new MethodClassification(this);
     }
 
     private static Set<ExecutableElement> overloadSet() {

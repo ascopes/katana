@@ -32,7 +32,7 @@ public final class Model {
   private final TypeElement superInterface;
   private final AnnotationMirror annotationMirror;
   private final SettingsCollection settingsCollection;
-  private final ClassifiedMethods methods;
+  private final MethodClassification methods;
   private final Set<Constructor> constructors;
   private final SortedSet<Attribute> attributes;
 
@@ -133,7 +133,7 @@ public final class Model {
     private @MonotonicNonNull Boolean mutable;
     private @MonotonicNonNull AnnotationMirror annotationMirror;
     private @MonotonicNonNull SettingsCollection settingsCollection;
-    private @MonotonicNonNull ClassifiedMethods methods;
+    private @MonotonicNonNull MethodClassification methods;
 
     // Nullable attributes
     private @Nullable BuilderStrategy builderStrategy;
@@ -160,7 +160,7 @@ public final class Model {
       return Objects.requireNonNull(this.settingsCollection);
     }
 
-    ClassifiedMethods getMethods() {
+    MethodClassification getMethods() {
       return Objects.requireNonNull(this.methods);
     }
 
@@ -216,7 +216,7 @@ public final class Model {
       return this;
     }
 
-    public Builder methods(ClassifiedMethods methods) {
+    public Builder methods(MethodClassification methods) {
       this.methods = methods;
       return this;
     }

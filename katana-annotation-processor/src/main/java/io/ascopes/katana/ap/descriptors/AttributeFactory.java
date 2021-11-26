@@ -37,25 +37,25 @@ public final class AttributeFactory {
   }
 
   public Result<Set<Attribute>> create(
-      ClassifiedMethods classifiedMethods,
+      MethodClassification methodClassification,
       SettingsCollection settings
   ) {
-    return classifiedMethods
+    return methodClassification
         .getGetters()
         .keySet()
         .stream()
-        .map(attr -> this.buildFor(attr, classifiedMethods, settings))
+        .map(attr -> this.buildFor(attr, methodClassification, settings))
         .collect(ResultCollector.aggregating(Collectors.toSet()));
   }
 
   private Result<Attribute> buildFor(
       String attributeName,
-      ClassifiedMethods classifiedMethods,
+      MethodClassification methodClassification,
       SettingsCollection settings
   ) {
     // Expect this to always be present.
     ExecutableElement getter = Objects
-        .requireNonNull(classifiedMethods.getGetters().get(attributeName));
+        .requireNonNull(methodClassification.getGetters().get(attributeName));
     TypeName typeName = TypeName.get(getter.getReturnType());
 
     // Ensure we have a valid identifier.
