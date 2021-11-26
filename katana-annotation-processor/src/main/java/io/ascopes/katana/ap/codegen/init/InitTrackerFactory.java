@@ -26,15 +26,15 @@ public final class InitTrackerFactory {
   public InitTracker createTracker(SortedSet<Attribute> attributes) {
     if (attributes.size() < Integer.SIZE) {
       this.logger.debug("Using an int tracker for tracking initialized attributes");
-      return new IntInitTracker(attributes);
+      return new IntInitTrackerImpl(attributes);
     }
 
     if (attributes.size() < Long.SIZE) {
       this.logger.debug("Using a long tracker for tracking initialized attributes");
-      return new LongInitTracker(attributes);
+      return new LongInitTrackerImpl(attributes);
     }
 
     this.logger.debug("Using a BigInteger tracker for tracking initialized attributes");
-    return new BigIntegerInitTracker(attributes);
+    return new BigIntegerInitTrackerImpl(attributes);
   }
 }

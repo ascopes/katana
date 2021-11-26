@@ -14,9 +14,9 @@ import java.util.SortedSet;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-class BigIntegerInitTracker extends AbstractInitTracker {
+final class BigIntegerInitTrackerImpl extends AbstractInitTracker {
 
-  BigIntegerInitTracker(SortedSet<Attribute> attributeSet) {
+  BigIntegerInitTrackerImpl(SortedSet<Attribute> attributeSet) {
     super(attributeSet);
   }
 

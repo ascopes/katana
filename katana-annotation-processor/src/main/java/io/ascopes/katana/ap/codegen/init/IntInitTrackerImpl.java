@@ -12,9 +12,9 @@ import java.util.SortedSet;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-class IntInitTracker extends AbstractInitTracker {
+final class IntInitTrackerImpl extends AbstractInitTracker {
 
-  IntInitTracker(SortedSet<Attribute> attributeSet) {
+  IntInitTrackerImpl(SortedSet<Attribute> attributeSet) {
     super(attributeSet);
   }
 
