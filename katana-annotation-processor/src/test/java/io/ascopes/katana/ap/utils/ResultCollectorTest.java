@@ -7,6 +7,7 @@ import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.Test;
 
 class ResultCollectorTest {
+
   @Test
   void can_collect_successful_results_only_sequential() {
     Result<List<String>> results = Stream

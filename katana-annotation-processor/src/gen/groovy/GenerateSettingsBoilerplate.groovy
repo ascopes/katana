@@ -58,7 +58,7 @@ CodeBlock getDefaultValueFor(Method method, Class<Annotation> annotation) {
   Annotation annotationInstance = method.getAnnotation(annotation)
   String[] defaultValue
   if (annotationInstance == null) {
-    assert method.defaultValue != null : "No default value for $method.name provided!"
+    assert method.defaultValue != null: "No default value for $method.name provided!"
     return stringifyDefaultValue(method.defaultValue, method.returnType)
   } else {
     defaultValue = (String[]) annotation.getMethod("value").invoke(annotationInstance)

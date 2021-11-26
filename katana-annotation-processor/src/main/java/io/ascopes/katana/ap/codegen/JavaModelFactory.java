@@ -2,6 +2,8 @@ package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
+import io.ascopes.katana.ap.codegen.components.BuilderFactory;
+import io.ascopes.katana.ap.codegen.components.ConstructorFactory;
 import io.ascopes.katana.ap.codegen.components.FieldFactory;
 import io.ascopes.katana.ap.codegen.components.GetterFactory;
 import io.ascopes.katana.ap.codegen.components.SetterFactory;
@@ -19,17 +21,20 @@ import javax.lang.model.element.Modifier;
  * @since 0.0.1
  */
 public final class JavaModelFactory {
-
   private final Logger logger;
   private final FieldFactory fieldFactory;
   private final GetterFactory getterFactory;
   private final SetterFactory setterFactory;
+  private final ConstructorFactory constructorFactory;
+  private final BuilderFactory builderFactory;
 
   public JavaModelFactory() {
     this.logger = new Logger();
     this.fieldFactory = new FieldFactory();
     this.getterFactory = new GetterFactory();
     this.setterFactory = new SetterFactory();
+    this.constructorFactory = new ConstructorFactory();
+    this.builderFactory = new BuilderFactory();
   }
 
   public JavaFile create(Model model) {
@@ -43,7 +48,7 @@ public final class JavaModelFactory {
     return JavaFile
         .builder(model.getPackageName(), typeSpec)
         .skipJavaLangImports(true)
-        .indent("    ")
+        .indent(model.getSettingsCollection().getIndent().getValue())
         .build();
   }
 
@@ -59,6 +64,8 @@ public final class JavaModelFactory {
         .ifPresent(builder::addAnnotation);
 
     this.applyAttributes(builder, model);
+    this.applyConstructors(builder, model);
+    this.applyBuilders(builder, model);
 
     return builder.build();
   }
@@ -75,6 +82,21 @@ public final class JavaModelFactory {
         typeSpecBuilder.addMethod(this.setterFactory.create(attribute, settings));
       }
     }
+  }
+
+  private void applyConstructors(TypeSpec.Builder typeSpecBuilder, Model model) {
+    typeSpecBuilder.addMethods(this.constructorFactory.create(model));
+  }
+
+  private void applyBuilders(TypeSpec.Builder typeSpecBuilder, Model model) {
+    model.getBuilderStrategy()
+        .map(strategy -> this.builderFactory.create(model, strategy))
+        .ifPresent(components -> {
+          typeSpecBuilder.addMethod(components.getBuilderConstructor());
+          typeSpecBuilder.addMethod(components.getBuilderInitializer());
+          typeSpecBuilder.addType(components.getBuilderType());
+          components.getToBuilderMethod().ifPresent(typeSpecBuilder::addMethod);
+        });
   }
 }
 

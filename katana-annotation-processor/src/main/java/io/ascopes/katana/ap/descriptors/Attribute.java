@@ -33,7 +33,6 @@ public final class Attribute {
   // Nullable fields
   private final @Nullable AnnotationMirror deprecatedAnnotation;
 
-
   private Attribute(Builder builder) {
     this.name = Objects.requireNonNull(builder.name);
     this.identifier = Objects.requireNonNull(builder.identifier);

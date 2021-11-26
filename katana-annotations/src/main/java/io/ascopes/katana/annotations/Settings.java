@@ -93,27 +93,36 @@ public @interface Settings {
   //////////////////////////////////////////////////
 
   /**
-   * @return whether to generate an all-arguments constructor for models.
+   * @return true if an all arguments constructor should be added.
    */
   boolean allArgsConstructor() default false;
 
   /**
-   * @return whether to generate a copy constructor for models.
+   * @return true if a default constructor should be added. For mutable types this is a no-args
+   * constructor, and for immutable types this is the same as {@link #allArgsConstructor()}.
    */
-  boolean copyConstructor() default true;
+  boolean defaultArgsConstructor() default true;
 
   /**
-   * @return whether to generate a default constructor for models. This is the same as all-arguments
-   * for immutable types, and is a constructor for all non-null attributes on mutable types that
-   * lack default values. If you do not have non-null attributes without default values on mutable
-   * types, then this will generate a no-arguments constructor.
+   * @return true if a copy-constructor should be added.
    */
-  boolean defaultConstructor() default true;
+  boolean copyConstructor() default false;
 
   /**
-   * @return whether to generate an all-arguments constructor for immutable models.
+   * @return true if a builder should be added.
    */
   boolean builder() default false;
+
+  /**
+   * @return the name to give the builder, if enabled. Ignored if {@link #builder()} is false.
+   */
+  String builderName() default "Builder";
+
+  /**
+   * @return true if a {@code toBuilder} method should be added to models that have a supported
+   * builder. This is ignored if {@link #builder()} is false.
+   */
+  boolean toBuilder() default false;
 
   ///////////////////////////
   //// Accessor settings ////
@@ -163,19 +172,18 @@ public @interface Settings {
   Equality equalityMode() default Equality.INCLUDE_ALL;
 
   /**
-   * @return the name of the static equals method name to look for if {@link
-   * #equalityMode()} is set to {@link Equality#CUSTOM}. The method must have the
-   * signature {@code static boolean isEqualTo(ThisInterface self, Object other)}, such that "{@code
-   * isEqualTo}" is the value of this setting, and {@code ThisInterface} is the interface you
-   * annotated.
+   * @return the name of the static equals method name to look for if {@link #equalityMode()} is set
+   * to {@link Equality#CUSTOM}. The method must have the signature {@code static boolean
+   * isEqualTo(ThisInterface self, Object other)}, such that "{@code isEqualTo}" is the value of
+   * this setting, and {@code ThisInterface} is the interface you annotated.
    */
   String equalsMethodName() default "isEqualTo";
 
   /**
-   * @return the name of the static hashCode method name to look for if {@link
-   * #equalityMode()} is set to {@link Equality#CUSTOM}. The method must have the
-   * signature {@code static int hashCodeOf(ThisInterface self)}, such that "{@code hashCodeOf}" is
-   * the value of this setting, and {@code ThisInterface} is the interface you annotated.
+   * @return the name of the static hashCode method name to look for if {@link #equalityMode()} is
+   * set to {@link Equality#CUSTOM}. The method must have the signature {@code static int
+   * hashCodeOf(ThisInterface self)}, such that "{@code hashCodeOf}" is the value of this setting,
+   * and {@code ThisInterface} is the interface you annotated.
    */
   String hashCodeMethodName() default "hashCodeOf";
 
@@ -195,4 +203,13 @@ public @interface Settings {
    * {@code ThisInterface} is the interface you annotated.
    */
   String toStringMethodName() default "asString";
+
+  ////////////////////
+  //// Aesthetics ////
+  ////////////////////
+
+  /**
+   * @return the indent to use in generated code. You probably won't care about this.
+   */
+  String indent() default "    ";
 }

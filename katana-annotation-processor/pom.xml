@@ -27,7 +27,8 @@
     <settings.settingClassName>Setting</settings.settingClassName>
     <settings.settingSchemaPackageName>${settings.packageName}</settings.settingSchemaPackageName>
     <settings.settingSchemaClassName>SettingSchema</settings.settingSchemaClassName>
-    <settings.generatedOutputRoot>${project.build.directory}/generated-sources/settings</settings.generatedOutputRoot>
+    <settings.generatedOutputRoot>${project.build.directory}/generated-sources/settings
+    </settings.generatedOutputRoot>
     <settings.generatedPackageName>${settings.packageName}.gen</settings.generatedPackageName>
   </properties>
 
@@ -144,7 +145,8 @@
             <configuration>
               <includeClasspath>PROJECT_AND_PLUGIN</includeClasspath>
               <scripts>
-                <script>${project.basedir}/src/gen/groovy/GenerateSettingsBoilerplate.groovy</script>
+                <script>${project.basedir}/src/gen/groovy/GenerateSettingsBoilerplate.groovy
+                </script>
               </scripts>
             </configuration>
           </execution>

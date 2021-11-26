@@ -12,11 +12,13 @@ import org.mockito.Mockito;
  * @since 0.0.1
  */
 public abstract class GenericMocker {
+
   private GenericMocker() {
     throw new UnsupportedOperationException("static-only class");
   }
 
   public static abstract class Ref<T> {
+
     private final Class<T> type;
 
     @SuppressWarnings("unchecked")

@@ -3,11 +3,14 @@ package io.ascopes.katana.ap.descriptors;
 import io.ascopes.katana.annotations.MutableModel;
 import io.ascopes.katana.ap.settings.Setting;
 import io.ascopes.katana.ap.settings.SettingsResolver;
+import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
 import io.ascopes.katana.ap.utils.Diagnostics;
 import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
+import java.util.HashSet;
+import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
@@ -79,10 +82,11 @@ public final class ModelFactory {
         .mutable(mutable);
 
     return this.parseSettings(builder)
-        .ifOkFlatMap(this::determinePackageName)
-        .ifOkFlatMap(this::determineClassName)
+        .ifOkFlatMap(this::determineNames)
         .ifOkFlatMap(this::classifyMethods)
         .ifOkFlatMap(this::generateAttributes)
+        .ifOkFlatMap(this::determineConstructors)
+        .ifOkFlatMap(this::determineBuilders)
         .ifOkFlatMap(this::processModelLevelDeprecation)
         .ifOkMap(Model.Builder::build);
   }
@@ -103,7 +107,7 @@ public final class ModelFactory {
         .ifOkMap(builder::settingsCollection);
   }
 
-  private Result<Model.Builder> determinePackageName(Model.Builder builder) {
+  private Result<Model.Builder> determineNames(Model.Builder builder) {
     Setting<String> packageNameSetting = builder
         .getSettingsCollection()
         .getPackageName();
@@ -125,12 +129,6 @@ public final class ModelFactory {
       return Result.fail();
     }
 
-    return Result
-        .ok(packageName)
-        .ifOkMap(builder::packageName);
-  }
-
-  private Result<Model.Builder> determineClassName(Model.Builder builder) {
     Setting<String> classNameSetting = builder
         .getSettingsCollection()
         .getClassName();
@@ -152,9 +150,16 @@ public final class ModelFactory {
       return Result.fail();
     }
 
-    return Result
-        .ok(className)
-        .ifOkMap(builder::className);
+    String qualifiedName = packageName.isEmpty()
+        ? className
+        : String.join(".", packageName, className);
+
+    builder
+        .className(className)
+        .packageName(packageName)
+        .qualifiedName(qualifiedName);
+
+    return Result.ok(builder);
   }
 
   private Result<Model.Builder> classifyMethods(Model.Builder builder) {
@@ -177,6 +182,56 @@ public final class ModelFactory {
     return this.attributeFactory
         .create(builder.getMethods(), builder.getSettingsCollection())
         .ifOkMap(builder::attributes);
+  }
+
+  private Result<Model.Builder> determineConstructors(Model.Builder builder) {
+    SettingsCollection settings = builder.getSettingsCollection();
+
+    Set<Constructor> constructorSet = new HashSet<>();
+
+    if (settings.getCopyConstructor().getValue()) {
+      constructorSet.add(Constructor.COPY);
+    }
+
+    if (settings.getAllArgsConstructor().getValue()) {
+      constructorSet.add(Constructor.ALL_ARGS);
+    }
+
+    if (settings.getDefaultArgsConstructor().getValue()) {
+      // No-args constructor on an immutable type makes absolutely zero sense here.
+      constructorSet.add(builder.isMutable() ? Constructor.NO_ARGS : Constructor.ALL_ARGS);
+    }
+
+    this.logger.trace("Will implement constructors: {}", constructorSet);
+    builder.constructors(constructorSet);
+
+    return Result.ok(builder);
+  }
+
+  private Result<Model.Builder> determineBuilders(Model.Builder builder) {
+    // Edge case I probably won't account for.
+    //
+    // I wake up one day and decide "hey, lets make a model that has a builder, but also make it
+    // so the model only has one field, which has the type of the builder".
+    // Then I decide to also make an all-arguments constructor.
+    //
+    // There is literally zero reason anyone would reasonably do this, I think. If there is,
+    // they can open an issue and explain it to me, and then I will probably go and scratch my
+    // head over how to best deal with this for a few days, then alter the code in this method
+    // to do something.... probably.
+    SettingsCollection settings = builder.getSettingsCollection();
+
+    if (settings.getBuilder().getValue()) {
+      BuilderStrategy builderStrategy = BuilderStrategy
+          .builder()
+          .name(settings.getBuilderName().getValue())
+          .toBuilderEnabled(settings.getToBuilder().getValue())
+          .build();
+
+      builder.builderStrategy(builderStrategy);
+    }
+
+    return Result.ok(builder);
   }
 
   private void failIllegalPackageName(

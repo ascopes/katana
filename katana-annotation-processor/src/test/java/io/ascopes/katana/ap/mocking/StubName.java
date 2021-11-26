@@ -11,6 +11,7 @@ import javax.lang.model.element.Name;
  * @since 0.0.1
  */
 public final class StubName implements Name {
+
   private final String content;
 
   public StubName(String content) {

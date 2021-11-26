@@ -45,7 +45,7 @@ class ResultTest {
         .isInstanceOf(IllegalStateException.class)
         .hasMessage("Cannot unwrap an ignored/failed result!");
   }
-  
+
   @Test
   void isOk_true_with_value() {
     BDDAssertions
@@ -161,7 +161,8 @@ class ResultTest {
 
   @Test
   void ifOkThen_when_ok_with_value() {
-    Consumer<String> consumer = GenericMocker.mock(new Ref<Consumer<String>>(){});
+    Consumer<String> consumer = GenericMocker.mock(new Ref<Consumer<String>>() {
+    });
 
     Result.ok("123").ifOkThen(consumer);
 
@@ -173,7 +174,8 @@ class ResultTest {
 
   @Test
   void ifOkThen_when_ok_not_valued_will_fail() {
-    Consumer<Void> consumer = GenericMocker.mock(new Ref<Consumer<Void>>(){});
+    Consumer<Void> consumer = GenericMocker.mock(new Ref<Consumer<Void>>() {
+    });
 
     BDDAssertions
         .thenCode(() -> Result.ok().ifOkThen(consumer))
@@ -187,7 +189,8 @@ class ResultTest {
   @ParameterizedTest
   @MethodSource("nonOk")
   void ifOkThen_when_not_ok(Result<Object> result) {
-    Consumer<Object> consumer = GenericMocker.mock(new Ref<Consumer<Object>>(){});
+    Consumer<Object> consumer = GenericMocker.mock(new Ref<Consumer<Object>>() {
+    });
 
     BDDAssertions
         .thenCode(() -> result.ifOkThen(consumer))
@@ -543,7 +546,7 @@ class ResultTest {
         .hasMessage("Did not expect element to be ignored! " + message);
   }
 
-  @ParameterizedTest(name="{0}.equals({1}) == {2}")
+  @ParameterizedTest(name = "{0}.equals({1}) == {2}")
   @MethodSource("equalityChecks")
   void equals_checks(Result<?> first, Object second, boolean isEqual) {
     BDDAssertions
@@ -551,7 +554,7 @@ class ResultTest {
         .isEqualTo(isEqual);
   }
 
-  @ParameterizedTest(name="{0}.hashCode() == {1}.hashCode() == {2}")
+  @ParameterizedTest(name = "{0}.hashCode() == {1}.hashCode() == {2}")
   @MethodSource("hashChecks")
   void hashChecks(Result<?> first, Object second, boolean isEqual) {
     BDDAssertions

@@ -9,10 +9,8 @@ import io.ascopes.katana.ap.utils.AnnotationUtils;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
 import io.ascopes.katana.ap.utils.ResultCollector;
-import java.util.Comparator;
 import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
@@ -38,7 +36,7 @@ public final class AttributeFactory {
     this.elementUtils = elementUtils;
   }
 
-  public Result<SortedSet<Attribute>> create(
+  public Result<Set<Attribute>> create(
       ClassifiedMethods classifiedMethods,
       SettingsCollection settings
   ) {
@@ -47,9 +45,7 @@ public final class AttributeFactory {
         .keySet()
         .stream()
         .map(attr -> this.buildFor(attr, classifiedMethods, settings))
-        .collect(ResultCollector.aggregating(
-            Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(Attribute::getName)))
-        ));
+        .collect(ResultCollector.aggregating(Collectors.toSet()));
   }
 
   private Result<Attribute> buildFor(

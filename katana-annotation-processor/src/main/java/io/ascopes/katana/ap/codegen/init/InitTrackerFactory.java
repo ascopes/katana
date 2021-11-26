@@ -10,7 +10,7 @@ import java.util.SortedSet;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public class InitTrackerFactory {
+public final class InitTrackerFactory {
 
   private final Logger logger;
 
@@ -25,16 +25,16 @@ public class InitTrackerFactory {
    */
   public InitTracker createTracker(SortedSet<Attribute> attributes) {
     if (attributes.size() < Integer.SIZE) {
-      logger.debug("Using an int tracker for tracking initialized attributes");
+      this.logger.debug("Using an int tracker for tracking initialized attributes");
       return new IntInitTracker(attributes);
     }
 
     if (attributes.size() < Long.SIZE) {
-      logger.debug("Using a long tracker for tracking initialized attributes");
+      this.logger.debug("Using a long tracker for tracking initialized attributes");
       return new LongInitTracker(attributes);
     }
 
-    logger.debug("Using a BigInteger tracker for tracking initialized attributes");
+    this.logger.debug("Using a BigInteger tracker for tracking initialized attributes");
     return new BigIntegerInitTracker(attributes);
   }
 }

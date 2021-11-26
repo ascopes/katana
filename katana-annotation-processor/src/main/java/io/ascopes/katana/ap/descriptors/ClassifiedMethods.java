@@ -1,8 +1,8 @@
 package io.ascopes.katana.ap.descriptors;
 
+import io.ascopes.katana.ap.utils.CollectionUtils;
 import io.ascopes.katana.ap.utils.Functors;
 import io.ascopes.katana.ap.utils.ObjectBuilder;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,8 +33,8 @@ public final class ClassifiedMethods {
 
 
   private ClassifiedMethods(Builder builder) {
-    this.getters = unmodifiableSortedMap(builder.getters);
-    this.staticMethods = deepImmutableOverloads(builder.staticMethods);
+    this.getters = CollectionUtils.freeze(builder.getters);
+    this.staticMethods = CollectionUtils.deepFreeze(builder.staticMethods);
 
     // Nullable attributes
     this.equalsImplementation = builder.equalsImplementation;
@@ -88,27 +88,6 @@ public final class ClassifiedMethods {
     return new Builder();
   }
 
-  private static SortedMap<String, Set<ExecutableElement>> deepImmutableOverloads(
-      SortedMap<String, Set<ExecutableElement>> elements
-  ) {
-    SortedMap<String, Set<ExecutableElement>> elementsCopy = new TreeMap<>(String::compareTo);
-    elements.forEach((key, values) -> {
-      Objects.requireNonNull(values, () -> "set was null for " + key);
-      values.forEach(item -> Objects.requireNonNull(item, () -> "null item in set for " + key));
-      elementsCopy.put(key, Collections.unmodifiableSet(values));
-    });
-    return unmodifiableSortedMap(elementsCopy);
-  }
-
-  private static <K, V> SortedMap<K, V> unmodifiableSortedMap(SortedMap<K, V> map) {
-    Objects.requireNonNull(map, "Map was null");
-    map.forEach((key, value) -> {
-      Objects.requireNonNull(key, () -> "key was null for value " + value);
-      Objects.requireNonNull(value, () -> "value was null for key " + key);
-    });
-    return Collections.unmodifiableSortedMap(map);
-  }
-
   @SuppressWarnings("UnusedReturnValue")
   @MustCall("build")
   public static final class Builder implements ObjectBuilder<ClassifiedMethods> {
@@ -121,8 +100,8 @@ public final class ClassifiedMethods {
     private @Nullable ExecutableElement toStringImplementation;
 
     private Builder() {
-      this.getters = new MethodNameMap<>();
-      this.staticMethods = new MethodNameMap<>();
+      this.getters = new TreeMap<>(String::compareTo);
+      this.staticMethods = new TreeMap<>(String::compareTo);
     }
 
     @MaybePresent
@@ -131,11 +110,17 @@ public final class ClassifiedMethods {
     }
 
     public Builder getter(String attributeName, ExecutableElement method) {
-      return this.put(this.getters, attributeName, method);
+      Objects.requireNonNull(attributeName);
+      Objects.requireNonNull(method);
+      this.getters.put(attributeName, method);
+      return this;
     }
 
     public Builder staticMethod(ExecutableElement method) {
-      return this.put(this.staticMethods, method);
+      Objects.requireNonNull(method);
+      String attributeName = method.getSimpleName().toString();
+      this.staticMethods.computeIfAbsent(attributeName, unused -> overloadSet()).add(method);
+      return this;
     }
 
     public Builder equalsImplementation(@Nullable ExecutableElement equalsImplementation) {
@@ -157,38 +142,12 @@ public final class ClassifiedMethods {
       return new ClassifiedMethods(this);
     }
 
-    private Builder put(
-        SortedMap<String, ExecutableElement> map,
-        String attributeName,
-        ExecutableElement method
-    ) {
-      Objects.requireNonNull(attributeName);
-      Objects.requireNonNull(method);
-      map.put(attributeName, method);
-      return this;
+    private static Set<ExecutableElement> overloadSet() {
+      return new HashSet<>();
     }
 
-    private Builder put(
-        SortedMap<String, Set<ExecutableElement>> map,
-        ExecutableElement method
-    ) {
-      String attributeName = method.getSimpleName().toString();
-      Objects.requireNonNull(method);
-      map.computeIfAbsent(attributeName, unused -> new MethodOverloadSet())
-          .add(method);
-      return this;
+    private static SortedMap<String, Set<ExecutableElement>> methodNameMap() {
+      return new TreeMap<>(String::compareTo);
     }
-  }
-
-  private static final class MethodNameMap<V> extends TreeMap<String, V> {
-
-    // Type alias
-    private MethodNameMap() {
-      super(String::compareTo);
-    }
-  }
-
-  private static final class MethodOverloadSet extends HashSet<ExecutableElement> {
-    // Type alias
   }
 }
