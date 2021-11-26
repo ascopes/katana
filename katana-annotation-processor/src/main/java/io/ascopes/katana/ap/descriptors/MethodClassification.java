@@ -145,9 +145,5 @@ public final class MethodClassification {
     private static Set<ExecutableElement> overloadSet() {
       return new HashSet<>();
     }
-
-    private static SortedMap<String, Set<ExecutableElement>> methodNameMap() {
-      return new TreeMap<>(String::compareTo);
-    }
   }
 }
