@@ -1,6 +1,7 @@
 package io.ascopes.katana.ap.descriptors;
 
 import io.ascopes.katana.ap.utils.ObjectBuilder;
+import io.ascopes.katana.ap.utils.StringUtils;
 import java.util.Objects;
 import org.checkerframework.checker.mustcall.qual.MustCall;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -31,6 +32,14 @@ public final class BuilderStrategy {
 
   public static Builder builder() {
     return new Builder();
+  }
+
+  @Override
+  public String toString() {
+    return "BuilderStrategy{" +
+        "name=" + StringUtils.quoted(this.name) + ", " +
+        "toBuilderEnabled=" + this.toBuilderEnabled +
+        '}';
   }
 
   // This is a BuilderStrategyBuilder, who says I can't use annoying names in my code?

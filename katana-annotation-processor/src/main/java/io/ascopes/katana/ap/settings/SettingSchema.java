@@ -63,12 +63,4 @@ public final class SettingSchema<T> {
   public BuilderSetter<T> getBuilderSetter() {
     return this.builderSetter;
   }
-
-  @Override
-  public String toString() {
-    return "SettingSchema{" +
-        "name='" + this.name + '\'' +
-        ", type=" + this.type +
-        '}';
-  }
 }

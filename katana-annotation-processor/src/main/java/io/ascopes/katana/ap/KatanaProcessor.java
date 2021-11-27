@@ -14,7 +14,6 @@ import io.ascopes.katana.ap.descriptors.ModelFactory;
 import io.ascopes.katana.ap.logging.Diagnostics;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
-import io.ascopes.katana.ap.logging.LoggingLevel;
 import io.ascopes.katana.ap.settings.SettingsResolver;
 import io.ascopes.katana.ap.utils.Result;
 import java.util.Collections;
@@ -78,7 +77,6 @@ public final class KatanaProcessor extends AbstractProcessor {
     // Init the loggers.
     Optional
         .ofNullable(processingEnv.getOptions().get(LOGGING_LEVEL))
-        .map(LoggingLevel::parse)
         .ifPresent(LoggerFactory::globalLevel);
 
     this.logger = LoggerFactory.loggerFor(this.getClass());
@@ -173,7 +171,7 @@ public final class KatanaProcessor extends AbstractProcessor {
         });
 
     long delta = System.nanoTime() - start;
-    double rate = (double)delta / processed.get();
+    double rate = (double) delta / processed.get();
 
     this.logger.info(
         "Processed {} in {} ({}) ({} failures)",

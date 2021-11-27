@@ -2,7 +2,6 @@ package io.ascopes.katana.ap.utils;
 
 import com.github.jknack.handlebars.EscapingStrategy;
 import com.github.jknack.handlebars.Handlebars;
-import io.ascopes.katana.ap.logging.HandlebarsHelpers;
 import java.util.HashMap;
 import java.util.Map;
 import org.assertj.core.api.BDDAssertions;
@@ -10,7 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class HandlebarsHelpersTest {
+class StringUtilsTest {
 
   static Handlebars handlebars;
 
@@ -18,7 +17,7 @@ class HandlebarsHelpersTest {
   static void setUpAll() {
     handlebars = new Handlebars()
         .with(EscapingStrategy.NOOP)
-        .registerHelpers(HandlebarsHelpers.class);
+        .registerHelpers(StringUtils.class);
   }
 
   @ParameterizedTest

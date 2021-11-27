@@ -3,6 +3,7 @@ package io.ascopes.katana.ap.descriptors;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.CollectionUtils;
 import io.ascopes.katana.ap.utils.ObjectBuilder;
+import io.ascopes.katana.ap.utils.StringUtils;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Objects;
@@ -106,10 +107,10 @@ public final class Model {
   @Override
   public String toString() {
     return "Model{" +
-        "packageName='" + this.packageName + "', " +
-        "className='" + this.className + "', " +
+        "packageName=" + StringUtils.quoted(this.packageName) + ", " +
+        "className=" + StringUtils.quoted(this.className) + ", " +
         "attributes=" + this.attributes + ", " +
-        "superInterface='" + this.superInterface.getQualifiedName() + "', " +
+        "superInterface=" + StringUtils.quoted(this.superInterface.getQualifiedName()) + ", " +
         "mutable=" + this.mutable +
         '}';
   }

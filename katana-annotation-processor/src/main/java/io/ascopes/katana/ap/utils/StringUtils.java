@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.logging;
+package io.ascopes.katana.ap.utils;
 
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -6,7 +6,7 @@ import org.checkerframework.common.util.report.qual.ReportCreation;
 import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
- * Helper methods for handlebars templates.
+ * Helper methods for strings.
  *
  * @author Ashley Scopes
  * @since 0.0.1
@@ -14,9 +14,9 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
 @ReportCreation
 @ReportInherit
 @SuppressWarnings("unused")
-public abstract class HandlebarsHelpers {
+public abstract class StringUtils {
 
-  private HandlebarsHelpers() {
+  private StringUtils() {
     throw new UnsupportedOperationException("static-only class");
   }
 

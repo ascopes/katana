@@ -3,6 +3,7 @@ package io.ascopes.katana.ap.descriptors;
 import io.ascopes.katana.ap.utils.CollectionUtils;
 import io.ascopes.katana.ap.utils.Functors;
 import io.ascopes.katana.ap.utils.ObjectBuilder;
+import io.ascopes.katana.ap.utils.StringUtils;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -76,9 +77,9 @@ public final class MethodClassification {
 
     return "Methods{" +
         "getters=" + getters + ", " +
-        "equalsImplementation=" + this.equalsImplementation + ", " +
-        "hashCodeImplementation=" + this.hashCodeImplementation + ", " +
-        "toStringImplementation=" + this.toStringImplementation + ", " +
+        "equalsImplementation=" + StringUtils.quoted(this.equalsImplementation) + ", " +
+        "hashCodeImplementation=" + StringUtils.quoted(this.hashCodeImplementation) + ", " +
+        "toStringImplementation=" + StringUtils.quoted(this.toStringImplementation) + ", " +
         "staticMethods=" + staticMethods +
         '}';
   }

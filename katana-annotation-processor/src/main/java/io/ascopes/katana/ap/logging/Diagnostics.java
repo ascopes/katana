@@ -7,6 +7,7 @@ import com.github.jknack.handlebars.helper.ConditionalHelpers;
 import com.github.jknack.handlebars.helper.DefaultHelperRegistry;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
+import io.ascopes.katana.ap.utils.StringUtils;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -43,7 +44,7 @@ public final class Diagnostics {
     this.handlebars = new Handlebars()
         .with(new ClassPathTemplateLoader("/"))
         .with(new DefaultHelperRegistry()
-            .registerHelpers(HandlebarsHelpers.class)
+            .registerHelpers(StringUtils.class)
             .registerHelpers(StringHelpers.class)
             .registerHelpers(ConditionalHelpers.class))
         .with(EscapingStrategy.NOOP);

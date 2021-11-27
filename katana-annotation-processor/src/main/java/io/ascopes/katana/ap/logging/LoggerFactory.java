@@ -1,11 +1,14 @@
 package io.ascopes.katana.ap.logging;
 
+import io.ascopes.katana.ap.utils.StringUtils;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Singleton provider of loggers. While I could have used something like Logback, that massively
@@ -127,6 +130,25 @@ public final class LoggerFactory {
 
   public static Logger loggerFor(Class<?> targetClass) {
     return getInstance().new LoggerImpl(targetClass.getCanonicalName());
+  }
+
+  public static void globalLevel(String level) {
+    try {
+      globalLevel(LoggingLevel.parse(level));
+    } catch (IllegalArgumentException ex) {
+      String validLevelsList =
+          Stream
+              .of(LoggingLevel.values())
+              .map(StringUtils::quoted)
+              .collect(Collectors.joining(", "));
+
+      String message = "Invalid logging level "
+          + StringUtils.quoted(level)
+          + ", valid levels are: "
+          + validLevelsList;
+
+      throw new IllegalArgumentException(message);
+    }
   }
 
   public static void globalLevel(LoggingLevel level) {

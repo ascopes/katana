@@ -3,6 +3,7 @@ package io.ascopes.katana.ap.descriptors;
 import com.squareup.javapoet.TypeName;
 import io.ascopes.katana.annotations.Visibility;
 import io.ascopes.katana.ap.utils.ObjectBuilder;
+import io.ascopes.katana.ap.utils.StringUtils;
 import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
@@ -84,9 +85,10 @@ public final class Attribute {
   @Override
   public String toString() {
     return "Attribute{" +
-        "identifier='" + this.identifier + "', " +
-        "type='" + this.getterToOverride.getReturnType() + "', " +
-        "get=true, set=" + this.setterEnabled +
+        "identifier=" + StringUtils.quoted(this.identifier) + ", " +
+        "type=" + StringUtils.quoted(this.getterToOverride.getReturnType()) + ", " +
+        "get=true, " +
+        "set=" + this.setterEnabled +
         '}';
   }
 
