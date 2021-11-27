@@ -33,11 +33,6 @@ public final class SetterFactory {
         .methodBuilder(setterName)
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
         .addParameter(attribute.getType(), attribute.getIdentifier(), Modifier.FINAL)
-        .addJavadoc(
-            "@param $L the value to set for the {@code $L} attribute",
-            attribute.getIdentifier(),
-            attribute.getName()
-        )
         .addStatement("this.$1L = $1L", attribute.getIdentifier());
 
     attribute
@@ -46,7 +41,7 @@ public final class SetterFactory {
         .ifPresent(builder::addAnnotation);
 
     MethodSpec method = builder.build();
-    this.logger.trace("Generated setter method {}", method);
+    this.logger.trace("Generated setter\n{}", method);
     return method;
   }
 }

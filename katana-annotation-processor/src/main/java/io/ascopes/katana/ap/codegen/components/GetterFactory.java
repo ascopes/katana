@@ -25,7 +25,6 @@ public final class GetterFactory {
     MethodSpec.Builder builder = MethodSpec
         .overriding(attribute.getGetterToOverride())
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-        .addJavadoc("@return the value of the {@code $L} attribute.", attribute.getName())
         .addStatement("return this.$L", attribute.getIdentifier());
 
     attribute
@@ -34,7 +33,7 @@ public final class GetterFactory {
         .ifPresent(builder::addAnnotation);
 
     MethodSpec method = builder.build();
-    this.logger.trace("Generated getter {}", method);
+    this.logger.trace("Generated getter\n{}", method);
     return method;
   }
 }

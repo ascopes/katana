@@ -32,7 +32,7 @@ public final class JavaFileWriter {
     try {
       this.logger.info("Writing out generated source for {}", name);
       javaFile.writeTo(this.filer);
-      this.logger.info("Written out generated source for {} successfully!", name);
+      this.logger.debug("Written out generated source for {} successfully!", name);
       return Result.ok();
 
     } catch (IOException ex) {

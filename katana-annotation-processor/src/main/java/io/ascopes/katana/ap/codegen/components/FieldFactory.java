@@ -41,7 +41,7 @@ public final class FieldFactory {
     }
 
     FieldSpec field = builder.build();
-    this.logger.trace("Generated field {}", field);
+    this.logger.trace("Generated field\n{}", field);
     return field;
   }
 }

@@ -39,9 +39,10 @@ public final class JavaModelFactory {
 
   public JavaFile create(Model model) {
     this.logger.debug("Building Java file for {}", model);
-
     TypeSpec typeSpec = this.buildModelTypeSpecFrom(model);
-    return this.wrapTypeSpecInPackage(typeSpec, model);
+    JavaFile javaFile = this.wrapTypeSpecInPackage(typeSpec, model);
+    this.logger.trace("Generated source file {}\n{}", model.getQualifiedName(), javaFile);
+    return javaFile;
   }
 
   private JavaFile wrapTypeSpecInPackage(TypeSpec typeSpec, Model model) {
