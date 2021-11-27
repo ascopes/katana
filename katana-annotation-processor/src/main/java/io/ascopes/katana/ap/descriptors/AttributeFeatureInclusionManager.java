@@ -3,10 +3,11 @@ package io.ascopes.katana.ap.descriptors;
 import io.ascopes.katana.annotations.internal.AttributeFeature;
 import io.ascopes.katana.annotations.internal.ExclusionAdvice;
 import io.ascopes.katana.annotations.internal.InclusionAdvice;
+import io.ascopes.katana.ap.logging.Diagnostics;
+import io.ascopes.katana.ap.logging.Logger;
+import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.settings.Setting;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
-import io.ascopes.katana.ap.utils.Diagnostics;
-import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.Result;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
@@ -34,7 +35,7 @@ public class AttributeFeatureInclusionManager {
       Diagnostics diagnostics,
       Elements elementUtils
   ) {
-    this.logger = new Logger();
+    this.logger = LoggerFactory.loggerFor(this.getClass());
     this.diagnostics = diagnostics;
     this.elementUtils = elementUtils;
   }

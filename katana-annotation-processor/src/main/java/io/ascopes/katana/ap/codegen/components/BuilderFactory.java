@@ -6,7 +6,8 @@ import io.ascopes.katana.ap.codegen.init.InitTracker;
 import io.ascopes.katana.ap.codegen.init.InitTrackerFactory;
 import io.ascopes.katana.ap.descriptors.BuilderStrategy;
 import io.ascopes.katana.ap.descriptors.Model;
-import io.ascopes.katana.ap.utils.Logger;
+import io.ascopes.katana.ap.logging.Logger;
+import io.ascopes.katana.ap.logging.LoggerFactory;
 import java.util.Objects;
 import java.util.Optional;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -25,7 +26,7 @@ public final class BuilderFactory {
 
   public BuilderFactory() {
     this.initTrackerFactory = new InitTrackerFactory();
-    this.logger = new Logger();
+    this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
   public BuilderComponents create(Model model, BuilderStrategy strategy) {

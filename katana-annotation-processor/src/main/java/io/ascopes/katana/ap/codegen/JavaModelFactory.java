@@ -9,9 +9,10 @@ import io.ascopes.katana.ap.codegen.components.GetterFactory;
 import io.ascopes.katana.ap.codegen.components.SetterFactory;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.Model;
+import io.ascopes.katana.ap.logging.Logger;
+import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.CodeGenUtils;
-import io.ascopes.katana.ap.utils.Logger;
 import javax.lang.model.element.Modifier;
 
 /**
@@ -21,6 +22,7 @@ import javax.lang.model.element.Modifier;
  * @since 0.0.1
  */
 public final class JavaModelFactory {
+
   private final Logger logger;
   private final FieldFactory fieldFactory;
   private final GetterFactory getterFactory;
@@ -29,7 +31,7 @@ public final class JavaModelFactory {
   private final BuilderFactory builderFactory;
 
   public JavaModelFactory() {
-    this.logger = new Logger();
+    this.logger = LoggerFactory.loggerFor(this.getClass());
     this.fieldFactory = new FieldFactory();
     this.getterFactory = new GetterFactory();
     this.setterFactory = new SetterFactory();

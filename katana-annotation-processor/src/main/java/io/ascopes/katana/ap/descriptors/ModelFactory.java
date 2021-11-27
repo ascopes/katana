@@ -1,12 +1,13 @@
 package io.ascopes.katana.ap.descriptors;
 
 import io.ascopes.katana.annotations.MutableModel;
+import io.ascopes.katana.ap.logging.Diagnostics;
+import io.ascopes.katana.ap.logging.Logger;
+import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.settings.Setting;
 import io.ascopes.katana.ap.settings.SettingsResolver;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
-import io.ascopes.katana.ap.utils.Diagnostics;
-import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
 import java.util.HashSet;
@@ -47,7 +48,7 @@ public final class ModelFactory {
     this.attributeFactory = attributeFactory;
     this.elementUtils = elementUtils;
     this.diagnostics = diagnostics;
-    this.logger = new Logger();
+    this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
   public Result<Model> create(

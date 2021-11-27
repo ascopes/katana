@@ -11,13 +11,13 @@ import io.ascopes.katana.ap.descriptors.InterfaceSearcher;
 import io.ascopes.katana.ap.descriptors.MethodClassificationFactory;
 import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.descriptors.ModelFactory;
+import io.ascopes.katana.ap.logging.Diagnostics;
+import io.ascopes.katana.ap.logging.Logger;
+import io.ascopes.katana.ap.logging.LoggerFactory;
+import io.ascopes.katana.ap.logging.LoggingLevel;
 import io.ascopes.katana.ap.settings.SettingsResolver;
-import io.ascopes.katana.ap.utils.Diagnostics;
-import io.ascopes.katana.ap.utils.Logger;
-import io.ascopes.katana.ap.utils.Logger.Level;
 import io.ascopes.katana.ap.utils.Result;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,11 +50,7 @@ public final class KatanaProcessor extends AbstractProcessor {
   private @MonotonicNonNull ModelFactory modelFactory;
   private @MonotonicNonNull JavaModelFactory javaModelFactory;
   private @MonotonicNonNull JavaFileWriter javaFileWriter;
-  private final Logger logger;
-
-  public KatanaProcessor() {
-    this.logger = new Logger();
-  }
+  private @MonotonicNonNull Logger logger;
 
   @Override
   public Set<String> getSupportedOptions() {
@@ -82,8 +78,10 @@ public final class KatanaProcessor extends AbstractProcessor {
     // Init the loggers.
     Optional
         .ofNullable(processingEnv.getOptions().get(LOGGING_LEVEL))
-        .map(Level::valueOf)
-        .ifPresent(this::setLoggingLevel);
+        .map(LoggingLevel::parse)
+        .ifPresent(LoggerFactory::globalLevel);
+
+    this.logger = LoggerFactory.loggerFor(this.getClass());
 
     Diagnostics diagnostics = new Diagnostics(
         this.processingEnv.getMessager()
@@ -132,11 +130,6 @@ public final class KatanaProcessor extends AbstractProcessor {
     this.modelFactory = modelFactory;
     this.javaModelFactory = javaModelFactory;
     this.javaFileWriter = javaFileWriter;
-  }
-
-  public void setLoggingLevel(Level level) {
-    Objects.requireNonNull(level);
-    Logger.setGlobalLevel(level);
   }
 
   @Override

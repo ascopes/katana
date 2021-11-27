@@ -2,9 +2,10 @@ package io.ascopes.katana.ap.codegen.components;
 
 import com.squareup.javapoet.FieldSpec;
 import io.ascopes.katana.ap.descriptors.Attribute;
+import io.ascopes.katana.ap.logging.Logger;
+import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.CodeGenUtils;
-import io.ascopes.katana.ap.utils.Logger;
 import javax.lang.model.element.Modifier;
 
 
@@ -19,7 +20,7 @@ public final class FieldFactory {
   private final Logger logger;
 
   public FieldFactory() {
-    this.logger = new Logger();
+    this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
   public FieldSpec create(Attribute attribute, SettingsCollection settings) {

@@ -1,12 +1,11 @@
 package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.JavaFile;
-import io.ascopes.katana.ap.utils.Diagnostics;
-import io.ascopes.katana.ap.utils.Logger;
+import io.ascopes.katana.ap.logging.Diagnostics;
+import io.ascopes.katana.ap.logging.Logger;
+import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.utils.Result;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import javax.annotation.processing.Filer;
 import javax.tools.Diagnostic.Kind;
 
@@ -23,7 +22,7 @@ public final class JavaFileWriter {
   private final Diagnostics diagnostics;
 
   public JavaFileWriter(Filer filer, Diagnostics diagnostics) {
-    this.logger = new Logger();
+    this.logger = LoggerFactory.loggerFor(this.getClass());
     this.filer = filer;
     this.diagnostics = diagnostics;
   }
@@ -36,16 +35,12 @@ public final class JavaFileWriter {
       return Result.ok();
 
     } catch (IOException ex) {
-      StringWriter stringWriter = new StringWriter();
-      PrintWriter printWriter = new PrintWriter(stringWriter);
-      ex.printStackTrace(printWriter);
-
       this.diagnostics
           .builder()
           .kind(Kind.ERROR)
           .template("ioException")
           .param("fileName", name)
-          .param("stacktrace", stringWriter.toString())
+          .param("stacktrace", ex)
           .log();
 
       return Result.fail();

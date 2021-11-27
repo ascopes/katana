@@ -1,7 +1,8 @@
 package io.ascopes.katana.ap.codegen.init;
 
 import io.ascopes.katana.ap.descriptors.Attribute;
-import io.ascopes.katana.ap.utils.Logger;
+import io.ascopes.katana.ap.logging.Logger;
+import io.ascopes.katana.ap.logging.LoggerFactory;
 import java.util.SortedSet;
 
 /**
@@ -15,7 +16,7 @@ public final class InitTrackerFactory {
   private final Logger logger;
 
   public InitTrackerFactory() {
-    this.logger = new Logger();
+    this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
   /**

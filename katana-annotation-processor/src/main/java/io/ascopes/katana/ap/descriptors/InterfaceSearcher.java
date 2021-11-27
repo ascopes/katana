@@ -1,8 +1,9 @@
 package io.ascopes.katana.ap.descriptors;
 
+import io.ascopes.katana.ap.logging.Diagnostics;
+import io.ascopes.katana.ap.logging.Logger;
+import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
-import io.ascopes.katana.ap.utils.Diagnostics;
-import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.Result;
 import java.util.stream.Stream;
 import javax.annotation.processing.RoundEnvironment;
@@ -26,7 +27,7 @@ public final class InterfaceSearcher {
 
   public InterfaceSearcher(Diagnostics diagnostics) {
     this.diagnostics = diagnostics;
-    this.logger = new Logger();
+    this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
   public Stream<TypeElement> findAnnotatedInterfacesFor(

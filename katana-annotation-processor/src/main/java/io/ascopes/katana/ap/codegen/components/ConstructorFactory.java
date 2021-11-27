@@ -6,7 +6,8 @@ import com.squareup.javapoet.TypeName;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.Constructor;
 import io.ascopes.katana.ap.descriptors.Model;
-import io.ascopes.katana.ap.utils.Logger;
+import io.ascopes.katana.ap.logging.Logger;
+import io.ascopes.katana.ap.logging.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -23,7 +24,7 @@ public final class ConstructorFactory {
   private final Logger logger;
 
   public ConstructorFactory() {
-    this.logger = new Logger();
+    this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
   public Iterable<MethodSpec> create(Model model) {

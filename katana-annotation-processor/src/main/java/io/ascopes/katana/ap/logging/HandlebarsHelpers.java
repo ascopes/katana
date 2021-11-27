@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.utils;
+package io.ascopes.katana.ap.logging;
 
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.Nullable;

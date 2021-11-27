@@ -3,8 +3,9 @@ package io.ascopes.katana.ap.codegen.components;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.MethodSpec;
 import io.ascopes.katana.ap.descriptors.Attribute;
+import io.ascopes.katana.ap.logging.Logger;
+import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
-import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import javax.lang.model.element.Modifier;
 
@@ -20,7 +21,7 @@ public final class SetterFactory {
   private final Logger logger;
 
   public SetterFactory() {
-    this.logger = new Logger();
+    this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
   public MethodSpec create(Attribute attribute, SettingsCollection settings) {

@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.utils;
+package io.ascopes.katana.ap.logging;
 
 import com.github.jknack.handlebars.EscapingStrategy;
 import com.github.jknack.handlebars.Handlebars;
@@ -38,7 +38,7 @@ public final class Diagnostics {
   private final Handlebars handlebars;
 
   public Diagnostics(Messager messager) {
-    this.logger = new Logger();
+    this.logger = LoggerFactory.loggerFor(this.getClass());
     this.messager = messager;
     this.handlebars = new Handlebars()
         .with(new ClassPathTemplateLoader("/"))
@@ -88,6 +88,14 @@ public final class Diagnostics {
 
     @MustCall("log")
     ParamsStage param(String name, Object value);
+
+    @MustCall("log")
+    default ParamsStage param(String name, Throwable ex) {
+      StringWriter stringWriter = new StringWriter();
+      PrintWriter printWriter = new PrintWriter(stringWriter);
+      ex.printStackTrace(printWriter);
+      return this.param(name, stringWriter.toString());
+    }
   }
 
   public interface FinishStage {
@@ -157,14 +165,20 @@ public final class Diagnostics {
     @Override
     public void log() {
       try {
-        String path = this.directory + "/" + template;
-        String message = handlebars.compile(path).apply(params);
-        messager.printMessage(this.kind, message, element, annotationMirror, annotationValue);
+        String path = this.directory + "/" + this.template;
+        String message = Diagnostics.this.handlebars.compile(path).apply(this.params);
+        Diagnostics.this.messager.printMessage(
+            this.kind,
+            message,
+            this.element,
+            this.annotationMirror,
+            this.annotationValue
+        );
       } catch (IOException | HandlebarsException ex) {
         StringWriter writer = new StringWriter();
         PrintWriter printWriter = new PrintWriter(writer);
         ex.printStackTrace(printWriter);
-        logger.error("Failed to generate template for diagnostics", ex);
+        Diagnostics.this.logger.error("Failed to generate template for diagnostics", ex);
       }
     }
   }

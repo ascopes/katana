@@ -3,10 +3,11 @@ package io.ascopes.katana.ap.descriptors;
 import io.ascopes.katana.annotations.Equality;
 import io.ascopes.katana.annotations.ToString;
 import io.ascopes.katana.ap.iterators.AvailableMethodsIterator;
+import io.ascopes.katana.ap.logging.Diagnostics;
+import io.ascopes.katana.ap.logging.Logger;
+import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.settings.Setting;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
-import io.ascopes.katana.ap.utils.Diagnostics;
-import io.ascopes.katana.ap.utils.Logger;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
 import java.util.stream.Collectors;
@@ -40,7 +41,7 @@ public final class MethodClassificationFactory {
       Types typeUtils
   ) {
     this.diagnostics = diagnostics;
-    this.logger = new Logger();
+    this.logger = LoggerFactory.loggerFor(this.getClass());
     this.elementUtils = elementUtils;
     this.typeUtils = typeUtils;
   }

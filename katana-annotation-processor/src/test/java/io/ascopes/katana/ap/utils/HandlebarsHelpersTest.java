@@ -2,6 +2,7 @@ package io.ascopes.katana.ap.utils;
 
 import com.github.jknack.handlebars.EscapingStrategy;
 import com.github.jknack.handlebars.Handlebars;
+import io.ascopes.katana.ap.logging.HandlebarsHelpers;
 import java.util.HashMap;
 import java.util.Map;
 import org.assertj.core.api.BDDAssertions;
