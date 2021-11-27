@@ -10,6 +10,8 @@ import java.time.format.DateTimeFormatter;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import org.checkerframework.common.util.report.qual.ReportCreation;
+import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
  * Code generation helpers.
@@ -17,7 +19,9 @@ import javax.lang.model.element.TypeElement;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public abstract class CodeGenUtils {
+@ReportCreation
+@ReportInherit
+public final class CodeGenUtils {
 
   private static final AnnotationSpec OVERRIDE = AnnotationSpec.builder(Override.class).build();
 

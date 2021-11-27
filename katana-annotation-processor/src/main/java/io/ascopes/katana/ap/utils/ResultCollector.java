@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
+import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
  * A collector for results that aggregates the result state. A combiner is provided to combine a
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
  * @author Ashley Scopes
  * @since 0.0.1
  */
+@ReportInherit
 public final class ResultCollector<T, C>
     implements Collector<Result<T>, ResultCollector<T, C>.State, Result<C>> {
 

@@ -13,8 +13,7 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
  */
 @ReportCreation
 @ReportInherit
-@SuppressWarnings("unused")
-public abstract class StringUtils {
+public final class StringUtils {
 
   private StringUtils() {
     throw new UnsupportedOperationException("static-only class");

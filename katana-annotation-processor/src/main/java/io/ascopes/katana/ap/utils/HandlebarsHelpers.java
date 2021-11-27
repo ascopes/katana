@@ -1,7 +1,8 @@
 package io.ascopes.katana.ap.utils;
 
-import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.util.report.qual.ReportCreation;
+import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
  * Helpers to expose to Handlebars.
@@ -9,6 +10,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Ashley Scopes
  * @since 0.0.1
  */
+@ReportCreation
+@ReportInherit
+@SuppressWarnings("unused")
 public final class HandlebarsHelpers {
 
   private HandlebarsHelpers() {

@@ -17,7 +17,7 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
  */
 @ReportCreation
 @ReportInherit
-public abstract class AnnotationUtils {
+public final class AnnotationUtils {
 
   private AnnotationUtils() {
     throw new UnsupportedOperationException("static-only class");

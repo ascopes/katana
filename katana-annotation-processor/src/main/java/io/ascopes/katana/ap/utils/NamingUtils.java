@@ -16,7 +16,7 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
  */
 @ReportCreation
 @ReportInherit
-public abstract class NamingUtils {
+public final class NamingUtils {
 
   private NamingUtils() {
     throw new UnsupportedOperationException("static-only class");

@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import org.checkerframework.common.util.report.qual.ReportCreation;
+import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
  * Collection helper methods.
@@ -14,7 +16,9 @@ import java.util.TreeMap;
  * @since 0.0.1
  */
 // TODO(ascopes): unit tests!
-public abstract class CollectionUtils {
+@ReportCreation
+@ReportInherit
+public final class CollectionUtils {
 
   private CollectionUtils() {
     throw new UnsupportedOperationException("static-only class");

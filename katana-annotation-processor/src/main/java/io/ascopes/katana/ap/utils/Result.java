@@ -5,6 +5,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.common.util.report.qual.ReportCreation;
+import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
  * Monadic representation of a result that can be marked as OK with a value, OK with no value,
@@ -19,6 +21,7 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
  * @author Ashley Scopes
  * @since 0.0.1
  */
+@ReportInherit
 public final class Result<T> {
 
   private static final Result<Void> CLEARED = new Result<>(null);

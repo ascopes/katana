@@ -9,6 +9,8 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.checkerframework.common.util.report.qual.ReportCreation;
+import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
  * Functional programming helpers.
@@ -18,7 +20,9 @@ import java.util.stream.Stream;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public abstract class Functors {
+@ReportCreation
+@ReportInherit
+public final class Functors {
 
   private Functors() {
     throw new UnsupportedOperationException("static-only class");

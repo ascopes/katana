@@ -1,7 +1,5 @@
 package io.ascopes.katana.ap.utils;
 
-import io.ascopes.katana.ap.mocking.GenericMocker;
-import io.ascopes.katana.ap.mocking.GenericMocker.Ref;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -161,7 +159,13 @@ class ResultTest {
 
   @Test
   void ifOkThen_when_ok_with_value() {
-    Consumer<String> consumer = GenericMocker.mock(new Ref<Consumer<String>>() {
+    // This cannot be a lambda as mockito cannot spy those correctly.
+    @SuppressWarnings("Convert2Lambda")
+    Consumer<String> consumer = BDDMockito.spy(new Consumer<String>() {
+      @Override
+      public void accept(String s) {
+        // do nothing.
+      }
     });
 
     Result.ok("123").ifOkThen(consumer);
@@ -174,7 +178,13 @@ class ResultTest {
 
   @Test
   void ifOkThen_when_ok_not_valued_will_fail() {
-    Consumer<Void> consumer = GenericMocker.mock(new Ref<Consumer<Void>>() {
+    // This cannot be a lambda as mockito cannot spy those correctly.
+    @SuppressWarnings("Convert2Lambda")
+    Consumer<Void> consumer = BDDMockito.spy(new Consumer<Void>() {
+      @Override
+      public void accept(Void v) {
+        // do nothing.
+      }
     });
 
     BDDAssertions
@@ -189,7 +199,13 @@ class ResultTest {
   @ParameterizedTest
   @MethodSource("nonOk")
   void ifOkThen_when_not_ok(Result<Object> result) {
-    Consumer<Object> consumer = GenericMocker.mock(new Ref<Consumer<Object>>() {
+// This cannot be a lambda as mockito cannot spy those correctly.
+    @SuppressWarnings("Convert2Lambda")
+    Consumer<Object> consumer = BDDMockito.spy(new Consumer<Object>() {
+      @Override
+      public void accept(Object o) {
+        // do nothing.
+      }
     });
 
     BDDAssertions
