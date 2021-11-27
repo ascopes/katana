@@ -1,7 +1,8 @@
-package io.ascopes.katana.ap.mocking;
+package io.ascopes.katana.ap.stubbing;
 
 import java.util.Objects;
 import javax.lang.model.element.Name;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 
 /**
@@ -34,13 +35,15 @@ public final class StubName implements Name {
   }
 
   @Override
+  @NonNull
   public CharSequence subSequence(int start, int end) {
     return this.content.subSequence(start, end);
   }
 
   @Override
+  @NonNull
   public String toString() {
-    return this.content.toString();
+    return this.content;
   }
 
   @Override
@@ -50,6 +53,6 @@ public final class StubName implements Name {
 
   @Override
   public int hashCode() {
-    return Objects.hash(content);
+    return Objects.hash(this.content);
   }
 }

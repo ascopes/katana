@@ -191,5 +191,4 @@ class NamingUtilsTest {
         .add(Arguments.of("foo.bar." + kw + ".baz.bork", kw)));
     return bldr.build();
   }
-
 }

@@ -1,6 +1,6 @@
 package io.ascopes.katana.ap.utils;
 
-import io.ascopes.katana.ap.mocking.StubName;
+import io.ascopes.katana.ap.stubbing.StubName;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 
 class AnnotationUtilsTest {
-
   @Test
   void getAnnotationMirror_returns_the_first_annotation_mirror_when_matching() {
     // Given

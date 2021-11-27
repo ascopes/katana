@@ -34,8 +34,8 @@ public final class MethodClassification {
 
 
   private MethodClassification(Builder builder) {
-    this.getters = CollectionUtils.freeze(builder.getters);
-    this.staticMethods = CollectionUtils.deepFreeze(builder.staticMethods);
+    this.getters = CollectionUtils.freezeSortedMap(builder.getters);
+    this.staticMethods = CollectionUtils.freezeSortedMapOfSets(builder.staticMethods);
 
     // Nullable attributes
     this.equalsImplementation = builder.equalsImplementation;

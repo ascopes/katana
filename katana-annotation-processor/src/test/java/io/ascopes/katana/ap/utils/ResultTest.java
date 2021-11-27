@@ -523,45 +523,6 @@ class ResultTest {
         .isEqualTo(content);
   }
 
-  @Test
-  void assertNotIgnored_when_ok_with_value() {
-    Result<Object> initial = Result.ok(new Object());
-
-    BDDAssertions
-        .thenCode(() -> initial.assertNotIgnored(() -> "woof!"))
-        .doesNotThrowAnyException();
-  }
-
-  @Test
-  void assertNotIgnored_when_ok_without_value() {
-    Result<Void> initial = Result.ok();
-
-    BDDAssertions
-        .thenCode(() -> initial.assertNotIgnored(() -> "woof!"))
-        .doesNotThrowAnyException();
-  }
-
-  @Test
-  void assertNotIgnored_when_failed() {
-    Result<Object> initial = Result.fail();
-
-    BDDAssertions
-        .thenCode(() -> initial.assertNotIgnored(() -> "woof!"))
-        .doesNotThrowAnyException();
-  }
-
-  @Test
-  void assertNotIgnored_when_ignored() {
-    Result<Object> initial = Result.ignore();
-
-    String message = UUID.randomUUID().toString();
-
-    BDDAssertions
-        .thenCode(() -> initial.assertNotIgnored(() -> message))
-        .isInstanceOf(IllegalStateException.class)
-        .hasMessage("Did not expect element to be ignored! " + message);
-  }
-
   @ParameterizedTest(name = "{0}.equals({1}) == {2}")
   @MethodSource("equalityChecks")
   void equals_checks(Result<?> first, Object second, boolean isEqual) {

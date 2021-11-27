@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import org.checkerframework.checker.nullness.qual.PolyNull;
-import org.checkerframework.common.util.report.qual.ReportCreation;
 import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
@@ -207,22 +206,6 @@ public final class Result<T> {
     return this.isOk()
         ? this.unwrap()
         : ifNotOk.get();
-  }
-
-  /**
-   * Throw an exception if this result is ignored.
-   *
-   * @param errorMessage supplier of an additional error message to provide, if ignored.
-   * @return this result if not ignored, to allow further call chaining.
-   * @throws IllegalStateException if ignored.
-   */
-  public Result<T> assertNotIgnored(Supplier<String> errorMessage) throws IllegalStateException {
-    Objects.requireNonNull(errorMessage);
-    if (this.isIgnored()) {
-      throw new IllegalStateException(
-          "Did not expect element to be ignored! " + errorMessage.get());
-    }
-    return this;
   }
 
   /**

@@ -22,26 +22,23 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
 @ReportCreation
 @ReportInherit
 public final class CodeGenUtils {
-
-  private static final AnnotationSpec OVERRIDE = AnnotationSpec.builder(Override.class).build();
-
   public static Modifier[] modifiers(Visibility visibility) {
     switch (visibility) {
       case PRIVATE:
         return new Modifier[]{Modifier.PRIVATE};
-      case PACKAGE_PRIVATE:
-        return new Modifier[0];
       case PROTECTED:
         return new Modifier[]{Modifier.PROTECTED};
       case PUBLIC:
         return new Modifier[]{Modifier.PUBLIC};
+
+      // Skip modifiers on anything else, including package private.
       default:
-        throw new IllegalArgumentException("Unknown visibility modifier " + visibility);
+        return new Modifier[0];
     }
   }
 
   public static AnnotationSpec override() {
-    return OVERRIDE;
+    return AnnotationSpec.builder(Override.class).build();
   }
 
   public static AnnotationSpec copyDeprecatedFrom(AnnotationMirror annotationMirror) {

@@ -51,8 +51,8 @@ public final class Model {
     this.settingsCollection = Objects.requireNonNull(builder.settingsCollection);
     this.methods = Objects.requireNonNull(builder.methods);
 
-    this.constructors = CollectionUtils.freeze(builder.constructors);
-    this.attributes = CollectionUtils.freeze(builder.attributes);
+    this.constructors = CollectionUtils.freezeSet(builder.constructors);
+    this.attributes = CollectionUtils.freezeSortedSet(builder.attributes);
 
     // Nullable attributes
     this.builderStrategy = builder.builderStrategy;
