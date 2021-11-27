@@ -65,8 +65,4 @@ public abstract class StringUtils {
         return "a " + name;
     }
   }
-
-  public static String an(@Nullable Object element) {
-    return a(element);
-  }
 }
