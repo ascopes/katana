@@ -173,11 +173,13 @@ public final class KatanaProcessor extends AbstractProcessor {
         });
 
     long delta = System.nanoTime() - start;
+    double rate = (double)delta / processed.get();
 
     this.logger.info(
-        "Processed {} model definitions in approx {}ms ({} failures)",
-        processed.get(),
-        Math.round(delta / 1_000_000.0),
+        "Processed {} in {} ({}) ({} failures)",
+        processed.get() == 1 ? "1 model definition" : processed.get() + " model definitions",
+        String.format("~%.1fms", delta / 1_000_000.0),
+        String.format("~%.1f per second", rate / 1_000_000.0),
         failed.get()
     );
 
