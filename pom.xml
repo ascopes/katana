@@ -24,25 +24,6 @@
   </modules>
 
   <properties>
-    <assertj.version>3.11.1</assertj.version>
-    <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
-    <checkerframework.version>3.19.0</checkerframework.version>
-    <google-compile-testing.version>0.19</google-compile-testing.version>
-    <groovy.version>3.0.9</groovy.version>
-    <handlebars.version>4.3.0</handlebars.version>
-    <javapoet.version>1.13.0</javapoet.version>
-    <junit-jupiter.version>5.8.1</junit-jupiter.version>
-    <mockito-core.version>4.0.0</mockito-core.version>
-    <slf4j.version>1.7.32</slf4j.version>
-
-    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-    <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
-    <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
-    <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
-
-    <build-helper-maven-plugin.version>3.1.0</build-helper-maven-plugin.version>
-    <gmaven-plus-plugin.version>1.13.0</gmaven-plus-plugin.version>
-
     <katana.description>
       Katana is an annotation processor for Java 8 and higher which produces data class
       implementations
@@ -50,6 +31,7 @@
       implement
       standards-compliant models in a Java application.
     </katana.description>
+
     <katana.jdk.version>8</katana.jdk.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -57,53 +39,77 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Library dependencies -->
+
       <dependency>
+        <!-- Mustache templating engine based on Handlebars.js, used for error message rendering -->
         <groupId>com.github.jknack</groupId>
         <artifactId>handlebars</artifactId>
-        <version>${handlebars.version}</version>
+        <version>4.3.0</version>
       </dependency>
 
       <dependency>
-        <groupId>com.google.testing.compile</groupId>
-        <artifactId>compile-testing</artifactId>
-        <version>${google-compile-testing.version}</version>
-      </dependency>
-
-      <dependency>
+        <!-- Java source code builders -->
         <groupId>com.squareup</groupId>
         <artifactId>javapoet</artifactId>
-        <version>${javapoet.version}</version>
+        <version>1.13.0</version>
       </dependency>
 
       <dependency>
-        <groupId>org.assertj</groupId>
-        <artifactId>assertj-core</artifactId>
-        <version>${assertj.version}</version>
-      </dependency>
-
-      <dependency>
+        <!-- Bug detection annotations -->
         <groupId>org.checkerframework</groupId>
         <artifactId>checker-qual</artifactId>
-        <version>${checkerframework.version}</version>
+        <version>3.19.0</version>
+      </dependency>
+
+      <!-- Test dependencies -->
+
+      <dependency>
+        <!-- Easy parsing of generated code to verify outputs in integration tests -->
+        <groupId>com.github.javaparser</groupId>
+        <artifactId>javaparser-symbol-solver-core</artifactId>
+        <version>3.23.1</version>
+        <scope>test</scope>
       </dependency>
 
       <dependency>
+        <!-- Compiler test tools for unit and integration testing -->
+        <groupId>com.google.testing.compile</groupId>
+        <artifactId>compile-testing</artifactId>
+        <version>0.19</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <!-- Test assertion utilities -->
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>3.11.1</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <!-- Unit and integration testing framework -->
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter</artifactId>
-        <version>${junit-jupiter.version}</version>
+        <version>5.8.1</version>
+        <scope>test</scope>
       </dependency>
 
       <dependency>
+        <!-- Mocking framework -->
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>${mockito-core.version}</version>
+        <version>4.0.0</version>
+        <scope>test</scope>
       </dependency>
 
       <dependency>
-        <!-- Needed by tests, etc -->
+        <!-- Some test dependencies need an SLF4J provider -->
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
-        <version>${slf4j.version}</version>
+        <version>1.7.32</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -112,9 +118,10 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <!-- Enforce the compiler version to use -->
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven-compiler-plugin.version}</version>
+          <version>3.8.1</version>
 
           <configuration>
             <source>${katana.jdk.version}</source>
@@ -123,9 +130,10 @@
         </plugin>
 
         <plugin>
+          <!-- Integration test runner -->
           <groupId>org.apache.maven.plugins</groupId>
-          <version>${maven-failsafe-plugin.version}</version>
           <artifactId>maven-failsafe-plugin</artifactId>
+          <version>3.0.0-M5</version>
 
           <configuration>
             <includes>
@@ -145,9 +153,10 @@
         </plugin>
 
         <plugin>
+          <!-- Add things to the MANIFEST.MF in the output JAR -->
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>${maven-jar-plugin.version}</version>
+          <version>3.2.0</version>
 
           <configuration>
             <archive>
@@ -164,10 +173,10 @@
         </plugin>
 
         <plugin>
-          <!-- We have to bump the version for JUnit5 support. -->
+          <!-- Unit test runner -->
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>${maven-surefire-plugin.version}</version>
+          <version>3.0.0-M5</version>
 
           <configuration>
             <excludes>
@@ -178,28 +187,32 @@
         </plugin>
 
         <plugin>
+          <!-- Allows us to add additional build directories -->
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
-          <version>${build-helper-maven-plugin.version}</version>
+          <version>3.1.0</version>
         </plugin>
 
         <plugin>
+          <!-- Groovy script runner -->
           <groupId>org.codehaus.gmavenplus</groupId>
           <artifactId>gmavenplus-plugin</artifactId>
-          <version>${gmaven-plus-plugin.version}</version>
+          <version>1.13.0</version>
 
           <dependencies>
             <dependency>
+              <!-- Groovy standard library to use -->
               <groupId>org.codehaus.groovy</groupId>
               <artifactId>groovy</artifactId>
-              <version>${groovy.version}</version>
-              <scope>runtime</scope>
+              <version>3.0.9</version>
+              <scope>compile</scope>
             </dependency>
 
             <dependency>
+              <!-- Needed to suppress a Maven warning, not used anywhere else directly -->
               <groupId>org.codehaus.groovy</groupId>
               <artifactId>groovy-ant</artifactId>
-              <version>${groovy.version}</version>
+              <version>3.0.9</version>
               <scope>runtime</scope>
             </dependency>
           </dependencies>
