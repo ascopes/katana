@@ -10,11 +10,9 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
 /**
  * Monadic representation of a result that can be marked as OK with a value, OK with no value,
  * ignored with no value, or failed with no value.
- * <p>
- * Used to chain sequences of ordered operations together that may "give up" at any point in the
+ *
+ * <p>Used to chain sequences of ordered operations together that may "give up" at any point in the
  * process.
- * <p>
- * Due to the complex nature of this class, please keep methods documented.
  *
  * @param <T> the inner value type.
  * @author Ashley Scopes
@@ -50,6 +48,8 @@ public final class Result<T> {
   }
 
   /**
+   * Determine if the result is OK.
+   *
    * @return true if the result is OK.
    */
   public boolean isOk() {
@@ -57,6 +57,8 @@ public final class Result<T> {
   }
 
   /**
+   * Determine if the result is not OK.
+   *
    * @return true if the result is not OK.
    */
   public boolean isNotOk() {
@@ -64,6 +66,8 @@ public final class Result<T> {
   }
 
   /**
+   * Determine if the result is failed.
+   *
    * @return true if the result is failed.
    */
   public boolean isFailed() {
@@ -71,6 +75,8 @@ public final class Result<T> {
   }
 
   /**
+   * Determine if the result is ignored.
+   *
    * @return true if the result is ignored.
    */
   public boolean isIgnored() {
@@ -143,8 +149,8 @@ public final class Result<T> {
    * @param toRun logic to run if ignored.
    * @return this result.
    */
-  // TODO(ascopes): unit tests
   public Result<T> ifIgnoredThen(Runnable toRun) {
+    // TODO(ascopes): unit tests
     if (this.isIgnored()) {
       toRun.run();
     }
@@ -157,8 +163,8 @@ public final class Result<T> {
    * @param then the result value to replace with.
    * @return the result.
    */
-  // TODO(ascopes): unit tests
   public Result<T> ifIgnoredReplace(T then) {
+    // TODO(ascopes): unit tests
     return this.ifIgnoredReplace(() -> Result.ok(then));
   }
 
@@ -176,8 +182,10 @@ public final class Result<T> {
   }
 
   /**
-   * @return a cleared result value that has no meaning other than the status. This will still
-   * remain ok, ignored, or failed, but you will not be able to access the result.
+   * Discard any value if this result is OK. OK results remain as being OK, but you will no longer
+   * have any value within it. Other results stay as they are.
+   *
+   * @return a cleared result value that has no meaning other than the status.
    */
   public Result<Void> thenDiscardValue() {
     return this.isOk()
@@ -186,6 +194,9 @@ public final class Result<T> {
   }
 
   /**
+   * Return the value in this result if it is OK. If the result is not OK then return the
+   * given value instead.
+   *
    * @param ifNotOk value to use if not OK.
    * @return the value of this result if it was OK, or the result of the supplier otherwise.
    */
@@ -197,6 +208,9 @@ public final class Result<T> {
   }
 
   /**
+   * Return the value in this result if it is OK. If the result is not OK then invoke the given
+   * supplier and use that value instead.
+   *
    * @param ifNotOk supplier to perform to get some result if this result is not OK.
    * @return the value of this result if it was OK, or the result of the supplier otherwise.
    */
@@ -266,6 +280,8 @@ public final class Result<T> {
   }
 
   /**
+   * Generate an empty OK result.
+   *
    * @return an OK result that has no value.
    */
   public static Result<Void> ok() {
@@ -273,6 +289,8 @@ public final class Result<T> {
   }
 
   /**
+   * Generate an OK result with some value.
+   *
    * @return an OK result that has a value.
    */
   public static <T> Result<T> ok(T value) {
@@ -280,6 +298,8 @@ public final class Result<T> {
   }
 
   /**
+   * Generate a failed result.
+   *
    * @return a failed result with no value.
    */
   public static <T> Result<T> fail() {
@@ -287,6 +307,8 @@ public final class Result<T> {
   }
 
   /**
+   * Generate an ignored result.
+   *
    * @return an ignored result with no value.
    */
   public static <T> Result<T> ignore() {

@@ -37,11 +37,31 @@ public final class SettingsResolver {
   private final Elements elementUtils;
   private final Types typeUtils;
 
+  /**
+   * Initialize this resolver.
+   *
+   * @param elementUtils the element utilities to use for introspection.
+   * @param typeUtils    the type utilities to use for introspection.
+   */
   public SettingsResolver(Elements elementUtils, Types typeUtils) {
     this.elementUtils = elementUtils;
     this.typeUtils = typeUtils;
   }
 
+  /**
+   * Parse settings for a given annotated interface and model type mirror (i.e. {@link
+   * ImmutableModel} or {@link MutableModel}). Consider all superinterfaces and all super-packages
+   * with {@link Settings} on them, as well as the {@link Settings} within the model annotation
+   * itself.
+   *
+   * <p>Parse the settings using the generated schemas from the Maven build (see the groovy script)
+   * and collect them into a generated instance of {@link SettingsCollection}.
+   *
+   * @param interfaceElement the interface to generate the model from.
+   * @param annotationMirror the model annotation.
+   * @param mutable          true if a mutable model definition, false if immutable.
+   * @return an OK result containing the parsed settings, or a failed result if resolution failed.
+   */
   public Result<SettingsCollection> parseSettings(
       TypeElement interfaceElement,
       AnnotationMirror annotationMirror,
@@ -108,7 +128,7 @@ public final class SettingsResolver {
 
       T actualValue = possibleAnnotationValue
           .ifOkMap(AnnotationValue::getValue)
-          .ifOkMap(schema.getGenericType()::cast)
+          .ifOkMap(schema.getParameterizedTypeish()::cast)
           .unwrap();
 
       String description = "setting '" + schema.getName() + "' with"

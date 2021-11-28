@@ -9,6 +9,9 @@ package io.ascopes.katana.annotations.internal;
 public interface AttributeFeature {
 
   /**
+   * Determine whether the attribute feature would include all attributes implicitly
+   * by default.
+   *
    * @return true if the value represents "include all".
    */
   default boolean isIncludeAll() {
@@ -16,6 +19,9 @@ public interface AttributeFeature {
   }
 
   /**
+   * Determine whether the attribute feature would exclude all attributes implicitly
+   * by default.
+   *
    * @return true if the value represents "exclude all".
    */
   default boolean isExcludeAll() {
@@ -23,6 +29,8 @@ public interface AttributeFeature {
   }
 
   /**
+   * Determine whether the attribute feature would be explicitly skipped.
+   *
    * @return true if the value represents "disabled".
    */
   default boolean isDisabled() {

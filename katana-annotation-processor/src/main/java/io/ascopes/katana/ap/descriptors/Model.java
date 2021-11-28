@@ -106,13 +106,13 @@ public final class Model {
    */
   @Override
   public String toString() {
-    return "Model{" +
-        "packageName=" + StringUtils.quoted(this.packageName) + ", " +
-        "className=" + StringUtils.quoted(this.className) + ", " +
-        "attributes=" + this.attributes + ", " +
-        "superInterface=" + StringUtils.quoted(this.superInterface.getQualifiedName()) + ", " +
-        "mutable=" + this.mutable +
-        '}';
+    return "Model{"
+        + "packageName=" + StringUtils.quoted(this.packageName) + ", "
+        + "className=" + StringUtils.quoted(this.className) + ", "
+        + "attributes=" + this.attributes + ", "
+        + "superInterface=" + StringUtils.quoted(this.superInterface.getQualifiedName()) + ", "
+        + "mutable=" + this.mutable
+        + '}';
   }
 
   @MustCall("build")

@@ -25,12 +25,24 @@ public final class InterfaceSearcher {
   private final Diagnostics diagnostics;
   private final Logger logger;
 
+  /**
+   * Initialize this interface searcher.
+   *
+   * @param diagnostics the diagnostics to use.
+   */
   public InterfaceSearcher(Diagnostics diagnostics) {
     this.diagnostics = diagnostics;
     this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
-  public Stream<TypeElement> findAnnotatedInterfacesFor(
+  /**
+   * Find all model interfaces for a given model annotation type in the given round environment.
+   *
+   * @param annotationType the model annotation type to look for.
+   * @param roundEnv the round environment.
+   * @return a stream of all discovered interfaces.
+   */
+  public Stream<TypeElement> findAllInterfacesWithAnnotation(
       TypeElement annotationType,
       RoundEnvironment roundEnv
   ) {

@@ -17,9 +17,9 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
  * stream of unwrapped OK results, and this is then wrapped in an OK result state if everything
  * succeeds. If a failure is detected, then collection goes no further, results are dropped, and an
  * error result is provided instead.
- * <p>
- * An example usage of this type is to provide the transformation from a Stream of {@code Result<T>}
- * as the input to a Result of {@code Collection<T>} as the output.
+ *
+ * <p>An example usage of this type is to provide the transformation from a Stream of {@code
+ * Result<T>} as the input to a Result of {@code Collection<T>} as the output.
  *
  * @param <T> the type within the input results.
  * @param <C> the result of the input collector.
@@ -36,11 +36,17 @@ public final class ResultCollector<T, C>
     this.finalCollector = Objects.requireNonNull(finalCollector);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Supplier<ResultCollector<T, C>.State> supplier() {
     return State::new;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public BiConsumer<ResultCollector<T, C>.State, Result<T>> accumulator() {
     return (state, next) -> {
@@ -57,6 +63,9 @@ public final class ResultCollector<T, C>
     };
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public BinaryOperator<ResultCollector<T, C>.State> combiner() {
     return (firstState, secondState) -> {
@@ -71,6 +80,9 @@ public final class ResultCollector<T, C>
     };
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Function<ResultCollector<T, C>.State, Result<C>> finisher() {
     return state -> state.failed.get()
@@ -78,15 +90,17 @@ public final class ResultCollector<T, C>
         : Result.ok(state.builder.build().collect(this.finalCollector));
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Set<Characteristics> characteristics() {
     return Collections.singleton(Characteristics.UNORDERED);
   }
 
-  public static <T, C> ResultCollector<T, C> aggregating(Collector<T, ?, C> collector) {
-    return new ResultCollector<>(collector);
-  }
-
+  /**
+   * Internal class for keeping track of the state while it is being aggregated.
+   */
   public final class State {
 
     private final Stream.Builder<T> builder = Stream.builder();
@@ -95,5 +109,17 @@ public final class ResultCollector<T, C>
     private State() {
       // Internal detail only.
     }
+  }
+
+  /**
+   * Aggregate a stream of results into a single result of whatever the given collector provides.
+   *
+   * @param collector the collector to aggregate with.
+   * @param <T>       the input type.
+   * @param <C>       the output type.
+   * @return the collector.
+   */
+  public static <T, C> ResultCollector<T, C> aggregating(Collector<T, ?, C> collector) {
+    return new ResultCollector<>(collector);
   }
 }

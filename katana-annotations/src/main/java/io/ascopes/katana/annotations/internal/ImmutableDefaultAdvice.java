@@ -10,8 +10,8 @@ import java.lang.annotation.Target;
 /**
  * Marker for each annotation attribute within {@link Settings} to enable the specification of
  * global defaults for settings that apply to immutable types only.
- * <p>
- * This annotation does nothing outside the {@link Settings} class, and should not be used by
+ *
+ * <p>This annotation does nothing outside the {@link Settings} class, and should not be used by
  * users.
  *
  * @author Ashley Scopes

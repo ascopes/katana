@@ -54,12 +54,13 @@ public enum ToString implements CustomizableAttributeFeature {
   /**
    * Use custom implementations for the {@link Object#toString()}. This requires a static method to
    * be defined with the following signature:
-   * <p>
-   * <code>public static String asString(ThisInterface self)</code>
-   * <p>
-   * ...where {@code ThisInterface} is the name of the interface you are using this annotation in.
-   * <p>
-   * Not specifying this method is an error if you use this setting.
+   *
+   * <p><code>public static String asString(ThisInterface self)</code>
+   *
+   * <p>...where {@code ThisInterface} is the name of the interface you are using this annotation
+   * in.
+   *
+   * <p>Not specifying this method is an error if you use this setting.
    */
   CUSTOM {
     @Override

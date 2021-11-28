@@ -24,6 +24,12 @@ public final class SupertypeIterator implements StreamableIterator<TypeElement> 
   private final Queue<TypeElement> upcoming;
   private final TreeSet<TypeElement> seen;
 
+  /**
+   * Initialize this iterator.
+   *
+   * @param typeUtils the type utilities to use for introspection.
+   * @param root the type root to start at.
+   */
   public SupertypeIterator(Types typeUtils, TypeElement root) {
     this.typeUtils = typeUtils;
     this.upcoming = new LinkedList<>();
@@ -31,11 +37,17 @@ public final class SupertypeIterator implements StreamableIterator<TypeElement> 
     this.seen = new TreeSet<>(this::compareTypeElements);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean hasNext() {
     return !this.upcoming.isEmpty();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public TypeElement next() throws NoSuchElementException {
     @Nullable
@@ -56,6 +68,9 @@ public final class SupertypeIterator implements StreamableIterator<TypeElement> 
     return next;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int characteristics() {
     return Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.ORDERED;

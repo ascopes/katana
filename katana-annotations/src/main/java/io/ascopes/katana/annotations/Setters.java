@@ -10,11 +10,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Policy for generating setter methods on mutable models, and "wither" methods on immutable
- * models.
- * <p>
- * Wither methods are setters that return a new instance of the object they apply to, rather than
- * mutating the current object. In this respect, they are threadsafe.
+ * Policy for generating setter methods on mutable models.
+ *
+ * <p>This is ignored for immutable models (mutability on an immutable object is meaningless).
  *
  * @author Ashley Scopes
  * @since 0.0.1

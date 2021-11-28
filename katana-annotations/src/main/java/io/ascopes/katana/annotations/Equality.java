@@ -59,15 +59,16 @@ public enum Equality implements CustomizableAttributeFeature {
   /**
    * Use custom implementations for equality and identity. This requires two static methods to be
    * defined in your interface:
-   * <p>
+   *
    * <ol>
    *   <li><code>public static boolean isEqual(ThisInterface self, Object other)</code></li>
    *   <li><code>public static int hashCodeOf(ThisInterface self)</code></li>
    * </ol>
-   * <p>
-   * (where {@code ThisInterface} is the name of the interface you are using this annotation in).
-   * <p>
-   * Not specifying these methods is an error.
+   *
+   * <p>...where {@code ThisInterface} is the name of the interface you are using this annotation
+   * in.
+   *
+   * <p>Not specifying these methods is an error.
    */
   CUSTOM {
     @Override

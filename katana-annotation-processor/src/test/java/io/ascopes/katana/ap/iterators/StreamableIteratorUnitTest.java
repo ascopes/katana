@@ -1,17 +1,17 @@
 package io.ascopes.katana.ap.iterators;
 
-import static java.util.Spliterator.DISTINCT;
-import static java.util.Spliterator.NONNULL;
-import static java.util.Spliterator.ORDERED;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
+
+import static java.util.Spliterator.DISTINCT;
+import static java.util.Spliterator.NONNULL;
+import static java.util.Spliterator.ORDERED;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 class StreamableIteratorUnitTest {
 

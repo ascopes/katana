@@ -9,8 +9,6 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
  * Functional programming helpers.
- * <p>
- * Due to the complex nature of these functions, please keep them documented.
  *
  * @author Ashley Scopes
  * @since 0.0.1

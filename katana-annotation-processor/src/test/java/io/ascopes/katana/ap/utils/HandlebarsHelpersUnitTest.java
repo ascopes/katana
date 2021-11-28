@@ -13,13 +13,6 @@ class HandlebarsHelpersUnitTest {
 
   static Handlebars handlebars;
 
-  @BeforeAll
-  static void setUpAll() {
-    handlebars = new Handlebars()
-        .with(EscapingStrategy.NOOP)
-        .registerHelpers(HandlebarsHelpers.class);
-  }
-
   @ParameterizedTest
   @CsvSource({
       "hello world!,\"hello world!\"",
@@ -114,5 +107,12 @@ class HandlebarsHelpersUnitTest {
 
     BDDAssertions.then(actualOutput)
         .isEqualTo("I saw " + expectedOutput);
+  }
+
+  @BeforeAll
+  static void setUpAll() {
+    handlebars = new Handlebars()
+        .with(EscapingStrategy.NOOP)
+        .registerHelpers(HandlebarsHelpers.class);
   }
 }

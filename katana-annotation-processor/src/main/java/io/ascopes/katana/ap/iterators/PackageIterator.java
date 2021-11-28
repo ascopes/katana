@@ -9,8 +9,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Iterator across all parent packages for a given element.
- * <p>
- * This follows a bottom-up approach, and will thus include the empty unnamed package last.
+ *
+ * <p>This follows a bottom-up approach, and will thus include the empty unnamed package last.
  *
  * @author Ashley Scopes
  * @since 0.0.1
@@ -22,16 +22,28 @@ public final class PackageIterator implements StreamableIterator<PackageElement>
   @Nullable
   private PackageElement next;
 
+  /**
+   * Initialize this iterator.
+   *
+   * @param elementUtils the element utilities to use for introspection.
+   * @param start the first element to start from.
+   */
   public PackageIterator(Elements elementUtils, Element start) {
     this.elementUtils = elementUtils;
     this.next = elementUtils.getPackageOf(start);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean hasNext() {
     return this.next != null;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public PackageElement next() throws NoSuchElementException {
     PackageElement current = this.next;
@@ -61,6 +73,9 @@ public final class PackageIterator implements StreamableIterator<PackageElement>
     return current;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int characteristics() {
     return Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.ORDERED;

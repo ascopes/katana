@@ -24,10 +24,10 @@ public final class HandlebarsHelpers {
   }
 
   public static String a(String thing) {
-    return StringUtils.a(thing);
+    return StringUtils.prependAOrAn(thing);
   }
 
   public static String an(String thing) {
-    return StringUtils.a(thing);
+    return StringUtils.prependAOrAn(thing);
   }
 }

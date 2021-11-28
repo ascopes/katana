@@ -9,6 +9,13 @@ import java.lang.annotation.Target;
 /**
  * Annotation to specify the visibility of the underlying field for an attribute.
  *
+ * <p>It is usually not recommended changing this unless you have a good reason to, as it
+ * defeats the principle of using behaviours as a means of accessing and modifying information.
+ *
+ * <p>Fields are considered an implementation detail first and foremost within Katana, so this
+ * may also threaten stability of your builds if reliance on features such as volatility and
+ * final-ness are relied on.
+ *
  * @author Ashley Scopes
  * @since 0.0.1
  */
@@ -16,8 +23,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
 public @interface FieldVisibility {
+
   /**
-   * @return the visibility to use for this field.
+   * The visibility to use for this field.
+   *
+   * @return the visibility.
    */
   Visibility value();
 }

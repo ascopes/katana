@@ -48,7 +48,7 @@ class StringUtilsUnitTest {
       "zebra,a zebra",
   })
   void can_put_a_at_start_of_word(String input, String expectedOutput) {
-    BDDAssertions.then(StringUtils.a(input))
+    BDDAssertions.then(StringUtils.prependAOrAn(input))
         .isEqualTo(expectedOutput);
   }
 }

@@ -30,16 +30,16 @@ public final class BuilderStrategy {
     return this.toBuilderEnabled;
   }
 
-  public static Builder builder() {
-    return new Builder();
-  }
-
   @Override
   public String toString() {
     return "BuilderStrategy{" +
         "name=" + StringUtils.quoted(this.name) + ", " +
         "toBuilderEnabled=" + this.toBuilderEnabled +
         '}';
+  }
+
+  public static Builder builder() {
+    return new Builder();
   }
 
   // This is a BuilderStrategyBuilder, who says I can't use annoying names in my code?

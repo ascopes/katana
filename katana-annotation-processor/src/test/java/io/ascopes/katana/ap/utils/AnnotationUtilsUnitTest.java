@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 
 class AnnotationUtilsUnitTest {
+
   @Test
   void getAnnotationMirror_returns_the_first_annotation_mirror_when_matching() {
     // Given
@@ -97,7 +98,7 @@ class AnnotationUtilsUnitTest {
   }
 
   @Test
-  void getValue_returns_failure_when_not_found() {
+  void getValue_returns_not_ok_when_not_found() {
     // Given
     AnnotationMirror mirror = BDDMockito.mock(AnnotationMirror.class);
     Map<ExecutableElement, AnnotationValue> elementValues = new HashMap<>();
@@ -113,8 +114,8 @@ class AnnotationUtilsUnitTest {
     Result<? extends AnnotationValue> result = AnnotationUtils.getValue(mirror, "bork");
 
     // Then
-    BDDAssertions.then(result.isFailed())
-        .isTrue();
+    BDDAssertions.then(result.isOk())
+        .isFalse();
   }
 
   static MockAnnotationMirrorHolder mockAnnotationMirrorType(String name) {

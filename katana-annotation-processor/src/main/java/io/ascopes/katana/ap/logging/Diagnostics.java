@@ -8,7 +8,6 @@ import com.github.jknack.handlebars.helper.DefaultHelperRegistry;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import io.ascopes.katana.ap.utils.HandlebarsHelpers;
-import io.ascopes.katana.ap.utils.StringUtils;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -39,6 +38,11 @@ public final class Diagnostics {
   private final Messager messager;
   private final Handlebars handlebars;
 
+  /**
+   * Initialize this diagnostics helper.
+   *
+   * @param messager the diagnostics to initialize.
+   */
   public Diagnostics(Messager messager) {
     this.logger = LoggerFactory.loggerFor(this.getClass());
     this.messager = messager;
@@ -51,6 +55,18 @@ public final class Diagnostics {
         .with(EscapingStrategy.NOOP);
   }
 
+  /**
+   * Return a builder for a diagnostic message that will be sent to the compiler once completed.
+   *
+   * <p>If the kind is {@link Kind#ERROR}, the compilation will be aborted at some point before
+   * the process is killed.
+   *
+   * <p>Likewise, if the kind is {@link Kind#WARNING} or {@link Kind#MANDATORY_WARNING}, and
+   * {@code -Werror} is enabled on the compiler, then this will also result in the compilation
+   * aborting at some point before the process is killed.
+   *
+   * @return the builder.
+   */
   @MustCall("kind")
   public KindStage builder() {
     return this.builder(Thread.currentThread().getStackTrace()[2].getClassName());
@@ -61,60 +77,16 @@ public final class Diagnostics {
     return new MessageBuilder("/" + className.replace(".", "/"));
   }
 
-  public interface KindStage {
-
-    @MustCall("template")
-    ElementStage kind(Kind kind);
-  }
-
-  public interface ElementStage extends MessageStage {
-
-    @MustCall("template")
-    ElementStage element(@Nullable Element element);
-
-    @MustCall("template")
-    ElementStage annotationMirror(@Nullable AnnotationMirror annotationMirror);
-
-    @MustCall("template")
-    ElementStage annotationValue(@Nullable AnnotationValue annotationValue);
-
-  }
-
-  public interface MessageStage {
-
-    @MustCall({"log", "param"})
-    ParamsStage template(String template);
-  }
-
-  public interface ParamsStage extends FinishStage {
-
-    @MustCall("log")
-    ParamsStage param(String name, Object value);
-
-    @MustCall("log")
-    default ParamsStage param(String name, Throwable ex) {
-      StringWriter stringWriter = new StringWriter();
-      PrintWriter printWriter = new PrintWriter(stringWriter);
-      ex.printStackTrace(printWriter);
-      return this.param(name, stringWriter.toString());
-    }
-  }
-
-  public interface FinishStage {
-
-    void log();
-  }
-
   private final class MessageBuilder
       implements KindStage, ElementStage, MessageStage, ParamsStage, FinishStage {
 
     private final String directory;
+    private final Map<String, Object> params;
     private @MonotonicNonNull Kind kind;
     private @Nullable Element element;
     private @Nullable AnnotationMirror annotationMirror;
     private @Nullable AnnotationValue annotationValue;
     private @MonotonicNonNull String template;
-    private final Map<String, Object> params;
 
     private MessageBuilder(String directory) {
       this.directory = Objects.requireNonNull(directory);
@@ -183,6 +155,126 @@ public final class Diagnostics {
         Diagnostics.this.logger.error("Failed to generate template for diagnostics", ex);
       }
     }
+  }
+
+  /**
+   * Stage for the diagnostics builder which allows the specification of the diagnostic message kind
+   * to use.
+   */
+  public interface KindStage {
+
+    /**
+     * Set the kind of the message.
+     *
+     * @param kind the kind to use.
+     * @return the element-specification stage.
+     */
+    @MustCall("template")
+    ElementStage kind(Kind kind);
+  }
+
+  /**
+   * Stage for the diagnostics builder which allows the specification of an optional element,
+   * annotation mirror, and annotation value to show in compiler diagnostics.
+   *
+   * <p>This can be ignored and the message stage jumped to immediately (this also provides
+   * access to that stage).
+   */
+  public interface ElementStage extends MessageStage {
+
+    /**
+     * Set the element to show in diagnostics.
+     *
+     * @param element the element to show in diagnostics.
+     * @return this stage.
+     */
+    @MustCall("template")
+    ElementStage element(@Nullable Element element);
+
+    /**
+     * Set the annotation mirror to show in diagnostics.
+     *
+     * <p>If you call this, you also need to call {@link #element(Element)} otherwise the results
+     * are undefined.
+     *
+     * @param annotationMirror the annotation mirror to show in diagnostics.
+     * @return this stage.
+     */
+    @MustCall({"template", "element"})
+    ElementStage annotationMirror(@Nullable AnnotationMirror annotationMirror);
+
+    /**
+     * Set the annotation value to show in diagnostics.
+     *
+     * <p>If you call this, you also need to call {@link #annotationMirror(AnnotationMirror)}
+     * otherwise the results are undefined.
+     *
+     * @param annotationValue the annotation value to show in diagnostics.
+     * @return this stage.
+     */
+    @MustCall({"template", "element", "annotationMirror"})
+    ElementStage annotationValue(@Nullable AnnotationValue annotationValue);
+
+  }
+
+  /**
+   * Stage for the diagnostics builder which allows the specification of the template name to use.
+   */
+  public interface MessageStage {
+
+    /**
+     * Specify the handlebars template to render.
+     *
+     * @param template the template name to use. This should not include a file extension in the
+     *                 name (the actual file must have the {@code *.hbs} extension), and must be
+     *                 located in a classpath directory matching the package name, within a
+     *                 directory matching the name of the class this is being called from.
+     * @return the parameter specification stage.
+     */
+    @MustCall({"log", "param"})
+    ParamsStage template(String template);
+  }
+
+  /**
+   * Stage for the diagnostics builder which allows the specification of the parameters to render.
+   */
+  public interface ParamsStage extends FinishStage {
+
+    /**
+     * Add a parameter.
+     *
+     * @param name  the name of the parameter in the handlebars template.
+     * @param value the value of the parameter.
+     * @return this stage.
+     */
+    @MustCall("log")
+    ParamsStage param(String name, Object value);
+
+
+    /**
+     * Add a parameter as a stacktrace of a given exception.
+     *
+     * @param name the name of the parameter in the handlebars template.
+     * @param ex   the exception that should be rendered.
+     * @return this stage.
+     */
+    @MustCall("log")
+    default ParamsStage param(String name, Throwable ex) {
+      StringWriter stringWriter = new StringWriter();
+      PrintWriter printWriter = new PrintWriter(stringWriter);
+      ex.printStackTrace(printWriter);
+      return this.param(name, stringWriter.toString());
+    }
+  }
+
+  /**
+   * Final stage in message rendering.
+   */
+  public interface FinishStage {
+    /**
+     * Commit the rendered message to the compiler diagnostics.
+     */
+    void log();
   }
 
 }

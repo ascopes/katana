@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+  "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+  "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+  <!--
+    We purposely name the method a(String) and an(String) to make it appear fluently
+    readable in generated templates.
+  -->
+  <suppress files="HandlebarsHelpers.java" checks="MethodName"/>
+</suppressions>

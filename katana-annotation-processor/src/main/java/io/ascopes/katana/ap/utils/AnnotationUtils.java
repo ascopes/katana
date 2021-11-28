@@ -23,6 +23,13 @@ public final class AnnotationUtils {
     throw new UnsupportedOperationException("static-only class");
   }
 
+  /**
+   * Find an annotation mirror for the given annotation type on the given annotated element.
+   *
+   * @param annotatedElement the element to look for annotations on.
+   * @param annotationType   the annotation type to look for annotations that match.
+   * @return an OK result of the annotation, if found, otherwise an ignored result.
+   */
   public static Result<? extends AnnotationMirror> findAnnotationMirror(
       Element annotatedElement,
       TypeElement annotationType
@@ -43,6 +50,16 @@ public final class AnnotationUtils {
         .orElseGet(Result::ignore);
   }
 
+  /**
+   * Get a value for a given attribute from a given annotation mirror.
+   *
+   * <p>This ignores implicit default values. Only explicitly provided information will be
+   * considered here.
+   *
+   * @param mirror the mirror to look at.
+   * @param name the name of the attribute.
+   * @return the value of the attribute in an OK result, or an ignored result if not found.
+   */
   public static Result<? extends AnnotationValue> getValue(
       AnnotationMirror mirror,
       String name
@@ -58,6 +75,6 @@ public final class AnnotationUtils {
         .map(Entry::getValue)
         .findAny()
         .map(Result::ok)
-        .orElseGet(Result::fail);
+        .orElseGet(Result::ignore);
   }
 }

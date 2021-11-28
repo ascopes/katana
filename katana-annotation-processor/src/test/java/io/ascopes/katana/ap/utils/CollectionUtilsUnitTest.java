@@ -102,15 +102,15 @@ class CollectionUtilsUnitTest {
         .thenCode(() -> operation.accept(frozenMap.get("firstSet")))
         .isInstanceOf(UnsupportedOperationException.class);
   }
-  
+
   static <T extends Collection<Object>> Stream<Consumer<T>> mutableOperationsCollection() {
     return Stream
         .of(
             named("add", c -> c.add(new Object())),
             named("addAll", c -> c.addAll(Arrays.asList(new Object(), new Object()))),
             named("remove", c -> c.remove(new Object())),
-            named("removeAll", c-> c.removeAll(Collections.singletonList(1234))),
-            named("retainAll", c-> c.retainAll(Collections.singletonList(1234)))
+            named("removeAll", c -> c.removeAll(Collections.singletonList(1234))),
+            named("retainAll", c -> c.retainAll(Collections.singletonList(1234)))
         );
   }
 

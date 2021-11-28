@@ -8,8 +8,6 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
  * Utilities for naming processing and manipulation.
- * <p>
- * Due to the complex nature of these functions, please keep them documented.
  *
  * @author Ashley Scopes
  * @since 0.0.1
@@ -24,9 +22,9 @@ public final class NamingUtils {
 
   /**
    * Make a name suitable for use as an identifier, if it is not appropriate already.
-   * <p>
-   * This assumes the most recently supported language version. This may vary in behaviour depending
-   * on the JDK you use.
+   *
+   * <p>This assumes the most recently supported language version. This may vary in behaviour
+   * depending on the JDK you use.
    *
    * @param name the name to manipulate.
    * @return the identifier to use.
@@ -48,10 +46,10 @@ public final class NamingUtils {
    * @param method the method to convert.
    * @param prefix the prefix.
    * @return an ignored result if no name remains, or if the prefix is not present. Otherwise, the
-   * name is returned in an OK result.
+   *     name is returned in an OK result.
    */
-  // TODO(ascopes): unit tests
   public static Result<String> removePrefixCamelCase(ExecutableElement method, String prefix) {
+    // TODO(ascopes): unit tests
     String name = method.getSimpleName().toString();
     int prefixLength = prefix.length();
 
@@ -68,16 +66,17 @@ public final class NamingUtils {
   /**
    * Concatenate a prefix and a name together to make a method name. If the prefix is empty, then
    * the returned name will match a fluent naming style.
-   * <p>
-   * For example, {@code addPrefixCamelCase("get", "userName")} will return {@code "getUserName"},
-   * whereas {@code addPrefixCamelCase("", "userName")} would return {@code "userName"} instead.
+   *
+   * <p>For example, {@code addPrefixCamelCase("get", "userName")} will return
+   * {@code "getUserName"}, whereas {@code addPrefixCamelCase("", "userName")} would return {@code
+   * "userName"} instead.
    *
    * @param prefix the prefix to add to the name.
    * @param name   the name itself.
    * @return the camel-case method name.
    */
-  // TODO(ascopes): unit tests
   public static String addPrefixCamelCase(String prefix, String name) {
+    // TODO(ascopes): unit tests
     prefix = prefix.trim();
 
     // If there is no content, then it is likely a fluent method name, so don't transform
@@ -163,10 +162,12 @@ public final class NamingUtils {
   }
 
   private static void throwInvalidIdentifier(String name, String reason) {
+    // TODO: use StringUtils#quoted
     throw new IllegalArgumentException("name '" + name + "' " + reason);
   }
 
   private static void throwInvalidClassName(String name, String reason, Throwable cause) {
+    // TODO: use StringUtils#quoted
     throw new IllegalArgumentException(
         "invalid class name '" + name + "': " + reason,
         cause
@@ -174,6 +175,7 @@ public final class NamingUtils {
   }
 
   private static void throwInvalidPackageName(String name, String reason, Throwable cause) {
+    // TODO: use StringUtils#quoted
     throw new IllegalArgumentException(
         "invalid package name '" + name + "': " + reason,
         cause

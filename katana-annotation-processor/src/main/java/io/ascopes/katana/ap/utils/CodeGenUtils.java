@@ -22,6 +22,18 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
 @ReportCreation
 @ReportInherit
 public final class CodeGenUtils {
+
+  private CodeGenUtils() {
+    throw new UnsupportedOperationException("static-only class");
+  }
+
+  /**
+   * Get an array of 0 or 1 visibility modifiers to pass to JavaPoet from the given visibility
+   * flag.
+   *
+   * @param visibility the visibility flag.
+   * @return an array of 0 or 1 visibility modifiers.
+   */
   public static Modifier[] modifiers(Visibility visibility) {
     switch (visibility) {
       case PRIVATE:
@@ -37,14 +49,31 @@ public final class CodeGenUtils {
     }
   }
 
+  /**
+   * Generate an {@link Override} annotation spec.
+   *
+   * @return an {@link Override} annotation spec.
+   */
   public static AnnotationSpec override() {
     return AnnotationSpec.builder(Override.class).build();
   }
 
+  /**
+   * Copy an annotation mirror that contains a {@link Deprecated} annotation.
+   *
+   * @param annotationMirror the mirror containing the deprecation annotation.
+   * @return an annotation spec that mirrors the deprecated annotation mirror.
+   */
   public static AnnotationSpec copyDeprecatedFrom(AnnotationMirror annotationMirror) {
     return AnnotationSpec.get(annotationMirror);
   }
 
+  /**
+   * Create a {@link Generated} annotation spec to apply to generated models.
+   *
+   * @param modelInterface the model interface that the model was generated from.
+   * @return an annotation spec for a {@link Generated} annotation.
+   */
   public static AnnotationSpec generated(TypeElement modelInterface) {
     OffsetDateTime now = OffsetDateTime.now(Clock.systemDefaultZone());
     String nowString = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(now);
@@ -54,9 +83,5 @@ public final class CodeGenUtils {
         .addMember("date", "$S", nowString)
         .addMember("from", "$T.class", TypeName.get(modelInterface.asType()))
         .build();
-  }
-
-  private CodeGenUtils() {
-    throw new UnsupportedOperationException("static-only class");
   }
 }

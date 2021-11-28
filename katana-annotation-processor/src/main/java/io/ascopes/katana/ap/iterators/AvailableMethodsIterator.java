@@ -15,12 +15,9 @@ import javax.lang.model.util.Types;
 
 /**
  * Method iterator across the methods declared within a V-Table for an element type.
- * <p>
- * This considers methods in all supertypes and super interfaces, and will ignore any methods that
- * are actively overridden by a method in a more specific implementation.
- * <p>
- * <strong>Note: </strong> due to the nature of this implementation, the methods are eagerly
- * calculated during construction, rather than lazily as needed.
+ *
+ * <p>This considers methods in all supertypes and super interfaces, and will ignore any methods
+ * that are actively overridden by a method in a more specific implementation.
  *
  * @author Ashley Scopes
  * @since 0.0.1
@@ -30,6 +27,15 @@ public final class AvailableMethodsIterator implements StreamableIterator<Execut
   private final Types typeUtils;
   private final Iterator<ExecutableElement> iterator;
 
+  /**
+   * Initialize this iterator.
+   *
+   * <p><strong>Note: </strong> due to the nature of this implementation, the methods are eagerly
+   * calculated during construction, rather than lazily as needed.
+   *
+   * @param typeUtils the type utilities to use for introspection.
+   * @param root the type root to start at.
+   */
   public AvailableMethodsIterator(Types typeUtils, TypeElement root) {
     // TODO: make this lazy, somehow. If not, this might need profiling perhaps.
 
@@ -44,16 +50,25 @@ public final class AvailableMethodsIterator implements StreamableIterator<Execut
         .iterator();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean hasNext() {
     return this.iterator.hasNext();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public ExecutableElement next() throws NoSuchElementException {
     return this.iterator.next();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int characteristics() {
     return Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.ORDERED;

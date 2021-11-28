@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unused")
 abstract class CommonIncludeExcludeTestCases<A extends Annotation> extends TypeAware<A> {
+
   private final Class<A> annotation;
   private final Logger logger;
 

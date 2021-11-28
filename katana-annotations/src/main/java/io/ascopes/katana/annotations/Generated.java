@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 /**
  * A generated annotation to use, since OpenJDK have made it impossible to have a consistent
  * annotation for this between JDK 8 and JDK 9.
- * <p>
- * Generated Katana classes will use this annotation.
+ *
+ * <p>Generated Katana classes will use this annotation.
  *
  * @author Ashley Scopes
  * @since 0.0.1
@@ -38,7 +38,12 @@ public @interface Generated {
   String date();
 
   /**
-   * @return the interface that the model was created from.
+   * The interface that the model was created from.
+   *
+   * <p>This will always be one of the superinterfaces of the annotated type, but this allows
+   * certain tooling to easily determine the root immediately.
+   *
+   * @return the interface class.
    */
   Class<?> from();
 }

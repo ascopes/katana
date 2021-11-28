@@ -96,7 +96,7 @@ public final class KatanaProcessor extends AbstractProcessor {
         this.processingEnv.getTypeUtils()
     );
 
-    InterfaceSearcher interfaceSearcher = new InterfaceSearcher(diagnostics);
+    this.interfaceSearcher = new InterfaceSearcher(diagnostics);
 
     AttributeFeatureInclusionManager attributeFeatureInclusionManager =
         new AttributeFeatureInclusionManager(
@@ -109,7 +109,7 @@ public final class KatanaProcessor extends AbstractProcessor {
         this.processingEnv.getElementUtils()
     );
 
-    ModelFactory modelFactory = new ModelFactory(
+    this.modelFactory = new ModelFactory(
         settingsResolver,
         methodClassifier,
         attributeFactory,
@@ -117,17 +117,13 @@ public final class KatanaProcessor extends AbstractProcessor {
         this.processingEnv.getElementUtils()
     );
 
-    JavaModelFactory javaModelFactory = new JavaModelFactory();
+    this.javaModelFactory = new JavaModelFactory();
 
-    JavaFileWriter javaFileWriter = new JavaFileWriter(
+    this.javaFileWriter = new JavaFileWriter(
         this.processingEnv.getFiler(),
         diagnostics
     );
 
-    this.interfaceSearcher = interfaceSearcher;
-    this.modelFactory = modelFactory;
-    this.javaModelFactory = javaModelFactory;
-    this.javaFileWriter = javaFileWriter;
   }
 
   @Override
@@ -190,7 +186,7 @@ public final class KatanaProcessor extends AbstractProcessor {
   ) {
     return this
         .interfaceSearcher
-        .findAnnotatedInterfacesFor(annotationType, roundEnv)
+        .findAllInterfacesWithAnnotation(annotationType, roundEnv)
         .map(interfaceType -> this.modelFactory.create(annotationType, interfaceType));
   }
 

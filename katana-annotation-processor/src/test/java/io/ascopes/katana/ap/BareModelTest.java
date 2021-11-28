@@ -1,12 +1,12 @@
 package io.ascopes.katana.ap;
 
-import static com.google.testing.compile.CompilationSubject.assertThat;
-import static com.google.testing.compile.JavaFileObjects.forSourceLines;
-
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static com.google.testing.compile.CompilationSubject.assertThat;
+import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 
 class BareModelTest {
 

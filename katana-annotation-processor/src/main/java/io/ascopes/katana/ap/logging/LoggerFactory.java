@@ -14,8 +14,8 @@ import java.util.stream.Stream;
  * Singleton provider of loggers. While I could have used something like Logback, that massively
  * increases the initialization time of this annotation processor, and logging is usually just here
  * for my sanity checks, so there is little benefit in doing so.
- * <p>
- * While I had considered JUL logging, that requires other faff to initialize it which may be
+ *
+ * <p>While I had considered JUL logging, that requires other faff to initialize it which may be
  * influenced by stuff in the user's {@code src/main/resources} used for their application.
  * Therefore, to prevent further side effects, I have implemented a basic shim myself instead that
  * loosely resembles the SLF4J API, somewhat.
@@ -29,9 +29,9 @@ public final class LoggerFactory {
   private static volatile LoggerFactory instance = null;
 
   private final RuntimeMXBean runtimeMxBean;
-  private volatile LoggingLevel globalLevel;
   private final PrintStream outputStream;
   private final Clock clock;
+  private volatile LoggingLevel globalLevel;
 
   private LoggerFactory() {
     this.runtimeMxBean = ManagementFactory.getRuntimeMXBean();
@@ -52,16 +52,16 @@ public final class LoggerFactory {
       StringBuilder messageBuilder = new StringBuilder();
       int size = format.length();
       int argumentIndex = 0;
-      char cCurr;
-      char cNext;
+      char currentChar;
+      char nextChar;
       for (int formatIndex = 0; formatIndex < size; ++formatIndex) {
-        cCurr = format.charAt(formatIndex);
-        cNext = formatIndex + 1 == size
+        currentChar = format.charAt(formatIndex);
+        nextChar = formatIndex + 1 == size
             ? '\0'
             : format.charAt(formatIndex + 1);
-        if (cCurr != '{' && cNext != '}') {
-          messageBuilder.append(cCurr);
-          if (cCurr == '\n') {
+        if (currentChar != '{' && nextChar != '}') {
+          messageBuilder.append(currentChar);
+          if (currentChar == '\n') {
             // Indent additional lines.
             messageBuilder.append("    ");
           }
@@ -75,15 +75,14 @@ public final class LoggerFactory {
       message = messageBuilder.toString();
     }
 
-    this.outputStream
-        .printf(
-            "[ %6s ] %s (up %.3fs) - %s - %s%n",
-            level.name(),
-            LocalDateTime.now(this.clock),
-            this.runtimeMxBean.getUptime() / 1_000.0,
-            name,
-            message
-        );
+    this.outputStream.printf(
+        "[ %6s ] %s (up %.3fs) - %s - %s%n",
+        level.name(),
+        LocalDateTime.now(this.clock),
+        this.runtimeMxBean.getUptime() / 1_000.0,
+        name,
+        message
+    );
   }
 
   private final class LoggerImpl implements Logger {
@@ -128,19 +127,30 @@ public final class LoggerFactory {
     }
   }
 
+  /**
+   * Return a logger for a given class.
+   *
+   * @param targetClass the class to return the logger for.
+   * @return the logger.
+   */
   public static Logger loggerFor(Class<?> targetClass) {
     return getInstance().new LoggerImpl(targetClass.getCanonicalName());
   }
 
-  public static void globalLevel(String level) {
+  /**
+   * Set the global logging level to use.
+   *
+   * @param level the level to set, as a string.
+   * @throws IllegalArgumentException if the logging level cannot be parsed.
+   */
+  public static void globalLevel(String level) throws IllegalArgumentException {
     try {
       globalLevel(LoggingLevel.parse(level));
     } catch (IllegalArgumentException ex) {
-      String validLevelsList =
-          Stream
-              .of(LoggingLevel.values())
-              .map(StringUtils::quoted)
-              .collect(Collectors.joining(", "));
+      String validLevelsList = Stream
+          .of(LoggingLevel.values())
+          .map(StringUtils::quoted)
+          .collect(Collectors.joining(", "));
 
       String message = "Invalid logging level "
           + StringUtils.quoted(level)
@@ -151,6 +161,11 @@ public final class LoggerFactory {
     }
   }
 
+  /**
+   * Set the global logging level to use.
+   *
+   * @param level the level to set.
+   */
   public static void globalLevel(LoggingLevel level) {
     getInstance().globalLevel = Objects.requireNonNull(level);
   }
