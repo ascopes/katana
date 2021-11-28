@@ -15,7 +15,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.BDDMockito;
 
-class ResultTest {
+class ResultUnitTest {
 
   @Test
   void can_unwrap_ok_result() {

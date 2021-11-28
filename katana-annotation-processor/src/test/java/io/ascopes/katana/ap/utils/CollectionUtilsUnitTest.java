@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class CollectionUtilsTest {
+class CollectionUtilsUnitTest {
 
   @Test
   void freezeSet_fails_if_null() {

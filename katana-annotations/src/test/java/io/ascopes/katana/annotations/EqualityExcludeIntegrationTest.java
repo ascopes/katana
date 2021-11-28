@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
 
-class SettersExcludeTest {
+class EqualityExcludeIntegrationTest {
 
   @Test
-  void Setters_Exclude_is_not_repeatable() {
+  void Equality_Exclude_is_not_repeatable() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -22,10 +22,10 @@ class SettersExcludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
-            "@Setters.Exclude",
-            "@Setters.Exclude",
+            "@Equality.Exclude",
+            "@Equality.Exclude",
             "public interface User {",
             "  String getPrincipal();",
             "  String getCredential();",
@@ -40,7 +40,7 @@ class SettersExcludeTest {
   }
 
   @Test
-  void Setters_Exclude_cannot_be_applied_to_type() {
+  void Equality_Exclude_cannot_be_applied_to_type() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -50,9 +50,9 @@ class SettersExcludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
-            "@Setters.Exclude",
+            "@Equality.Exclude",
             "public interface User {",
             "  String getPrincipal();",
             "  String getCredential();",
@@ -69,7 +69,7 @@ class SettersExcludeTest {
   }
 
   @Test
-  void Setters_Exclude_cannot_be_applied_to_annotation_type() {
+  void Equality_Exclude_cannot_be_applied_to_annotation_type() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -79,9 +79,9 @@ class SettersExcludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
-            "@Setters.Exclude",
+            "@Equality.Exclude",
             "public @interface Foo {",
             "}"
         ));
@@ -95,16 +95,16 @@ class SettersExcludeTest {
   }
 
   @Test
-  void Setters_Exclude_cannot_be_applied_to_package() {
+  void Equality_Exclude_cannot_be_applied_to_package() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
             "com.somecompany.userapi.models.package-info",
             "",
-            "@Setters.Exclude",
+            "@Equality.Exclude",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Setters;"
+            "import io.ascopes.katana.annotations.Equality;"
         ));
 
     assertThat(result)
@@ -116,7 +116,7 @@ class SettersExcludeTest {
   }
 
   @Test
-  void Setters_Exclude_cannot_be_applied_to_constructor() {
+  void Equality_Exclude_cannot_be_applied_to_constructor() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -124,10 +124,10 @@ class SettersExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
             "public class User {",
-            "  @Setters.Exclude",
+            "  @Equality.Exclude",
             "  public User() {",
             "  }",
             "}"
@@ -142,7 +142,7 @@ class SettersExcludeTest {
   }
 
   @Test
-  void Setters_Exclude_can_be_applied_to_method() {
+  void Equality_Exclude_can_be_applied_to_method() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -150,10 +150,10 @@ class SettersExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
             "public class User {",
-            "  @Setters.Exclude",
+            "  @Equality.Exclude",
             "  public String getPrincipal() {",
             "    return \"Steve\";",
             "  }",
@@ -164,7 +164,7 @@ class SettersExcludeTest {
   }
 
   @Test
-  void Setters_Exclude_cannot_be_applied_to_field() {
+  void Equality_Exclude_cannot_be_applied_to_field() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -172,10 +172,10 @@ class SettersExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
             "public class User {",
-            "  @Setters.Exclude",
+            "  @Equality.Exclude",
             "  private String principal;",
             "}"
         ));
@@ -189,7 +189,7 @@ class SettersExcludeTest {
   }
 
   @Test
-  void Setters_Exclude_cannot_be_applied_to_parameter() {
+  void Equality_Exclude_cannot_be_applied_to_parameter() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -197,12 +197,12 @@ class SettersExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
             "public class User {",
             "  private String principal;",
             "",
-            "  public void setPrincipal(@Setters.Exclude String principal) {",
+            "  public void setPrincipal(@Equality.Exclude String principal) {",
             "    this.principal = principal;",
             "  }",
             "}"
@@ -217,7 +217,7 @@ class SettersExcludeTest {
   }
 
   @Test
-  void Setters_Exclude_cannot_be_applied_to_type_argument() {
+  void Equality_Exclude_cannot_be_applied_to_type_argument() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -228,9 +228,9 @@ class SettersExcludeTest {
             "import java.util.Iterator;",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
-            "public class User implements Iterable<@Setters.Exclude String> {",
+            "public class User implements Iterable<@Equality.Exclude String> {",
             "  private SortedSet<String> authorities;",
             "",
             "  @Override",
@@ -249,7 +249,7 @@ class SettersExcludeTest {
   }
 
   @Test
-  void Setters_Exclude_cannot_be_applied_to_type_use() {
+  void Equality_Exclude_cannot_be_applied_to_type_use() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -257,13 +257,13 @@ class SettersExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
             "public class User {",
             "",
             "  @Override",
             "  public String toString() {",
-            "    @Setters.Exclude",
+            "    @Equality.Exclude",
             "    StringBuilder sb = new StringBuilder();",
             "",
             "    sb.append(\"User{}\");",
@@ -283,7 +283,7 @@ class SettersExcludeTest {
 
   @EnabledForJreRange(min = JRE.JAVA_16)
   @Test
-  void Setters_Exclude_cannot_be_applied_to_record_type() {
+  void Equality_Exclude_cannot_be_applied_to_record_type() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -293,9 +293,9 @@ class SettersExcludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
-            "@Setters.Exclude",
+            "@Equality.Exclude",
             "public record User(String principal, String credential, SortedSet<String> authorities) {",
             "}"
         ));

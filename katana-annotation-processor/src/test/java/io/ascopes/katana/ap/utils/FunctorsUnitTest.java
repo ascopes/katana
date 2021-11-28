@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
-class FunctorsTest {
+class FunctorsUnitTest {
 
   @Test
   void removeEmpties_removes_empty_optionals() {

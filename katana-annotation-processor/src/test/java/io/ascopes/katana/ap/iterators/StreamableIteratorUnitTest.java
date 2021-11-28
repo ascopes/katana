@@ -13,7 +13,7 @@ import java.util.Spliterator;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
-class StreamableIteratorTest {
+class StreamableIteratorUnitTest {
 
   @Test
   void spliterator_returns_valid_spliterator() {

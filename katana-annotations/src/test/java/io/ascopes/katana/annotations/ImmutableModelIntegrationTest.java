@@ -7,7 +7,7 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import org.junit.jupiter.api.Test;
 
-class ImmutableModelTest {
+class ImmutableModelIntegrationTest {
 
   @Test
   void ImmutableModel_can_be_applied_to_interface_without_explicit_settings() {

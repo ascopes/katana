@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
 
-class EqualityExcludeTest {
+class ToStringIncludeIntegrationTest {
 
   @Test
-  void Equality_Exclude_is_not_repeatable() {
+  void ToString_Include_is_not_repeatable() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -22,10 +22,10 @@ class EqualityExcludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Equality;",
+            "import io.ascopes.katana.annotations.ToString;",
             "",
-            "@Equality.Exclude",
-            "@Equality.Exclude",
+            "@ToString.Include",
+            "@ToString.Include",
             "public interface User {",
             "  String getPrincipal();",
             "  String getCredential();",
@@ -40,7 +40,7 @@ class EqualityExcludeTest {
   }
 
   @Test
-  void Equality_Exclude_cannot_be_applied_to_type() {
+  void ToString_Include_cannot_be_applied_to_type() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -50,9 +50,9 @@ class EqualityExcludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Equality;",
+            "import io.ascopes.katana.annotations.ToString;",
             "",
-            "@Equality.Exclude",
+            "@ToString.Include",
             "public interface User {",
             "  String getPrincipal();",
             "  String getCredential();",
@@ -69,7 +69,7 @@ class EqualityExcludeTest {
   }
 
   @Test
-  void Equality_Exclude_cannot_be_applied_to_annotation_type() {
+  void ToString_Include_cannot_be_applied_to_annotation_type() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -79,9 +79,9 @@ class EqualityExcludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Equality;",
+            "import io.ascopes.katana.annotations.ToString;",
             "",
-            "@Equality.Exclude",
+            "@ToString.Include",
             "public @interface Foo {",
             "}"
         ));
@@ -95,16 +95,16 @@ class EqualityExcludeTest {
   }
 
   @Test
-  void Equality_Exclude_cannot_be_applied_to_package() {
+  void ToString_Include_cannot_be_applied_to_package() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
             "com.somecompany.userapi.models.package-info",
             "",
-            "@Equality.Exclude",
+            "@ToString.Include",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Equality;"
+            "import io.ascopes.katana.annotations.ToString;"
         ));
 
     assertThat(result)
@@ -116,7 +116,7 @@ class EqualityExcludeTest {
   }
 
   @Test
-  void Equality_Exclude_cannot_be_applied_to_constructor() {
+  void ToString_Include_cannot_be_applied_to_constructor() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -124,10 +124,10 @@ class EqualityExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Equality;",
+            "import io.ascopes.katana.annotations.ToString;",
             "",
             "public class User {",
-            "  @Equality.Exclude",
+            "  @ToString.Include",
             "  public User() {",
             "  }",
             "}"
@@ -142,7 +142,7 @@ class EqualityExcludeTest {
   }
 
   @Test
-  void Equality_Exclude_can_be_applied_to_method() {
+  void ToString_Include_can_be_applied_to_method() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -150,10 +150,10 @@ class EqualityExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Equality;",
+            "import io.ascopes.katana.annotations.ToString;",
             "",
             "public class User {",
-            "  @Equality.Exclude",
+            "  @ToString.Include",
             "  public String getPrincipal() {",
             "    return \"Steve\";",
             "  }",
@@ -164,7 +164,7 @@ class EqualityExcludeTest {
   }
 
   @Test
-  void Equality_Exclude_cannot_be_applied_to_field() {
+  void ToString_Include_cannot_be_applied_to_field() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -172,10 +172,10 @@ class EqualityExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Equality;",
+            "import io.ascopes.katana.annotations.ToString;",
             "",
             "public class User {",
-            "  @Equality.Exclude",
+            "  @ToString.Include",
             "  private String principal;",
             "}"
         ));
@@ -189,7 +189,7 @@ class EqualityExcludeTest {
   }
 
   @Test
-  void Equality_Exclude_cannot_be_applied_to_parameter() {
+  void ToString_Include_cannot_be_applied_to_parameter() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -197,12 +197,12 @@ class EqualityExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Equality;",
+            "import io.ascopes.katana.annotations.ToString;",
             "",
             "public class User {",
             "  private String principal;",
             "",
-            "  public void setPrincipal(@Equality.Exclude String principal) {",
+            "  public void setPrincipal(@ToString.Include String principal) {",
             "    this.principal = principal;",
             "  }",
             "}"
@@ -217,7 +217,7 @@ class EqualityExcludeTest {
   }
 
   @Test
-  void Equality_Exclude_cannot_be_applied_to_type_argument() {
+  void ToString_Include_cannot_be_applied_to_type_argument() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -228,9 +228,9 @@ class EqualityExcludeTest {
             "import java.util.Iterator;",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Equality;",
+            "import io.ascopes.katana.annotations.ToString;",
             "",
-            "public class User implements Iterable<@Equality.Exclude String> {",
+            "public class User implements Iterable<@ToString.Include String> {",
             "  private SortedSet<String> authorities;",
             "",
             "  @Override",
@@ -249,7 +249,7 @@ class EqualityExcludeTest {
   }
 
   @Test
-  void Equality_Exclude_cannot_be_applied_to_type_use() {
+  void ToString_Include_cannot_be_applied_to_type_use() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -257,13 +257,13 @@ class EqualityExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Equality;",
+            "import io.ascopes.katana.annotations.ToString;",
             "",
             "public class User {",
             "",
             "  @Override",
             "  public String toString() {",
-            "    @Equality.Exclude",
+            "    @ToString.Include",
             "    StringBuilder sb = new StringBuilder();",
             "",
             "    sb.append(\"User{}\");",
@@ -283,7 +283,7 @@ class EqualityExcludeTest {
 
   @EnabledForJreRange(min = JRE.JAVA_16)
   @Test
-  void Equality_Exclude_cannot_be_applied_to_record_type() {
+  void ToString_Include_cannot_be_applied_to_record_type() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -293,9 +293,9 @@ class EqualityExcludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Equality;",
+            "import io.ascopes.katana.annotations.ToString;",
             "",
-            "@Equality.Exclude",
+            "@ToString.Include",
             "public record User(String principal, String credential, SortedSet<String> authorities) {",
             "}"
         ));
@@ -307,5 +307,4 @@ class EqualityExcludeTest {
     assertThat(result)
         .hadErrorContaining("not applicable");
   }
-
 }

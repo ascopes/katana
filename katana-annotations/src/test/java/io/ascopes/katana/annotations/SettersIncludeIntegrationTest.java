@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
 
-class ToStringIncludeTest {
+class SettersIncludeIntegrationTest {
 
   @Test
-  void ToString_Include_is_not_repeatable() {
+  void Setters_Include_is_not_repeatable() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -22,10 +22,10 @@ class ToStringIncludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.Setters;",
             "",
-            "@ToString.Include",
-            "@ToString.Include",
+            "@Setters.Include",
+            "@Setters.Include",
             "public interface User {",
             "  String getPrincipal();",
             "  String getCredential();",
@@ -40,7 +40,7 @@ class ToStringIncludeTest {
   }
 
   @Test
-  void ToString_Include_cannot_be_applied_to_type() {
+  void Setters_Include_cannot_be_applied_to_type() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -50,9 +50,9 @@ class ToStringIncludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.Setters;",
             "",
-            "@ToString.Include",
+            "@Setters.Include",
             "public interface User {",
             "  String getPrincipal();",
             "  String getCredential();",
@@ -69,7 +69,7 @@ class ToStringIncludeTest {
   }
 
   @Test
-  void ToString_Include_cannot_be_applied_to_annotation_type() {
+  void Setters_Include_cannot_be_applied_to_annotation_type() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -79,9 +79,9 @@ class ToStringIncludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.Setters;",
             "",
-            "@ToString.Include",
+            "@Setters.Include",
             "public @interface Foo {",
             "}"
         ));
@@ -95,16 +95,16 @@ class ToStringIncludeTest {
   }
 
   @Test
-  void ToString_Include_cannot_be_applied_to_package() {
+  void Setters_Include_cannot_be_applied_to_package() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
             "com.somecompany.userapi.models.package-info",
             "",
-            "@ToString.Include",
+            "@Setters.Include",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.ToString;"
+            "import io.ascopes.katana.annotations.Setters;"
         ));
 
     assertThat(result)
@@ -116,7 +116,7 @@ class ToStringIncludeTest {
   }
 
   @Test
-  void ToString_Include_cannot_be_applied_to_constructor() {
+  void Setters_Include_cannot_be_applied_to_constructor() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -124,10 +124,10 @@ class ToStringIncludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.Setters;",
             "",
             "public class User {",
-            "  @ToString.Include",
+            "  @Setters.Include",
             "  public User() {",
             "  }",
             "}"
@@ -142,7 +142,7 @@ class ToStringIncludeTest {
   }
 
   @Test
-  void ToString_Include_can_be_applied_to_method() {
+  void Setters_Include_can_be_applied_to_method() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -150,10 +150,10 @@ class ToStringIncludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.Setters;",
             "",
             "public class User {",
-            "  @ToString.Include",
+            "  @Setters.Include",
             "  public String getPrincipal() {",
             "    return \"Steve\";",
             "  }",
@@ -164,7 +164,7 @@ class ToStringIncludeTest {
   }
 
   @Test
-  void ToString_Include_cannot_be_applied_to_field() {
+  void Setters_Include_cannot_be_applied_to_field() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -172,10 +172,10 @@ class ToStringIncludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.Setters;",
             "",
             "public class User {",
-            "  @ToString.Include",
+            "  @Setters.Include",
             "  private String principal;",
             "}"
         ));
@@ -189,7 +189,7 @@ class ToStringIncludeTest {
   }
 
   @Test
-  void ToString_Include_cannot_be_applied_to_parameter() {
+  void Setters_Include_cannot_be_applied_to_parameter() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -197,12 +197,12 @@ class ToStringIncludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.Setters;",
             "",
             "public class User {",
             "  private String principal;",
             "",
-            "  public void setPrincipal(@ToString.Include String principal) {",
+            "  public void setPrincipal(@Setters.Include String principal) {",
             "    this.principal = principal;",
             "  }",
             "}"
@@ -217,7 +217,7 @@ class ToStringIncludeTest {
   }
 
   @Test
-  void ToString_Include_cannot_be_applied_to_type_argument() {
+  void Setters_Include_cannot_be_applied_to_type_argument() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -228,9 +228,9 @@ class ToStringIncludeTest {
             "import java.util.Iterator;",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.Setters;",
             "",
-            "public class User implements Iterable<@ToString.Include String> {",
+            "public class User implements Iterable<@Setters.Include String> {",
             "  private SortedSet<String> authorities;",
             "",
             "  @Override",
@@ -249,7 +249,7 @@ class ToStringIncludeTest {
   }
 
   @Test
-  void ToString_Include_cannot_be_applied_to_type_use() {
+  void Setters_Include_cannot_be_applied_to_type_use() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -257,13 +257,13 @@ class ToStringIncludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.Setters;",
             "",
             "public class User {",
             "",
             "  @Override",
             "  public String toString() {",
-            "    @ToString.Include",
+            "    @Setters.Include",
             "    StringBuilder sb = new StringBuilder();",
             "",
             "    sb.append(\"User{}\");",
@@ -283,7 +283,7 @@ class ToStringIncludeTest {
 
   @EnabledForJreRange(min = JRE.JAVA_16)
   @Test
-  void ToString_Include_cannot_be_applied_to_record_type() {
+  void Setters_Include_cannot_be_applied_to_record_type() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -293,9 +293,9 @@ class ToStringIncludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.Setters;",
             "",
-            "@ToString.Include",
+            "@Setters.Include",
             "public record User(String principal, String credential, SortedSet<String> authorities) {",
             "}"
         ));
@@ -308,3 +308,4 @@ class ToStringIncludeTest {
         .hadErrorContaining("not applicable");
   }
 }
+

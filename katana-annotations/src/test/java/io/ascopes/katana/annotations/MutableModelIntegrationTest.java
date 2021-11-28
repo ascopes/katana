@@ -6,13 +6,11 @@ import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledForJreRange;
-import org.junit.jupiter.api.condition.JRE;
 
-class ToStringExcludeTest {
+class MutableModelIntegrationTest {
 
   @Test
-  void ToString_Exclude_is_not_repeatable() {
+  void MutableModel_can_be_applied_to_interface_without_explicit_settings() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -22,10 +20,59 @@ class ToStringExcludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.MutableModel;",
             "",
-            "@ToString.Exclude",
-            "@ToString.Exclude",
+            "@MutableModel",
+            "public interface User {",
+            "  String getPrincipal();",
+            "  String getCredential();",
+            "  SortedSet<String> getAuthorities();",
+            "}"
+        ));
+
+    assertThat(result).succeededWithoutWarnings();
+  }
+
+  @Test
+  void MutableModel_can_be_applied_to_interface_with_explicit_settings() {
+    Compilation result = Compiler
+        .javac()
+        .compile(forSourceLines(
+            "com.somecompany.userapi.models.User",
+            "",
+            "package com.somecompany.userapi.models;",
+            "",
+            "import java.util.SortedSet;",
+            "",
+            "import io.ascopes.katana.annotations.MutableModel;",
+            "import io.ascopes.katana.annotations.Settings;",
+            "",
+            "@MutableModel(@Settings)",
+            "public interface User {",
+            "  String getPrincipal();",
+            "  String getCredential();",
+            "  SortedSet<String> getAuthorities();",
+            "}"
+        ));
+
+    assertThat(result).succeededWithoutWarnings();
+  }
+
+  @Test
+  void MutableModel_is_not_repeatable() {
+    Compilation result = Compiler
+        .javac()
+        .compile(forSourceLines(
+            "com.somecompany.userapi.models.User",
+            "",
+            "package com.somecompany.userapi.models;",
+            "",
+            "import java.util.SortedSet;",
+            "",
+            "import io.ascopes.katana.annotations.MutableModel;",
+            "",
+            "@MutableModel",
+            "@MutableModel",
             "public interface User {",
             "  String getPrincipal();",
             "  String getCredential();",
@@ -35,88 +82,31 @@ class ToStringExcludeTest {
 
     assertThat(result)
         .failed();
+    assertThat(result)
+        .hadErrorCount(1);
     assertThat(result)
         .hadErrorContainingMatch("not (a )?repeat");
   }
 
   @Test
-  void ToString_Exclude_cannot_be_applied_to_type() {
-    Compilation result = Compiler
-        .javac()
-        .compile(forSourceLines(
-            "com.somecompany.userapi.models.User",
-            "",
-            "package com.somecompany.userapi.models;",
-            "",
-            "import java.util.SortedSet;",
-            "",
-            "import io.ascopes.katana.annotations.ToString;",
-            "",
-            "@ToString.Exclude",
-            "public interface User {",
-            "  String getPrincipal();",
-            "  String getCredential();",
-            "  SortedSet<String> getAuthorities();",
-            "}"
-        ));
-
-    assertThat(result)
-        .failed();
-    assertThat(result)
-        .hadErrorCount(1);
-    assertThat(result)
-        .hadErrorContaining("not applicable");
-  }
-
-  @Test
-  void ToString_Exclude_cannot_be_applied_to_annotation_type() {
-    Compilation result = Compiler
-        .javac()
-        .compile(forSourceLines(
-            "com.somecompany.userapi.models.Foo",
-            "",
-            "package com.somecompany.userapi.models;",
-            "",
-            "import java.util.SortedSet;",
-            "",
-            "import io.ascopes.katana.annotations.ToString;",
-            "",
-            "@ToString.Exclude",
-            "public @interface Foo {",
-            "}"
-        ));
-
-    assertThat(result)
-        .failed();
-    assertThat(result)
-        .hadErrorCount(1);
-    assertThat(result)
-        .hadErrorContaining("not applicable");
-  }
-
-  @Test
-  void ToString_Exclude_cannot_be_applied_to_package() {
+  void MutableModel_can_be_applied_to_package() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
             "com.somecompany.userapi.models.package-info",
             "",
-            "@ToString.Exclude",
+            "@MutableModel",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.ToString;"
+            "import io.ascopes.katana.annotations.MutableModel;"
         ));
 
     assertThat(result)
-        .failed();
-    assertThat(result)
-        .hadErrorCount(1);
-    assertThat(result)
-        .hadErrorContaining("not applicable");
+        .succeededWithoutWarnings();
   }
 
   @Test
-  void ToString_Exclude_cannot_be_applied_to_constructor() {
+  void MutableModel_cannot_be_applied_to_constructor() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -124,10 +114,10 @@ class ToStringExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.MutableModel;",
             "",
             "public class User {",
-            "  @ToString.Exclude",
+            "  @MutableModel",
             "  public User() {",
             "  }",
             "}"
@@ -142,7 +132,7 @@ class ToStringExcludeTest {
   }
 
   @Test
-  void ToString_Exclude_can_be_applied_to_method() {
+  void MutableModel_cannot_be_applied_to_method() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -150,21 +140,26 @@ class ToStringExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.MutableModel;",
             "",
             "public class User {",
-            "  @ToString.Exclude",
+            "  @MutableModel",
             "  public String getPrincipal() {",
             "    return \"Steve\";",
             "  }",
             "}"
         ));
 
-    assertThat(result).succeeded();
+    assertThat(result)
+        .failed();
+    assertThat(result)
+        .hadErrorCount(1);
+    assertThat(result)
+        .hadErrorContaining("not applicable");
   }
 
   @Test
-  void ToString_Exclude_cannot_be_applied_to_field() {
+  void MutableModel_cannot_be_applied_to_field() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -172,10 +167,10 @@ class ToStringExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.MutableModel;",
             "",
             "public class User {",
-            "  @ToString.Exclude",
+            "  @MutableModel",
             "  private String principal;",
             "}"
         ));
@@ -189,7 +184,7 @@ class ToStringExcludeTest {
   }
 
   @Test
-  void ToString_Exclude_cannot_be_applied_to_parameter() {
+  void MutableModel_cannot_be_applied_to_parameter() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -197,12 +192,12 @@ class ToStringExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.MutableModel;",
             "",
             "public class User {",
             "  private String principal;",
             "",
-            "  public void setPrincipal(@ToString.Exclude String principal) {",
+            "  public void setPrincipal(@MutableModel String principal) {",
             "    this.principal = principal;",
             "  }",
             "}"
@@ -217,7 +212,7 @@ class ToStringExcludeTest {
   }
 
   @Test
-  void ToString_Exclude_cannot_be_applied_to_type_argument() {
+  void MutableModel_cannot_be_applied_to_type_argument() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -228,9 +223,9 @@ class ToStringExcludeTest {
             "import java.util.Iterator;",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.MutableModel;",
             "",
-            "public class User implements Iterable<@ToString.Exclude String> {",
+            "public class User implements Iterable<@MutableModel String> {",
             "  private SortedSet<String> authorities;",
             "",
             "  @Override",
@@ -249,7 +244,7 @@ class ToStringExcludeTest {
   }
 
   @Test
-  void ToString_Exclude_cannot_be_applied_to_type_use() {
+  void MutableModel_cannot_be_applied_to_type_use() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -257,13 +252,13 @@ class ToStringExcludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.ToString;",
+            "import io.ascopes.katana.annotations.MutableModel;",
             "",
             "public class User {",
             "",
             "  @Override",
             "  public String toString() {",
-            "    @ToString.Exclude",
+            "    @MutableModel",
             "    StringBuilder sb = new StringBuilder();",
             "",
             "    sb.append(\"User{}\");",
@@ -280,32 +275,4 @@ class ToStringExcludeTest {
     assertThat(result)
         .hadErrorContaining("not applicable");
   }
-
-  @EnabledForJreRange(min = JRE.JAVA_16)
-  @Test
-  void ToString_Exclude_cannot_be_applied_to_record_type() {
-    Compilation result = Compiler
-        .javac()
-        .compile(forSourceLines(
-            "com.somecompany.userapi.models.User",
-            "",
-            "package com.somecompany.userapi.models;",
-            "",
-            "import java.util.SortedSet;",
-            "",
-            "import io.ascopes.katana.annotations.ToString;",
-            "",
-            "@ToString.Exclude",
-            "public record User(String principal, String credential, SortedSet<String> authorities) {",
-            "}"
-        ));
-
-    assertThat(result)
-        .failed();
-    assertThat(result)
-        .hadErrorCount(1);
-    assertThat(result)
-        .hadErrorContaining("not applicable");
-  }
-
 }

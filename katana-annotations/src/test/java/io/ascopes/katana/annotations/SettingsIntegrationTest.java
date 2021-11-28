@@ -6,13 +6,11 @@ import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledForJreRange;
-import org.junit.jupiter.api.condition.JRE;
 
-class SettersIncludeTest {
+class SettingsIntegrationTest {
 
   @Test
-  void Setters_Include_is_not_repeatable() {
+  void Settings_can_be_applied_to_type() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -22,10 +20,9 @@ class SettersIncludeTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Settings;",
             "",
-            "@Setters.Include",
-            "@Setters.Include",
+            "@Settings",
             "public interface User {",
             "  String getPrincipal();",
             "  String getCredential();",
@@ -33,90 +30,28 @@ class SettersIncludeTest {
             "}"
         ));
 
-    assertThat(result)
-        .failed();
-    assertThat(result)
-        .hadErrorContainingMatch("not (a )?repeat");
+    assertThat(result).succeeded();
   }
 
   @Test
-  void Setters_Include_cannot_be_applied_to_type() {
-    Compilation result = Compiler
-        .javac()
-        .compile(forSourceLines(
-            "com.somecompany.userapi.models.User",
-            "",
-            "package com.somecompany.userapi.models;",
-            "",
-            "import java.util.SortedSet;",
-            "",
-            "import io.ascopes.katana.annotations.Setters;",
-            "",
-            "@Setters.Include",
-            "public interface User {",
-            "  String getPrincipal();",
-            "  String getCredential();",
-            "  SortedSet<String> getAuthorities();",
-            "}"
-        ));
-
-    assertThat(result)
-        .failed();
-    assertThat(result)
-        .hadErrorCount(1);
-    assertThat(result)
-        .hadErrorContaining("not applicable");
-  }
-
-  @Test
-  void Setters_Include_cannot_be_applied_to_annotation_type() {
-    Compilation result = Compiler
-        .javac()
-        .compile(forSourceLines(
-            "com.somecompany.userapi.models.Foo",
-            "",
-            "package com.somecompany.userapi.models;",
-            "",
-            "import java.util.SortedSet;",
-            "",
-            "import io.ascopes.katana.annotations.Setters;",
-            "",
-            "@Setters.Include",
-            "public @interface Foo {",
-            "}"
-        ));
-
-    assertThat(result)
-        .failed();
-    assertThat(result)
-        .hadErrorCount(1);
-    assertThat(result)
-        .hadErrorContaining("not applicable");
-  }
-
-  @Test
-  void Setters_Include_cannot_be_applied_to_package() {
+  void Settings_can_be_applied_to_package() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
             "com.somecompany.userapi.models.package-info",
             "",
-            "@Setters.Include",
+            "@Settings",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Setters;"
+            "import io.ascopes.katana.annotations.Settings;",
+            ""
         ));
 
-    assertThat(result)
-        .failed();
-    assertThat(result)
-        .hadErrorCount(1);
-    assertThat(result)
-        .hadErrorContaining("not applicable");
+    assertThat(result).succeeded();
   }
 
   @Test
-  void Setters_Include_cannot_be_applied_to_constructor() {
+  void Settings_is_not_repeatable() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -124,10 +59,40 @@ class SettersIncludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import java.util.SortedSet;",
+            "",
+            "import io.ascopes.katana.annotations.Settings;",
+            "",
+            "@Settings",
+            "@Settings",
+            "public interface User {",
+            "  String getPrincipal();",
+            "  String getCredential();",
+            "  SortedSet<String> getAuthorities();",
+            "}"
+        ));
+
+    assertThat(result)
+        .failed();
+    assertThat(result)
+        .hadErrorCount(1);
+    assertThat(result)
+        .hadErrorContainingMatch("not (a )?repeat");
+  }
+
+  @Test
+  void Settings_cannot_be_applied_to_constructor() {
+    Compilation result = Compiler
+        .javac()
+        .compile(forSourceLines(
+            "com.somecompany.userapi.models.User",
+            "",
+            "package com.somecompany.userapi.models;",
+            "",
+            "import io.ascopes.katana.annotations.Settings;",
             "",
             "public class User {",
-            "  @Setters.Include",
+            "  @Settings",
             "  public User() {",
             "  }",
             "}"
@@ -142,7 +107,7 @@ class SettersIncludeTest {
   }
 
   @Test
-  void Setters_Include_can_be_applied_to_method() {
+  void Settings_cannot_be_applied_to_method() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -150,21 +115,26 @@ class SettersIncludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Settings;",
             "",
             "public class User {",
-            "  @Setters.Include",
+            "  @Settings",
             "  public String getPrincipal() {",
             "    return \"Steve\";",
             "  }",
             "}"
         ));
 
-    assertThat(result).succeeded();
+    assertThat(result)
+        .failed();
+    assertThat(result)
+        .hadErrorCount(1);
+    assertThat(result)
+        .hadErrorContaining("not applicable");
   }
 
   @Test
-  void Setters_Include_cannot_be_applied_to_field() {
+  void Settings_cannot_be_applied_to_field() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -172,10 +142,10 @@ class SettersIncludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Settings;",
             "",
             "public class User {",
-            "  @Setters.Include",
+            "  @Settings",
             "  private String principal;",
             "}"
         ));
@@ -189,7 +159,7 @@ class SettersIncludeTest {
   }
 
   @Test
-  void Setters_Include_cannot_be_applied_to_parameter() {
+  void Settings_cannot_be_applied_to_parameter() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -197,12 +167,12 @@ class SettersIncludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Settings;",
             "",
             "public class User {",
             "  private String principal;",
             "",
-            "  public void setPrincipal(@Setters.Include String principal) {",
+            "  public void setPrincipal(@Settings String principal) {",
             "    this.principal = principal;",
             "  }",
             "}"
@@ -217,7 +187,7 @@ class SettersIncludeTest {
   }
 
   @Test
-  void Setters_Include_cannot_be_applied_to_type_argument() {
+  void Settings_cannot_be_applied_to_type_argument() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -228,9 +198,9 @@ class SettersIncludeTest {
             "import java.util.Iterator;",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Settings;",
             "",
-            "public class User implements Iterable<@Setters.Include String> {",
+            "public class User implements Iterable<@Settings String> {",
             "  private SortedSet<String> authorities;",
             "",
             "  @Override",
@@ -249,7 +219,7 @@ class SettersIncludeTest {
   }
 
   @Test
-  void Setters_Include_cannot_be_applied_to_type_use() {
+  void Settings_cannot_be_applied_to_type_use() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -257,13 +227,13 @@ class SettersIncludeTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Setters;",
+            "import io.ascopes.katana.annotations.Settings;",
             "",
             "public class User {",
             "",
             "  @Override",
             "  public String toString() {",
-            "    @Setters.Include",
+            "    @Settings",
             "    StringBuilder sb = new StringBuilder();",
             "",
             "    sb.append(\"User{}\");",
@@ -280,32 +250,4 @@ class SettersIncludeTest {
     assertThat(result)
         .hadErrorContaining("not applicable");
   }
-
-  @EnabledForJreRange(min = JRE.JAVA_16)
-  @Test
-  void Setters_Include_cannot_be_applied_to_record_type() {
-    Compilation result = Compiler
-        .javac()
-        .compile(forSourceLines(
-            "com.somecompany.userapi.models.User",
-            "",
-            "package com.somecompany.userapi.models;",
-            "",
-            "import java.util.SortedSet;",
-            "",
-            "import io.ascopes.katana.annotations.Setters;",
-            "",
-            "@Setters.Include",
-            "public record User(String principal, String credential, SortedSet<String> authorities) {",
-            "}"
-        ));
-
-    assertThat(result)
-        .failed();
-    assertThat(result)
-        .hadErrorCount(1);
-    assertThat(result)
-        .hadErrorContaining("not applicable");
-  }
 }
-

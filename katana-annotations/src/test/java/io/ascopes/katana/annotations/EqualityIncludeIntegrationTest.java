@@ -6,11 +6,13 @@ import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 
-class SettingsTest {
+class EqualityIncludeIntegrationTest {
 
   @Test
-  void Settings_can_be_applied_to_type() {
+  void Equality_Include_is_not_repeatable() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -20,9 +22,10 @@ class SettingsTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Settings;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
-            "@Settings",
+            "@Equality.Include",
+            "@Equality.Include",
             "public interface User {",
             "  String getPrincipal();",
             "  String getCredential();",
@@ -30,28 +33,14 @@ class SettingsTest {
             "}"
         ));
 
-    assertThat(result).succeeded();
+    assertThat(result)
+        .failed();
+    assertThat(result)
+        .hadErrorContainingMatch("not (a )?repeat");
   }
 
   @Test
-  void Settings_can_be_applied_to_package() {
-    Compilation result = Compiler
-        .javac()
-        .compile(forSourceLines(
-            "com.somecompany.userapi.models.package-info",
-            "",
-            "@Settings",
-            "package com.somecompany.userapi.models;",
-            "",
-            "import io.ascopes.katana.annotations.Settings;",
-            ""
-        ));
-
-    assertThat(result).succeeded();
-  }
-
-  @Test
-  void Settings_is_not_repeatable() {
+  void Equality_Include_cannot_be_applied_to_type() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -61,10 +50,9 @@ class SettingsTest {
             "",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Settings;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
-            "@Settings",
-            "@Settings",
+            "@Equality.Include",
             "public interface User {",
             "  String getPrincipal();",
             "  String getCredential();",
@@ -77,11 +65,58 @@ class SettingsTest {
     assertThat(result)
         .hadErrorCount(1);
     assertThat(result)
-        .hadErrorContainingMatch("not (a )?repeat");
+        .hadErrorContaining("not applicable");
   }
 
   @Test
-  void Settings_cannot_be_applied_to_constructor() {
+  void Equality_Include_cannot_be_applied_to_annotation_type() {
+    Compilation result = Compiler
+        .javac()
+        .compile(forSourceLines(
+            "com.somecompany.userapi.models.Foo",
+            "",
+            "package com.somecompany.userapi.models;",
+            "",
+            "import java.util.SortedSet;",
+            "",
+            "import io.ascopes.katana.annotations.Equality;",
+            "",
+            "@Equality.Include",
+            "public @interface Foo {",
+            "}"
+        ));
+
+    assertThat(result)
+        .failed();
+    assertThat(result)
+        .hadErrorCount(1);
+    assertThat(result)
+        .hadErrorContaining("not applicable");
+  }
+
+  @Test
+  void Equality_Include_cannot_be_applied_to_package() {
+    Compilation result = Compiler
+        .javac()
+        .compile(forSourceLines(
+            "com.somecompany.userapi.models.package-info",
+            "",
+            "@Equality.Include",
+            "package com.somecompany.userapi.models;",
+            "",
+            "import io.ascopes.katana.annotations.Equality;"
+        ));
+
+    assertThat(result)
+        .failed();
+    assertThat(result)
+        .hadErrorCount(1);
+    assertThat(result)
+        .hadErrorContaining("not applicable");
+  }
+
+  @Test
+  void Equality_Include_cannot_be_applied_to_constructor() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -89,10 +124,10 @@ class SettingsTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Settings;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
             "public class User {",
-            "  @Settings",
+            "  @Equality.Include",
             "  public User() {",
             "  }",
             "}"
@@ -107,7 +142,7 @@ class SettingsTest {
   }
 
   @Test
-  void Settings_cannot_be_applied_to_method() {
+  void Equality_Include_can_be_applied_to_method() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -115,26 +150,21 @@ class SettingsTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Settings;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
             "public class User {",
-            "  @Settings",
+            "  @Equality.Include",
             "  public String getPrincipal() {",
             "    return \"Steve\";",
             "  }",
             "}"
         ));
 
-    assertThat(result)
-        .failed();
-    assertThat(result)
-        .hadErrorCount(1);
-    assertThat(result)
-        .hadErrorContaining("not applicable");
+    assertThat(result).succeeded();
   }
 
   @Test
-  void Settings_cannot_be_applied_to_field() {
+  void Equality_Include_cannot_be_applied_to_field() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -142,10 +172,10 @@ class SettingsTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Settings;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
             "public class User {",
-            "  @Settings",
+            "  @Equality.Include",
             "  private String principal;",
             "}"
         ));
@@ -159,7 +189,7 @@ class SettingsTest {
   }
 
   @Test
-  void Settings_cannot_be_applied_to_parameter() {
+  void Equality_Include_cannot_be_applied_to_parameter() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -167,12 +197,12 @@ class SettingsTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Settings;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
             "public class User {",
             "  private String principal;",
             "",
-            "  public void setPrincipal(@Settings String principal) {",
+            "  public void setPrincipal(@Equality.Include String principal) {",
             "    this.principal = principal;",
             "  }",
             "}"
@@ -187,7 +217,7 @@ class SettingsTest {
   }
 
   @Test
-  void Settings_cannot_be_applied_to_type_argument() {
+  void Equality_Include_cannot_be_applied_to_type_argument() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -198,9 +228,9 @@ class SettingsTest {
             "import java.util.Iterator;",
             "import java.util.SortedSet;",
             "",
-            "import io.ascopes.katana.annotations.Settings;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
-            "public class User implements Iterable<@Settings String> {",
+            "public class User implements Iterable<@Equality.Include String> {",
             "  private SortedSet<String> authorities;",
             "",
             "  @Override",
@@ -219,7 +249,7 @@ class SettingsTest {
   }
 
   @Test
-  void Settings_cannot_be_applied_to_type_use() {
+  void Equality_Include_cannot_be_applied_to_type_use() {
     Compilation result = Compiler
         .javac()
         .compile(forSourceLines(
@@ -227,13 +257,13 @@ class SettingsTest {
             "",
             "package com.somecompany.userapi.models;",
             "",
-            "import io.ascopes.katana.annotations.Settings;",
+            "import io.ascopes.katana.annotations.Equality;",
             "",
             "public class User {",
             "",
             "  @Override",
             "  public String toString() {",
-            "    @Settings",
+            "    @Equality.Include",
             "    StringBuilder sb = new StringBuilder();",
             "",
             "    sb.append(\"User{}\");",
@@ -250,4 +280,32 @@ class SettingsTest {
     assertThat(result)
         .hadErrorContaining("not applicable");
   }
+
+  @EnabledForJreRange(min = JRE.JAVA_16)
+  @Test
+  void Equality_Include_cannot_be_applied_to_record_type() {
+    Compilation result = Compiler
+        .javac()
+        .compile(forSourceLines(
+            "com.somecompany.userapi.models.User",
+            "",
+            "package com.somecompany.userapi.models;",
+            "",
+            "import java.util.SortedSet;",
+            "",
+            "import io.ascopes.katana.annotations.Equality;",
+            "",
+            "@Equality.Include",
+            "public record User(String principal, String credential, SortedSet<String> authorities) {",
+            "}"
+        ));
+
+    assertThat(result)
+        .failed();
+    assertThat(result)
+        .hadErrorCount(1);
+    assertThat(result)
+        .hadErrorContaining("not applicable");
+  }
 }
+

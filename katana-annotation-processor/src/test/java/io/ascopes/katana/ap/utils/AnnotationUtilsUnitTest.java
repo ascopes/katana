@@ -1,9 +1,9 @@
 package io.ascopes.katana.ap.utils;
 
-import io.ascopes.katana.ap.stubbing.StubName;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
@@ -12,10 +12,11 @@ import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import org.assertj.core.api.BDDAssertions;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 
-class AnnotationUtilsTest {
+class AnnotationUtilsUnitTest {
   @Test
   void getAnnotationMirror_returns_the_first_annotation_mirror_when_matching() {
     // Given
@@ -165,4 +166,52 @@ class AnnotationUtilsTest {
     Name simpleName;
   }
 
+  /**
+   * Stub for {@link Name} to use in tests.
+   */
+  static final class StubName implements Name {
+
+    private final String content;
+
+    public StubName(String content) {
+      this.content = Objects.requireNonNull(content);
+    }
+
+    @Override
+    public boolean contentEquals(CharSequence cs) {
+      return this.content.contentEquals(cs);
+    }
+
+    @Override
+    public int length() {
+      return this.content.length();
+    }
+
+    @Override
+    public char charAt(int index) {
+      return this.content.charAt(index);
+    }
+
+    @Override
+    @NonNull
+    public CharSequence subSequence(int start, int end) {
+      return this.content.subSequence(start, end);
+    }
+
+    @Override
+    @NonNull
+    public String toString() {
+      return this.content;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+      return other instanceof Name && ((Name) other).contentEquals(this);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(this.content);
+    }
+  }
 }
