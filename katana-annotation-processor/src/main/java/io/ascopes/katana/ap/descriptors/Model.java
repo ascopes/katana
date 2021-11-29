@@ -1,6 +1,6 @@
 package io.ascopes.katana.ap.descriptors;
 
-import io.ascopes.katana.ap.settings.gen.SettingsCollection;
+import com.squareup.javapoet.ClassName;
 import io.ascopes.katana.ap.utils.CollectionUtils;
 import io.ascopes.katana.ap.utils.ObjectBuilder;
 import io.ascopes.katana.ap.utils.StringUtils;
@@ -28,34 +28,31 @@ public final class Model {
 
   private final String packageName;
   private final String className;
-  private final String qualifiedName;
-  private final boolean mutable;
   private final TypeElement superInterface;
-  private final AnnotationMirror annotationMirror;
-  private final SettingsCollection settingsCollection;
-  private final MethodClassification methods;
   private final Set<Constructor> constructors;
   private final SortedSet<Attribute> attributes;
+  private final String indent;
+  private final String setterPrefix;
 
   // Nullable attributes
   private final @Nullable BuilderStrategy builderStrategy;
+  private final @Nullable EqualityStrategy equalityStrategy;
   private final @Nullable AnnotationMirror deprecatedAnnotation;
 
   private Model(Builder builder) {
     this.packageName = Objects.requireNonNull(builder.packageName);
     this.className = Objects.requireNonNull(builder.className);
-    this.qualifiedName = Objects.requireNonNull(builder.qualifiedName);
-    this.mutable = Objects.requireNonNull(builder.mutable);
     this.superInterface = Objects.requireNonNull(builder.superInterface);
-    this.annotationMirror = Objects.requireNonNull(builder.annotationMirror);
-    this.settingsCollection = Objects.requireNonNull(builder.settingsCollection);
-    this.methods = Objects.requireNonNull(builder.methods);
+    this.indent = Objects.requireNonNull(builder.indent);
+    this.setterPrefix = Objects.requireNonNull(builder.setterPrefix);
 
+    // Collection attributes.
     this.constructors = CollectionUtils.freezeSet(builder.constructors);
     this.attributes = CollectionUtils.freezeSortedSet(builder.attributes);
 
-    // Nullable attributes
+    // Nullable attributes.
     this.builderStrategy = builder.builderStrategy;
+    this.equalityStrategy = builder.equalityStrategy;
     this.deprecatedAnnotation = builder.deprecatedAnnotation;
   }
 
@@ -82,17 +79,8 @@ public final class Model {
    *
    * @return the qualified name for the generated model.
    */
-  public String getQualifiedName() {
-    return this.qualifiedName;
-  }
-
-  /**
-   * Determine whether the model is mutable or not.
-   *
-   * @return true if mutable, false if immutable.
-   */
-  public boolean isMutable() {
-    return this.mutable;
+  public ClassName getQualifiedName() {
+    return ClassName.get(this.packageName, this.className);
   }
 
   /**
@@ -102,15 +90,6 @@ public final class Model {
    */
   public TypeElement getSuperInterface() {
     return this.superInterface;
-  }
-
-  /**
-   * Get the settings collection for settings to use with this model.
-   *
-   * @return the settings collection.
-   */
-  public SettingsCollection getSettingsCollection() {
-    return this.settingsCollection;
   }
 
   /**
@@ -132,6 +111,24 @@ public final class Model {
   }
 
   /**
+   * Get the indent for the generated code.
+   *
+   * @return the indent for the generated code.
+   */
+  public String getIndent() {
+    return this.indent;
+  }
+
+  /**
+   * Get the setter prefix for the generated code.
+   *
+   * @return the setter prefix for the generated code.
+   */
+  public String getSetterPrefix() {
+    return this.setterPrefix;
+  }
+
+  /**
    * Get the builder strategy to use to generate a builder, if one is enabled.
    *
    * @return the builder strategy, or an empty optional if not enabled.
@@ -139,6 +136,16 @@ public final class Model {
   @MaybePresent
   public Optional<BuilderStrategy> getBuilderStrategy() {
     return Optional.ofNullable(this.builderStrategy);
+  }
+
+  /**
+   * Get the equality strategy to use to generate an equals and hashcode method, if one is enabled.
+   *
+   * @return the equality strategy, or an empty optional if not enabled.
+   */
+  @MaybePresent
+  public Optional<EqualityStrategy> getEqualityStrategy() {
+    return Optional.ofNullable(this.equalityStrategy);
   }
 
   /**
@@ -162,7 +169,6 @@ public final class Model {
         + "className=" + StringUtils.quoted(this.className) + ", "
         + "attributes=" + this.attributes + ", "
         + "superInterface=" + StringUtils.quoted(this.superInterface.getQualifiedName()) + ", "
-        + "mutable=" + this.mutable
         + '}';
   }
 
@@ -188,15 +194,13 @@ public final class Model {
 
     private @MonotonicNonNull String packageName;
     private @MonotonicNonNull String className;
-    private @MonotonicNonNull String qualifiedName;
     private @MonotonicNonNull TypeElement superInterface;
-    private @MonotonicNonNull Boolean mutable;
-    private @MonotonicNonNull AnnotationMirror annotationMirror;
-    private @MonotonicNonNull SettingsCollection settingsCollection;
-    private @MonotonicNonNull MethodClassification methods;
+    private @MonotonicNonNull String indent;
+    private @MonotonicNonNull String setterPrefix;
 
     // Nullable attributes
     private @Nullable BuilderStrategy builderStrategy;
+    private @Nullable EqualityStrategy equalityStrategy;
     private @Nullable AnnotationMirror deprecatedAnnotation;
 
     private Builder() {
@@ -229,26 +233,6 @@ public final class Model {
     }
 
     /**
-     * Set the qualified name.
-     *
-     * @param qualifiedName the qualified name to set.
-     * @return this builder.
-     */
-    public Builder qualifiedName(String qualifiedName) {
-      this.qualifiedName = Objects.requireNonNull(qualifiedName);
-      return this;
-    }
-
-    /**
-     * Get the super-interface set on this builder.
-     *
-     * @return the super-interface.
-     */
-    TypeElement getSuperInterface() {
-      return Objects.requireNonNull(this.superInterface);
-    }
-
-    /**
      * Set the super-interface that defined this model.
      *
      * @param superInterface the super-interface.
@@ -256,68 +240,6 @@ public final class Model {
      */
     public Builder superInterface(TypeElement superInterface) {
       this.superInterface = Objects.requireNonNull(superInterface);
-      return this;
-    }
-
-    /**
-     * Get the annotation mirror for the model annotation that was applied that triggered this model
-     * to be built.
-     *
-     * @return the annotation mirror.
-     */
-    AnnotationMirror getAnnotationMirror() {
-      return Objects.requireNonNull(this.annotationMirror);
-    }
-
-    /**
-     * Set the annotation mirror for the model annotation that was applied that triggered this model
-     * to be built.
-     *
-     * @param annotationMirror the annotation mirror.
-     * @return this builder.
-     */
-    public Builder annotationMirror(AnnotationMirror annotationMirror) {
-      this.annotationMirror = Objects.requireNonNull(annotationMirror);
-      return this;
-    }
-
-    /**
-     * Get the collection of settings that are set in this builder.
-     *
-     * @return the settings collection.
-     */
-    SettingsCollection getSettingsCollection() {
-      return Objects.requireNonNull(this.settingsCollection);
-    }
-
-    /**
-     * Set the collection of settings to use for the model.
-     *
-     * @param settingsCollection the settings collection.
-     * @return this builder.
-     */
-    public Builder settingsCollection(SettingsCollection settingsCollection) {
-      this.settingsCollection = settingsCollection;
-      return this;
-    }
-
-    /**
-     * Get the collection of classified methods set in this builder.
-     *
-     * @return the method classification collection.
-     */
-    MethodClassification getMethods() {
-      return Objects.requireNonNull(this.methods);
-    }
-
-    /**
-     * Set the classified methods for the model in this builder.
-     *
-     * @param methods the classified methods to set.
-     * @return this builder.
-     */
-    public Builder methods(MethodClassification methods) {
-      this.methods = methods;
       return this;
     }
 
@@ -346,23 +268,24 @@ public final class Model {
     }
 
     /**
-     * Get whether this model is mutable or not.
+     * Set the indent for output code.
      *
-     * @return true if mutable, false if immutable.
+     * @param indent the indent to use.
+     * @return this builder.
      */
-    boolean isMutable() {
-      return Objects.requireNonNull(this.mutable);
+    public Builder indent(String indent) {
+      this.indent = Objects.requireNonNull(indent);
+      return this;
     }
 
     /**
-     * Set whether this model is mutable or not.
+     * Set the setter prefix to use.
      *
-     * @param mutable true if mutable, false if immutable.
+     * @param setterPrefix the setter prefix to use.
      * @return this builder.
      */
-    public Builder mutable(Boolean mutable) {
-      // Box to enable us to error later if it was not explicitly set.
-      this.mutable = Objects.requireNonNull(mutable);
+    public Builder setterPrefix(String setterPrefix) {
+      this.setterPrefix = Objects.requireNonNull(setterPrefix);
       return this;
     }
 
@@ -374,6 +297,17 @@ public final class Model {
      */
     public Builder builderStrategy(@Nullable BuilderStrategy builderStrategy) {
       this.builderStrategy = builderStrategy;
+      return this;
+    }
+
+    /**
+     * Set the equality strategy.
+     *
+     * @param equalityStrategy the nullable equality strategy to set.
+     * @return this builder.
+     */
+    public Builder equalityStrategy(@Nullable EqualityStrategy equalityStrategy) {
+      this.equalityStrategy = equalityStrategy;
       return this;
     }
 

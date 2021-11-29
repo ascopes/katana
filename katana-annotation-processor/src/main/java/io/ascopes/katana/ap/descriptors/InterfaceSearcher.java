@@ -50,8 +50,8 @@ public final class InterfaceSearcher {
 
     for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(annotationType)) {
       this.tryUpcastAnnotatedType(annotationType, annotatedElement)
-          .ifOkThen(interfaces)
-          .ifOkThen(interfaceType -> this.logger.trace(
+          .ifOk(interfaces)
+          .ifOk(interfaceType -> this.logger.trace(
               "Found interface {} matching or ascending from {}-annotated interface",
               interfaceType.getQualifiedName(),
               annotationType.getQualifiedName()

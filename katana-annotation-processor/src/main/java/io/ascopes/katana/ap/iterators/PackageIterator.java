@@ -15,7 +15,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class PackageIterator implements StreamableIterator<PackageElement> {
+public final class PackageIterator extends KatanaIterator<PackageElement> {
 
   private final Elements elementUtils;
 
@@ -49,7 +49,7 @@ public final class PackageIterator implements StreamableIterator<PackageElement>
     PackageElement current = this.next;
 
     if (current == null) {
-      throw StreamableIterator.noMoreElementsException("parent packages");
+      throw KatanaIterator.noMoreElementsException("parent packages");
     }
 
     if (current.isUnnamed()) {

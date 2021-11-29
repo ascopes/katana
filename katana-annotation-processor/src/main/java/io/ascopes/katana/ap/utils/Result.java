@@ -89,12 +89,69 @@ public final class Result<T> {
    * @param then the logic to perform.
    * @return this result to allow further chaining.
    */
-  public Result<T> ifOkThen(Consumer<T> then) {
+  public Result<T> ifOk(Runnable then) {
+    // TODO(ascopes): unit test
+    Objects.requireNonNull(then);
+    if (this.isOk()) {
+      then.run();
+    }
+    return this;
+  }
+
+  /**
+   * If this result is OK, perform some logic.
+   *
+   * @param then the logic to perform.
+   * @return this result to allow further chaining.
+   */
+  public Result<T> ifOk(Consumer<T> then) {
     Objects.requireNonNull(then);
     this.assertNotCleared();
     if (this.isOk()) {
       then.accept(this.unwrap());
     }
+    return this;
+  }
+
+  /**
+   * Same as {@link #ifOkCheck(Function)}, except no parameter is input.
+   *
+   * @param then the logic to invoke if this was OK.
+   * @return the result.
+   */
+  public Result<T> ifOkCheck(Supplier<Result<?>> then) {
+    // TODO(ascopes): unit test
+    if (this.isOk()) {
+      Result<?> next = then.get();
+      if (!next.isOk()) {
+        return castFailedOrIgnored(next);
+      }
+    }
+    return this;
+  }
+
+  /**
+   * If this result is OK, then try to apply the value in this result to another function. If that
+   * function returns an ignored or failed result, then that result will become this result. If that
+   * result was OK, then this result is returned.
+   *
+   * <p>This is equivalent to {@link #ifOk(Consumer)}, except any failed/ignored result from
+   * the next function is considered in the returned result here.
+   *
+   * @param then the logic to invoke if this was OK.
+   * @return the result.
+   */
+  public Result<T> ifOkCheck(Function<T, Result<?>> then) {
+    // TODO(ascopes): unit test
+    Objects.requireNonNull(then);
+    this.assertNotCleared();
+    if (this.isOk()) {
+      Result<?> next = then.apply(this.unwrap());
+      if (!next.isOk()) {
+        return castFailedOrIgnored(next);
+      }
+    }
+
     return this;
   }
 
@@ -134,6 +191,7 @@ public final class Result<T> {
    * result.
    *
    * @param then the supplier of the result to replace with if this result is OK.
+   * @param <U>  the new result type.
    * @return the new result.
    */
   public <U> Result<U> ifOkReplace(Supplier<Result<U>> then) {
@@ -144,16 +202,17 @@ public final class Result<T> {
   }
 
   /**
-   * Run some logic if the result is ignored.
+   * Perform some logic if the result is ignored.
    *
-   * @param toRun logic to run if ignored.
+   * @param then the logic to perform.
    * @return this result.
    */
-  public Result<T> ifIgnoredThen(Runnable toRun) {
+  public Result<T> ifIgnored(Runnable then) {
     // TODO(ascopes): unit tests
     if (this.isIgnored()) {
-      toRun.run();
+      then.run();
     }
+
     return this;
   }
 
@@ -182,12 +241,26 @@ public final class Result<T> {
   }
 
   /**
+   * Fail if this result is ignored. Otherwise, just return this result.
+   *
+   * @return the result.
+   */
+  public Result<T> failIfIgnored() {
+    // TODO(ascopes): unit tests
+    if (this.isIgnored()) {
+      return fail();
+    }
+
+    return this;
+  }
+
+  /**
    * Discard any value if this result is OK. OK results remain as being OK, but you will no longer
    * have any value within it. Other results stay as they are.
    *
    * @return a cleared result value that has no meaning other than the status.
    */
-  public Result<Void> thenDiscardValue() {
+  public Result<Void> dropValue() {
     return this.isOk()
         ? CLEARED
         : castFailedOrIgnored(this);

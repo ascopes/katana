@@ -14,14 +14,14 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  */
 public final class BuilderStrategy {
 
-  private final String builderName;
+  private final String builderTypeName;
   private final boolean toBuilderMethodEnabled;
   private final String toBuilderMethodName;
   private final String builderMethodName;
   private final String buildMethodName;
 
   private BuilderStrategy(Builder builder) {
-    this.builderName = Objects.requireNonNull(builder.builderName);
+    this.builderTypeName = Objects.requireNonNull(builder.builderTypeName);
     this.toBuilderMethodEnabled = Objects.requireNonNull(builder.toBuilderMethodEnabled);
     this.toBuilderMethodName = Objects.requireNonNull(builder.toBuilderMethodName);
     this.builderMethodName = Objects.requireNonNull(builder.builderMethodName);
@@ -33,8 +33,8 @@ public final class BuilderStrategy {
    *
    * @return the name of the builder type.
    */
-  public String getBuilderName() {
-    return this.builderName;
+  public String getBuilderTypeName() {
+    return this.builderTypeName;
   }
 
   /**
@@ -79,7 +79,7 @@ public final class BuilderStrategy {
   @Override
   public String toString() {
     return "BuilderStrategy{"
-        + "name=" + StringUtils.quoted(this.builderName) + ", "
+        + "name=" + StringUtils.quoted(this.builderTypeName) + ", "
         + "toBuilderEnabled=" + this.toBuilderMethodEnabled + ", "
         + "toBuilderMethodName=" + StringUtils.quoted(this.toBuilderMethodName) + ", "
         + "builderMethodName=" + StringUtils.quoted(this.builderMethodName) + ", "
@@ -102,7 +102,7 @@ public final class BuilderStrategy {
   @MustCall("build")
   public static final class Builder implements ObjectBuilder<BuilderStrategy> {
 
-    private @MonotonicNonNull String builderName;
+    private @MonotonicNonNull String builderTypeName;
     private @MonotonicNonNull Boolean toBuilderMethodEnabled;
     private @MonotonicNonNull String toBuilderMethodName;
     private @MonotonicNonNull String buildMethodName;
@@ -114,11 +114,11 @@ public final class BuilderStrategy {
     /**
      * Set the name for the builder type.
      *
-     * @param builderName the name of the builder type.
+     * @param builderTypeName the name of the builder type.
      * @return this builder.
      */
-    public Builder builderName(String builderName) {
-      this.builderName = Objects.requireNonNull(builderName);
+    public Builder builderTypeName(String builderTypeName) {
+      this.builderTypeName = Objects.requireNonNull(builderTypeName);
       return this;
     }
 

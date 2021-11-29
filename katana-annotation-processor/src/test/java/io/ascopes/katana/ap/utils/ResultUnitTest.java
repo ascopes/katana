@@ -168,7 +168,7 @@ class ResultUnitTest {
       }
     });
 
-    Result.ok("123").ifOkThen(consumer);
+    Result.ok("123").ifOk(consumer);
 
     BDDMockito
         .then(consumer)
@@ -188,7 +188,7 @@ class ResultUnitTest {
     });
 
     BDDAssertions
-        .thenCode(() -> Result.ok().ifOkThen(consumer))
+        .thenCode(() -> Result.ok().ifOk(consumer))
         .isInstanceOf(IllegalStateException.class);
 
     BDDMockito
@@ -209,7 +209,7 @@ class ResultUnitTest {
     });
 
     BDDAssertions
-        .thenCode(() -> result.ifOkThen(consumer))
+        .thenCode(() -> result.ifOk(consumer))
         .doesNotThrowAnyException();
 
     BDDMockito
@@ -419,12 +419,12 @@ class ResultUnitTest {
     Result<Object> initial = Result.ok(UUID.randomUUID().toString());
 
     BDDAssertions
-        .then(initial.thenDiscardValue())
+        .then(initial.dropValue())
         .isNotSameAs(initial)
         .matches(Result::isOk);
 
     BDDAssertions
-        .thenCode(() -> initial.thenDiscardValue().unwrap())
+        .thenCode(() -> initial.dropValue().unwrap())
         .isInstanceOf(IllegalStateException.class);
   }
 
@@ -432,7 +432,7 @@ class ResultUnitTest {
   void thenDiscardValue_when_ok_without() {
     Result<Void> initial = Result.ok();
     BDDAssertions
-        .then(initial.thenDiscardValue())
+        .then(initial.dropValue())
         .isSameAs(initial);
   }
 
@@ -440,7 +440,7 @@ class ResultUnitTest {
   void thenDiscardValue_when_failed() {
     Result<Void> initial = Result.fail();
     BDDAssertions
-        .then(initial.thenDiscardValue())
+        .then(initial.dropValue())
         .isSameAs(initial);
   }
 
@@ -448,7 +448,7 @@ class ResultUnitTest {
   void thenDiscardValue_when_ignored() {
     Result<Void> initial = Result.ignore();
     BDDAssertions
-        .then(initial.thenDiscardValue())
+        .then(initial.dropValue())
         .isSameAs(initial);
   }
 

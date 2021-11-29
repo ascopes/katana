@@ -22,7 +22,7 @@ import javax.lang.model.util.Types;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class AvailableMethodsIterator implements StreamableIterator<ExecutableElement> {
+public final class AvailableMethodsIterator extends KatanaIterator<ExecutableElement> {
 
   private final Types typeUtils;
   private final Iterator<ExecutableElement> iterator;

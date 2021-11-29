@@ -1,8 +1,8 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.internal.AttributeFeature;
-import io.ascopes.katana.annotations.internal.ExclusionAdvice;
-import io.ascopes.katana.annotations.internal.InclusionAdvice;
+import io.ascopes.katana.annotations.features.AttributeFeature;
+import io.ascopes.katana.annotations.advices.ExclusionAdvice;
+import io.ascopes.katana.annotations.advices.InclusionAdvice;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -17,8 +17,8 @@ import java.lang.annotation.Target;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-@ExclusionAdvice(Setters.Exclude.class)
-@InclusionAdvice(Setters.Include.class)
+@ExclusionAdvice(annotation = Setters.Exclude.class)
+@InclusionAdvice(annotation = Setters.Include.class)
 @SuppressWarnings("unused")
 public enum Setters implements AttributeFeature {
   /**

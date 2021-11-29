@@ -1,4 +1,4 @@
-package io.ascopes.katana.annotations.internal;
+package io.ascopes.katana.annotations.advices;
 
 import io.ascopes.katana.annotations.Settings;
 import java.lang.annotation.Documented;
@@ -9,22 +9,22 @@ import java.lang.annotation.Target;
 
 /**
  * Marker for each annotation attribute within {@link Settings} to enable the specification of
- * global defaults for settings that apply to immutable types only.
+ * global defaults for settings that apply to mutable types only.
  *
  * <p>This annotation does nothing outside the {@link Settings} class, and should not be used by
  * users.
  *
  * @author Ashley Scopes
- * @see MutableDefaultAdvice
+ * @see ImmutableDefaultAdvice
  * @since 0.0.1
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface ImmutableDefaultAdvice {
+public @interface MutableDefaultAdvice {
 
   /**
-   * The raw values to parse as the global default settings for immutable types, should nothing
+   * The raw values to parse as the global default settings for mutable types, should nothing
    * user-defined override the annotated setting anywhere. For arrays, more than one value can be
    * passed. For non-array types, it is an error to provide anything other than one argument here.
    *

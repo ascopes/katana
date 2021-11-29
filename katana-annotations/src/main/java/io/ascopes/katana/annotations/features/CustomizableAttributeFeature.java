@@ -1,4 +1,4 @@
-package io.ascopes.katana.annotations.internal;
+package io.ascopes.katana.annotations.features;
 
 /**
  * Extension of {@link AttributeFeature} which also supports providing custom implementations by the
@@ -14,7 +14,7 @@ public interface CustomizableAttributeFeature extends AttributeFeature {
    *
    * @return true if the value represents a custom implementation should be used.
    */
-  default boolean isCustomImpl() {
+  default boolean isCustom() {
     return false;
   }
 }

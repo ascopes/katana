@@ -1,7 +1,7 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.internal.ImmutableDefaultAdvice;
-import io.ascopes.katana.annotations.internal.MutableDefaultAdvice;
+import io.ascopes.katana.annotations.advices.ImmutableDefaultAdvice;
+import io.ascopes.katana.annotations.advices.MutableDefaultAdvice;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -138,7 +138,7 @@ public @interface Settings {
    *
    * @return the name.
    */
-  String builderName() default "Builder";
+  String builderTypeName() default "Builder";
 
   /**
    * Name of the builder initialization method. This is ignored if {@link #builder()} is false.
@@ -228,26 +228,6 @@ public @interface Settings {
    */
   Equality equalityMode() default Equality.INCLUDE_ALL;
 
-  /**
-   * The name of the static equals method name to look for if {@link #equalityMode()} is set to
-   * {@link Equality#CUSTOM}. The method must have the signature {@code static boolean
-   * isEqualTo(ThisInterface self, Object other)}, such that "{@code isEqualTo}" is the value of
-   * this setting, and {@code ThisInterface} is the interface you annotated.
-   *
-   * @return the equality static method name.
-   */
-  String equalsMethodName() default "isEqualTo";
-
-  /**
-   * The name of the static hashCode method name to look for if {@link #equalityMode()} is set to
-   * {@link Equality#CUSTOM}. The method must have the signature {@code static int
-   * hashCodeOf(ThisInterface self)}, such that "{@code hashCodeOf}" is the value of this setting,
-   * and {@code ThisInterface} is the interface you annotated.
-   *
-   * @return the hashCode static method name.
-   */
-  String hashCodeMethodName() default "hashCodeOf";
-
   //////////////////////////////////////
   //// toString generation settings ////
   //////////////////////////////////////
@@ -258,16 +238,6 @@ public @interface Settings {
    * @return the ToString policy.
    */
   ToString toStringMode() default ToString.INCLUDE_ALL;
-
-  /**
-   * The name of the static toString method name to look for if {@link #toStringMode()} is set to
-   * {@link ToString#CUSTOM}. The method must have the signature {@code static String
-   * asString(ThisInterface self)}, such that "{@code asString}" is the value of this setting, and
-   * {@code ThisInterface} is the interface you annotated.
-   *
-   * @return the toString static method name.
-   */
-  String toStringMethodName() default "asString";
 
   ////////////////////
   //// Aesthetics ////

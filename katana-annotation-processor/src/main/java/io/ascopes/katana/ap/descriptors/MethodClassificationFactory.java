@@ -1,7 +1,5 @@
 package io.ascopes.katana.ap.descriptors;
 
-import io.ascopes.katana.annotations.Equality;
-import io.ascopes.katana.annotations.ToString;
 import io.ascopes.katana.ap.iterators.AvailableMethodsIterator;
 import io.ascopes.katana.ap.logging.Diagnostics;
 import io.ascopes.katana.ap.logging.Logger;
@@ -18,7 +16,6 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic.Kind;
 
@@ -31,24 +28,20 @@ import javax.tools.Diagnostic.Kind;
 public final class MethodClassificationFactory {
 
   private final Diagnostics diagnostics;
-  private final Elements elementUtils;
   private final Types typeUtils;
   private final Logger logger;
 
   /**
    * Initialize this factory.
    *
-   * @param diagnostics  diagnostics to use for reporting compilation errors.
-   * @param elementUtils the element utilities to use for introspection.
-   * @param typeUtils    the type utilities to use for introspection.
+   * @param diagnostics diagnostics to use for reporting compilation errors.
+   * @param typeUtils   the type utilities to use for introspection.
    */
   public MethodClassificationFactory(
       Diagnostics diagnostics,
-      Elements elementUtils,
       Types typeUtils
   ) {
     this.diagnostics = diagnostics;
-    this.elementUtils = elementUtils;
     this.typeUtils = typeUtils;
     this.logger = LoggerFactory.loggerFor(this.getClass());
   }
@@ -75,17 +68,15 @@ public final class MethodClassificationFactory {
       ExecutableElement method = it.next();
 
       failed |= this
-          .processAsGetter(builder, method, settings)
-          .ifIgnoredReplace(() -> this.processEquals(builder, method, settings, interfaceType))
-          .ifIgnoredReplace(() -> this.processHashCode(builder, method, settings, interfaceType))
-          .ifIgnoredReplace(() -> this.processToString(builder, method, settings, interfaceType))
-          // TODO(ascopes): reimplement setter + wither types in the future.
+          .takeIfValidGetterSignature(method)
+          .ifOkCheck(() -> this
+              .getBooleanAttrName(method, settings)
+              .ifIgnoredReplace(() -> this.getAttrName(method, settings))
+              .ifOkCheck(attrName -> this.applyGetter(builder, attrName, method)))
           .ifIgnoredReplace(() -> this.processAsStaticMethod(builder, method))
-          .ifIgnoredReplace(() -> {
-            this.failUnimplementableMethods(interfaceType, method);
-            return Result.fail();
-          })
-          .isNotOk();
+          .ifIgnored(() -> this.failUnimplementableMethods(interfaceType, method))
+          .failIfIgnored()
+          .isFailed();
     }
 
     return failed
@@ -93,173 +84,72 @@ public final class MethodClassificationFactory {
         : Result.ok(builder.build());
   }
 
-  private Result<Void> processAsGetter(
-      MethodClassification.Builder builder,
-      ExecutableElement method,
-      SettingsCollection settings
-  ) {
+  private Result<ExecutableElement> takeIfValidGetterSignature(ExecutableElement method) {
+    if (!this.isInstanceScoped(method)) {
+      this.logger.trace("Ignoring {} as getter, method not instance-scoped", method);
+      return Result.ignore();
+    }
+
+    if (!method.getParameters().isEmpty()) {
+      this.logger.trace("Ignoring {} as getter, method had parameters present", method);
+      return Result.ignore();
+    }
+
+    if (method.getReturnType().getKind() == TypeKind.VOID) {
+      this.logger.trace("Ignoring {} as getter, method had no return type", method);
+      return Result.ignore();
+    }
+
+    return Result.ok(method);
+  }
+
+  private Result<String> getBooleanAttrName(ExecutableElement method, SettingsCollection settings) {
     String booleanGetterPrefix = settings.getBooleanGetterPrefix().getValue();
+
+    Result<String> attrName = NamingUtils
+        .removePrefixCamelCase(method, booleanGetterPrefix);
+
+    if (attrName.isIgnored()) {
+      this.logger.trace(
+          "Ignoring {} as boolean getter, it does not match the naming strategy",
+          method
+      );
+      return Result.ignore();
+    }
+
+    if (!this.isBooleanReturnType(method, settings)) {
+      this.failNonBooleanGetter(method, settings);
+      return Result.fail();
+    }
+
+    return attrName
+        .ifOk(name -> this.logger.trace("{} is boolean getter for attribute {}", method, name));
+  }
+
+  private Result<String> getAttrName(ExecutableElement method, SettingsCollection settings) {
     String getterPrefix = settings.getGetterPrefix().getValue();
 
-    boolean interesting = method.getParameters().isEmpty()
-        && method.getReturnType().getKind() != TypeKind.VOID
-        && this.isInstanceScoped(method);
-
-    if (!interesting) {
-      this.logger.trace(
-          "Ignoring {} as a getter as it does not match the desired signature",
-          method
-      );
-      return Result.ignore();
-    }
-
     return NamingUtils
-        .removePrefixCamelCase(method, booleanGetterPrefix)
-        .ifOkFlatMap(attrName -> {
-          if (!this.isBooleanReturnType(method, settings)) {
-            this.failNonBooleanGetter(method, settings);
-            return Result.fail();
-          } else {
-            this.logger.trace("{} is a valid boolean getter", method);
-            return Result.ok(attrName);
-          }
+        .removePrefixCamelCase(method, getterPrefix)
+        .ifOk(name -> this.logger.trace("{} is getter for attribute {}", method, name));
+  }
+
+  private Result<Void> applyGetter(
+      MethodClassification.Builder builder,
+      String attrName,
+      ExecutableElement newMethod
+  ) {
+    return builder
+        .getExistingGetter(attrName)
+        .map(existingMethod -> {
+          this.failMethodAlreadyExists(existingMethod, newMethod);
+          return Result.<Void>fail();
         })
-        .ifIgnoredReplace(() -> NamingUtils.removePrefixCamelCase(method, getterPrefix))
-        .ifOkFlatMap(attributeName -> builder
-            .getExistingGetter(attributeName)
-            .map(existingGetter -> {
-              this.failMethodAlreadyExists(existingGetter, method);
-              return Result.<String>fail();
-            })
-            .orElseGet(() -> {
-              this.logger.trace("{} is a valid getter", method);
-              return Result.ok(attributeName);
-            }))
-        .ifOkThen(attributeName -> builder.getter(attributeName, method))
-        .thenDiscardValue()
-        .ifIgnoredThen(() -> this.logger.trace(
-            "Ignoring {} as a getter as it does not match any of the the required names",
-            method
-        ));
+        .orElseGet(Result::ok)
+        .ifOk(() -> builder.getter(attrName, newMethod));
   }
 
-  private Result<Void> processEquals(
-      MethodClassification.Builder builder,
-      ExecutableElement method,
-      SettingsCollection settings,
-      TypeElement interfaceTypeElement
-  ) {
-    if (settings.getEqualityMode().getValue() != Equality.CUSTOM) {
-      this.logger.trace(
-          "Ignoring {} as custom equality method as the feature is not set to CUSTOM",
-          method
-      );
-      return Result.ignore();
-    }
-
-    TypeMirror thisType = interfaceTypeElement.asType();
-    TypeMirror objectType = this.elementUtils
-        .getTypeElement(Object.class.getCanonicalName())
-        .asType();
-
-    // static boolean isEqual(ModelType first, Object second);
-    String hashCodeMethodName = settings.getEqualsMethodName().getValue();
-    boolean interesting = method.getSimpleName().contentEquals(hashCodeMethodName)
-        && !this.isInstanceScoped(method)
-        && this.isBooleanPrimitiveReturnType(method)
-        && method.getParameters().size() == 2
-        && this.typeUtils.isAssignable(thisType, method.getParameters().get(0).asType())
-        && this.typeUtils.isSameType(objectType, method.getParameters().get(1).asType());
-
-    if (!interesting) {
-      this.logger.trace(
-          "Ignoring {} as custom equality method as it does not match the desired format",
-          method
-      );
-
-      return Result.ignore();
-    }
-
-    builder.equalsImplementation(method);
-    return Result.ok();
-  }
-
-  private Result<Void> processHashCode(
-      MethodClassification.Builder builder,
-      ExecutableElement method,
-      SettingsCollection settings,
-      TypeElement interfaceTypeElement
-  ) {
-    if (settings.getEqualityMode().getValue() != Equality.CUSTOM) {
-      this.logger.trace(
-          "Ignoring {} as custom hashCode method as the feature is not set to CUSTOM",
-          method
-      );
-      return Result.ignore();
-    }
-
-    TypeMirror thisType = interfaceTypeElement.asType();
-
-    // static int hashCodeOf(ModelType first);
-    String hashCodeMethodName = settings.getHashCodeMethodName().getValue();
-    boolean interesting = method.getSimpleName().contentEquals(hashCodeMethodName)
-        && !this.isInstanceScoped(method)
-        && method.getReturnType().getKind() == TypeKind.INT
-        && method.getParameters().size() == 1
-        && this.typeUtils.isAssignable(thisType, method.getParameters().get(0).asType());
-
-    if (!interesting) {
-      this.logger.trace(
-          "Ignoring {} as custom hashCode method as it does not match the desired format",
-          method
-      );
-      return Result.ignore();
-    }
-
-    builder.hashCodeImplementation(method);
-    return Result.ok();
-  }
-
-  private Result<Void> processToString(
-      MethodClassification.Builder builder,
-      ExecutableElement method,
-      SettingsCollection settings,
-      TypeElement interfaceTypeElement
-  ) {
-    if (settings.getToStringMode().getValue() != ToString.CUSTOM) {
-      this.logger.trace(
-          "Ignoring {} as custom toString method as the feature is not set to CUSTOM",
-          method
-      );
-      return Result.ignore();
-    }
-
-    TypeMirror thisType = interfaceTypeElement.asType();
-    TypeMirror stringType = this.elementUtils
-        .getTypeElement(String.class.getCanonicalName())
-        .asType();
-
-    // static String asString(ModelType first);
-    String toStringMethodName = settings.getToStringMethodName().getValue();
-    boolean interesting = method.getSimpleName().contentEquals(toStringMethodName)
-        && !this.isInstanceScoped(method)
-        && this.typeUtils.isSameType(method.getReturnType(), stringType)
-        && method.getParameters().size() == 1
-        && this.typeUtils.isAssignable(thisType, method.getParameters().get(0).asType());
-
-    if (!interesting) {
-      this.logger.trace(
-          "Ignoring {} as custom toString method as it does not match the desired format",
-          method
-      );
-      return Result.ignore();
-    }
-
-    builder.toStringImplementation(method);
-    return Result.ok();
-  }
-
-  private Result<Void> processAsStaticMethod(
+  private Result<ExecutableElement> processAsStaticMethod(
       MethodClassification.Builder builder,
       ExecutableElement method
   ) {
@@ -272,7 +162,7 @@ public final class MethodClassificationFactory {
 
     this.logger.trace("{} is a static method");
     builder.staticMethod(method);
-    return Result.ok();
+    return Result.ok(method);
   }
 
   private String signatureOf(ExecutableElement element) {

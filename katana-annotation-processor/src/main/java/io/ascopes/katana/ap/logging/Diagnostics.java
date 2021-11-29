@@ -141,6 +141,9 @@ public final class Diagnostics {
       try {
         String path = this.directory + "/" + this.template;
         String message = Diagnostics.this.handlebars.compile(path).apply(this.params);
+
+        Diagnostics.this.logger.debug("Reporting error to compiler [{}]: {}", path, message);
+
         Diagnostics.this.messager.printMessage(
             this.kind,
             message,
@@ -149,12 +152,23 @@ public final class Diagnostics {
             this.annotationValue
         );
       } catch (IOException | HandlebarsException ex) {
-        StringWriter writer = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(writer);
-        ex.printStackTrace(printWriter);
-        Diagnostics.this.logger.error("Failed to generate template for diagnostics", ex);
+        String stackTrace = ex.getClass()
+            + ": "
+            + ex.getMessage()
+            + "\n"
+            + stackTraceToString(ex.getStackTrace());
+
+        Diagnostics.this.logger.error("Failed to generate error template.\n{}", stackTrace);
       }
     }
+  }
+
+  private static String stackTraceToString(StackTraceElement[] stack) {
+    StringBuilder builder = new StringBuilder();
+    for (StackTraceElement stackTraceElement : stack) {
+      builder.append(stackTraceElement.toString()).append("\n");
+    }
+    return builder.toString();
   }
 
   /**
@@ -277,6 +291,5 @@ public final class Diagnostics {
      */
     void log();
   }
-
 }
 

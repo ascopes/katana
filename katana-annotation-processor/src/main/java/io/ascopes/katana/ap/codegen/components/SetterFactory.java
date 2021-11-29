@@ -5,7 +5,6 @@ import com.squareup.javapoet.MethodSpec;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
-import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import javax.lang.model.element.Modifier;
 
@@ -30,15 +29,12 @@ public final class SetterFactory {
   /**
    * Create a setter for the given attribute.
    *
-   * @param attribute the attribute to generate the setter for.
-   * @param settings  the settings to use.
+   * @param attribute    the attribute to generate the setter for.
+   * @param setterPrefix the setter prefix to use.
    * @return the generated method spec.
    */
-  public MethodSpec create(Attribute attribute, SettingsCollection settings) {
-    String setterName = NamingUtils.addPrefixCamelCase(
-        settings.getSetterPrefix().getValue(),
-        attribute.getName()
-    );
+  public MethodSpec create(Attribute attribute, String setterPrefix) {
+    String setterName = NamingUtils.addPrefixCamelCase(setterPrefix, attribute.getName());
 
     MethodSpec.Builder builder = MethodSpec
         .methodBuilder(setterName)

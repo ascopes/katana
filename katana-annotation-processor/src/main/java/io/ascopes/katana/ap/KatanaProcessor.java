@@ -5,16 +5,12 @@ import io.ascopes.katana.annotations.ImmutableModel;
 import io.ascopes.katana.annotations.MutableModel;
 import io.ascopes.katana.ap.codegen.JavaFileWriter;
 import io.ascopes.katana.ap.codegen.JavaModelFactory;
-import io.ascopes.katana.ap.descriptors.AttributeFactory;
-import io.ascopes.katana.ap.descriptors.AttributeFeatureInclusionManager;
 import io.ascopes.katana.ap.descriptors.InterfaceSearcher;
-import io.ascopes.katana.ap.descriptors.MethodClassificationFactory;
 import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.descriptors.ModelFactory;
 import io.ascopes.katana.ap.logging.Diagnostics;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
-import io.ascopes.katana.ap.settings.SettingsResolver;
 import io.ascopes.katana.ap.utils.Result;
 import java.util.Collections;
 import java.util.Optional;
@@ -85,36 +81,12 @@ public final class KatanaProcessor extends AbstractProcessor {
         this.processingEnv.getMessager()
     );
 
-    SettingsResolver settingsResolver = new SettingsResolver(
-        this.processingEnv.getElementUtils(),
-        this.processingEnv.getTypeUtils()
-    );
-
-    MethodClassificationFactory methodClassifier = new MethodClassificationFactory(
-        diagnostics,
-        this.processingEnv.getElementUtils(),
-        this.processingEnv.getTypeUtils()
-    );
-
     this.interfaceSearcher = new InterfaceSearcher(diagnostics);
 
-    AttributeFeatureInclusionManager attributeFeatureInclusionManager =
-        new AttributeFeatureInclusionManager(
-            diagnostics,
-            this.processingEnv.getElementUtils()
-        );
-
-    AttributeFactory attributeFactory = new AttributeFactory(
-        attributeFeatureInclusionManager,
-        this.processingEnv.getElementUtils()
-    );
-
     this.modelFactory = new ModelFactory(
-        settingsResolver,
-        methodClassifier,
-        attributeFactory,
         diagnostics,
-        this.processingEnv.getElementUtils()
+        this.processingEnv.getElementUtils(),
+        this.processingEnv.getTypeUtils()
     );
 
     this.javaModelFactory = new JavaModelFactory();
@@ -192,6 +164,6 @@ public final class KatanaProcessor extends AbstractProcessor {
 
   private Result<Void> buildJavaFile(Model model) {
     JavaFile file = this.javaModelFactory.create(model);
-    return this.javaFileWriter.writeOutFile(model.getQualifiedName(), file);
+    return this.javaFileWriter.writeOutFile(model.getQualifiedName().reflectionName(), file);
   }
 }

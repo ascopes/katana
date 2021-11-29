@@ -4,8 +4,8 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.CompilationSubject;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
-import io.ascopes.katana.annotations.internal.ExclusionAdvice;
-import io.ascopes.katana.annotations.internal.InclusionAdvice;
+import io.ascopes.katana.annotations.advices.ExclusionAdvice;
+import io.ascopes.katana.annotations.advices.InclusionAdvice;
 import java.lang.annotation.Annotation;
 import javax.tools.JavaFileObject;
 import org.assertj.core.api.BDDAssertions;
@@ -352,7 +352,7 @@ abstract class CommonIncludeExcludeTestCases<A extends Annotation> extends TypeA
     try {
       actualValue = (Class<? extends Annotation>) advice
           .annotationType()
-          .getDeclaredMethod("value")
+          .getDeclaredMethod("annotation")
           .invoke(advice);
     } catch (Exception ex) {
       throw new RuntimeException(ex);

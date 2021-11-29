@@ -1,8 +1,8 @@
-package io.ascopes.katana.annotations;
+  package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.internal.AttributeFeature;
-import io.ascopes.katana.annotations.internal.ExclusionAdvice;
-import io.ascopes.katana.annotations.internal.InclusionAdvice;
+import io.ascopes.katana.annotations.features.AttributeFeature;
+import io.ascopes.katana.annotations.advices.ExclusionAdvice;
+import io.ascopes.katana.annotations.advices.InclusionAdvice;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -16,8 +16,8 @@ import java.lang.annotation.Target;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-@ExclusionAdvice(Transient.Exclude.class)
-@InclusionAdvice(Transient.Include.class)
+@ExclusionAdvice(annotation = Transient.Exclude.class)
+@InclusionAdvice(annotation = Transient.Include.class)
 @SuppressWarnings("unused")
 public enum Transient implements AttributeFeature {
   /**
@@ -47,7 +47,7 @@ public enum Transient implements AttributeFeature {
   @Retention(RetentionPolicy.SOURCE)
   @Target(ElementType.METHOD)
   public @interface Include {
-
+    // Marker annotation only.
   }
 
   /**
@@ -57,6 +57,6 @@ public enum Transient implements AttributeFeature {
   @Retention(RetentionPolicy.SOURCE)
   @Target(ElementType.METHOD)
   public @interface Exclude {
-
+    // Marker annotation only.
   }
 }

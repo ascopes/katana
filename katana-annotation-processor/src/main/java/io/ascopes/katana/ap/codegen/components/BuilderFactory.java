@@ -298,6 +298,6 @@ public final class BuilderFactory {
   }
 
   private ClassName builderTypeName(Model model, BuilderStrategy strategy) {
-    return this.modelTypeName(model).nestedClass(strategy.getBuilderName());
+    return this.modelTypeName(model).nestedClass(strategy.getBuilderTypeName());
   }
 }

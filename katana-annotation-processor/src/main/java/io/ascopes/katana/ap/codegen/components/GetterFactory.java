@@ -5,7 +5,6 @@ import com.squareup.javapoet.MethodSpec;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
-import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import javax.lang.model.element.Modifier;
 
 /**
@@ -29,10 +28,9 @@ public final class GetterFactory {
    * Create a getter for the given attribute.
    *
    * @param attribute the attribute to create the getter for.
-   * @param settings  the settings to use.
    * @return the generated method spec.
    */
-  public MethodSpec create(Attribute attribute, SettingsCollection settings) {
+  public MethodSpec create(Attribute attribute) {
     MethodSpec.Builder builder = MethodSpec
         .overriding(attribute.getGetterToOverride())
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)

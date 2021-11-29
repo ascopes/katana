@@ -121,6 +121,35 @@ public final class ResultCollector<T, C>
   }
 
   /**
+   * Aggregate a stream of results into a single result of whatever the given collector provides.
+   *
+   * @param then the collector to aggregate with.
+   * @param <T>  the input type.
+   * @param <C>  the output type.
+   * @return the collector.
+   */
+  public static <T, C> Collector<Result<T>, ?, Result<C>> aggregating(Collector<T, ?, C> then) {
+    return new ResultCollector<>(then, Stream::builder);
+  }
+
+  /**
+   * Discard each value within each result, only returning an empty result that fails if any input
+   * element was failed.
+   *
+   * <p>This attempts to allocate as little as possible.
+   *
+   * @param <T> the input type.
+   * @return the collector.
+   */
+  public static <T> Collector<Result<T>, ?, Result<Void>> discarding() {
+    // TODO: unit test
+    return Collectors.collectingAndThen(
+        new ResultCollector<>(new DiscardingCollector<>(), DiscardingStreamBuilder::new),
+        Result::dropValue
+    );
+  }
+
+  /**
    * Stream builder that discards everything.
    *
    * @param <T> the input argument type.
@@ -170,34 +199,5 @@ public final class ResultCollector<T, C>
     public Set<Characteristics> characteristics() {
       return Collections.singleton(Characteristics.IDENTITY_FINISH);
     }
-  }
-
-  /**
-   * Aggregate a stream of results into a single result of whatever the given collector provides.
-   *
-   * @param then the collector to aggregate with.
-   * @param <T>  the input type.
-   * @param <C>  the output type.
-   * @return the collector.
-   */
-  public static <T, C> Collector<Result<T>, ?, Result<C>> aggregating(Collector<T, ?, C> then) {
-    return new ResultCollector<>(then, Stream::builder);
-  }
-
-  /**
-   * Discard each value within each result, only returning an empty result that fails if any input
-   * element was failed.
-   *
-   * <p>This attempts to allocate as little as possible.
-   *
-   * @param <T> the input type.
-   * @return the collector.
-   */
-  public static <T> Collector<Result<T>, ?, Result<Void>> discarding() {
-    // TODO: unit test
-    return Collectors.collectingAndThen(
-        new ResultCollector<>(new DiscardingCollector<>(), DiscardingStreamBuilder::new),
-        Result::thenDiscardValue
-    );
   }
 }

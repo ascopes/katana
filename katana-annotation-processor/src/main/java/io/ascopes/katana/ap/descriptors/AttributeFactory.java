@@ -4,6 +4,7 @@ import com.squareup.javapoet.TypeName;
 import io.ascopes.katana.annotations.FieldVisibility;
 import io.ascopes.katana.annotations.Visibility;
 import io.ascopes.katana.ap.descriptors.Attribute.Builder;
+import io.ascopes.katana.ap.logging.Diagnostics;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
 import io.ascopes.katana.ap.utils.NamingUtils;
@@ -23,21 +24,23 @@ import javax.lang.model.util.Elements;
  */
 public final class AttributeFactory {
 
-  private final AttributeFeatureInclusionManager attributeFeatureInclusionManager;
   private final Elements elementUtils;
+  private final FeatureManager featureManager;
 
   /**
    * Initialize this factory.
    *
-   * @param attributeFeatureInclusionManager the inclusion manager to use.
-   * @param elementUtils                     the element utilities to use for introspection.
+   * @param diagnostics    the diagnostics to use for reporting compiler errors.
+   * @param featureManager the feature manager to use.
+   * @param elementUtils   the element utilities to use for introspection.
    */
   public AttributeFactory(
-      AttributeFeatureInclusionManager attributeFeatureInclusionManager,
+      Diagnostics diagnostics,
+      FeatureManager featureManager,
       Elements elementUtils
   ) {
-    this.attributeFeatureInclusionManager = attributeFeatureInclusionManager;
     this.elementUtils = elementUtils;
+    this.featureManager = featureManager;
   }
 
   /**
@@ -105,8 +108,8 @@ public final class AttributeFactory {
       Attribute.Builder builder,
       SettingsCollection settings
   ) {
-    return this.attributeFeatureInclusionManager
-        .check(builder.getName(), settings.getFieldTransience(), builder.getGetter())
+    return this.featureManager
+        .checkInclusion(builder.getName(), settings.getFieldTransience(), builder.getGetter())
         .ifOkMap(builder::transientField);
   }
 
@@ -132,9 +135,9 @@ public final class AttributeFactory {
       Attribute.Builder builder,
       SettingsCollection settings
   ) {
-    return this.attributeFeatureInclusionManager
-        .check(builder.getName(), settings.getSetters(), builder.getGetter())
-        .ifOkThen(builder::setterEnabled)
+    return this.featureManager
+        .checkInclusion(builder.getName(), settings.getSetters(), builder.getGetter())
+        .ifOk(builder::setterEnabled)
         // TODO(ascopes): allow overriding explicitly defined setters in the future
         .ifOkReplace(() -> Result.ok(builder));
   }
@@ -143,8 +146,8 @@ public final class AttributeFactory {
       Attribute.Builder builder,
       SettingsCollection settings
   ) {
-    return this.attributeFeatureInclusionManager
-        .check(builder.getName(), settings.getToStringMode(), builder.getGetter())
+    return this.featureManager
+        .checkInclusion(builder.getName(), settings.getToStringMode(), builder.getGetter())
         .ifOkMap(builder::includeInToString);
   }
 
@@ -152,8 +155,8 @@ public final class AttributeFactory {
       Attribute.Builder builder,
       SettingsCollection settings
   ) {
-    return this.attributeFeatureInclusionManager
-        .check(builder.getName(), settings.getEqualityMode(), builder.getGetter())
+    return this.featureManager
+        .checkInclusion(builder.getName(), settings.getEqualityMode(), builder.getGetter())
         .ifOkMap(builder::includeInEqualsAndHashCode);
   }
 
@@ -165,5 +168,34 @@ public final class AttributeFactory {
         .findAnnotationMirror(builder.getGetter(), deprecatedAnnotation)
         .ifOkMap(builder::deprecatedAnnotation)
         .ifIgnoredReplace(builder);
+  }
+
+  private static final class AttributeCandidate {
+
+    private final Attribute.Builder builder;
+    private final SettingsCollection settings;
+    private final boolean mutableModel;
+
+    private AttributeCandidate(
+        Attribute.Builder builder,
+        SettingsCollection settings,
+        boolean mutableModel
+    ) {
+      this.builder = builder;
+      this.settings = settings;
+      this.mutableModel = mutableModel;
+    }
+
+    public Builder getBuilder() {
+      return this.builder;
+    }
+
+    public SettingsCollection getSettings() {
+      return this.settings;
+    }
+
+    public boolean isMutableModel() {
+      return this.mutableModel;
+    }
   }
 }

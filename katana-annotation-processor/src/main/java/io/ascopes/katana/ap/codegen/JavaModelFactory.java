@@ -11,7 +11,6 @@ import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
-import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.CodeGenUtils;
 import javax.lang.model.element.Modifier;
 
@@ -60,7 +59,7 @@ public final class JavaModelFactory {
     return JavaFile
         .builder(model.getPackageName(), typeSpec)
         .skipJavaLangImports(true)
-        .indent(model.getSettingsCollection().getIndent().getValue())
+        .indent(model.getIndent())
         .build();
   }
 
@@ -83,15 +82,14 @@ public final class JavaModelFactory {
   }
 
   private void applyAttributes(TypeSpec.Builder typeSpecBuilder, Model model) {
-    SettingsCollection settings = model.getSettingsCollection();
-
     for (Attribute attribute : model.getAttributes()) {
       typeSpecBuilder
-          .addField(this.fieldFactory.create(attribute, settings))
-          .addMethod(this.getterFactory.create(attribute, settings));
+          .addField(this.fieldFactory.create(attribute))
+          .addMethod(this.getterFactory.create(attribute));
 
-      if (model.isMutable()) {
-        typeSpecBuilder.addMethod(this.setterFactory.create(attribute, settings));
+      if (!attribute.isFinalField()) {
+        typeSpecBuilder
+            .addMethod(this.setterFactory.create(attribute, model.getSetterPrefix()));
       }
     }
   }

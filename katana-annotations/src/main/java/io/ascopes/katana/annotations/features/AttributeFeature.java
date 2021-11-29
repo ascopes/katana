@@ -1,4 +1,4 @@
-package io.ascopes.katana.annotations.internal;
+package io.ascopes.katana.annotations.features;
 
 /**
  * Interface for a descriptor describing a feature on an attribute.

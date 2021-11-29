@@ -1,8 +1,10 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.internal.CustomizableAttributeFeature;
-import io.ascopes.katana.annotations.internal.ExclusionAdvice;
-import io.ascopes.katana.annotations.internal.InclusionAdvice;
+import io.ascopes.katana.annotations.advices.CustomMethodAdvice;
+import io.ascopes.katana.annotations.advices.CustomMethodAdvice.This;
+import io.ascopes.katana.annotations.advices.ExclusionAdvice;
+import io.ascopes.katana.annotations.advices.InclusionAdvice;
+import io.ascopes.katana.annotations.features.CustomizableAttributeFeature;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -16,8 +18,18 @@ import java.lang.annotation.Target;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-@ExclusionAdvice(Equality.Exclude.class)
-@InclusionAdvice(Equality.Include.class)
+@CustomMethodAdvice(
+    annotation = Equality.CustomEquals.class,
+    returns = boolean.class,
+    consumes = {This.class, Object.class}
+)
+@CustomMethodAdvice(
+    annotation = Equality.CustomHashCode.class,
+    returns = int.class,
+    consumes = This.class
+)
+@ExclusionAdvice(annotation = Equality.Exclude.class)
+@InclusionAdvice(annotation = Equality.Include.class)
 @SuppressWarnings("unused")
 public enum Equality implements CustomizableAttributeFeature {
   /**
@@ -58,21 +70,14 @@ public enum Equality implements CustomizableAttributeFeature {
 
   /**
    * Use custom implementations for equality and identity. This requires two static methods to be
-   * defined in your interface:
-   *
-   * <ol>
-   *   <li><code>public static boolean isEqual(ThisInterface self, Object other)</code></li>
-   *   <li><code>public static int hashCodeOf(ThisInterface self)</code></li>
-   * </ol>
-   *
-   * <p>...where {@code ThisInterface} is the name of the interface you are using this annotation
-   * in.
+   * defined in your interface, one annotated as {@link CustomEquals} and one annotated as {@link
+   * CustomHashCode}.
    *
    * <p>Not specifying these methods is an error.
    */
   CUSTOM {
     @Override
-    public boolean isCustomImpl() {
+    public boolean isCustom() {
       return true;
     }
   };
@@ -84,7 +89,7 @@ public enum Equality implements CustomizableAttributeFeature {
   @Retention(RetentionPolicy.SOURCE)
   @Target(ElementType.METHOD)
   public @interface Include {
-
+    // Marker annotation only.
   }
 
   /**
@@ -94,6 +99,33 @@ public enum Equality implements CustomizableAttributeFeature {
   @Retention(RetentionPolicy.SOURCE)
   @Target(ElementType.METHOD)
   public @interface Exclude {
+    // Marker annotation only.
+  }
 
+  /**
+   * Annotation to mark a static method as being the custom equals implementation.
+   *
+   * <p>The method must take the non-null interface it is defined in as the first argument,
+   * and a nullable {@link Object} as the second argument. It must always return a {@code boolean}
+   * primitive value.
+   */
+  @Documented
+  @Retention(RetentionPolicy.SOURCE)
+  @Target(ElementType.METHOD)
+  public @interface CustomEquals {
+    // Marker annotation only.
+  }
+
+  /**
+   * Annotation to mark a static method as being the custom hashCOde implementation.
+   *
+   * <p>The method must take the non-null interface it is defined in as the sole argument,
+   * and must always return an {@code int} primitive value.
+   */
+  @Documented
+  @Retention(RetentionPolicy.SOURCE)
+  @Target(ElementType.METHOD)
+  public @interface CustomHashCode {
+    // Marker annotation only.
   }
 }

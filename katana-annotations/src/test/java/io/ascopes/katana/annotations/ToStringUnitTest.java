@@ -1,5 +1,6 @@
 package io.ascopes.katana.annotations;
 
+import io.ascopes.katana.annotations.advices.CustomMethodAdvice.This;
 import org.junit.jupiter.api.Nested;
 
 class ToStringUnitTest {
@@ -22,5 +23,12 @@ class ToStringUnitTest {
   @Nested
   class ToStringFeatureUnitTest extends CommonAttributeFeatureTestCases<ToString> {
 
+  }
+
+  @Nested
+  class ToStringCustomMethodUnitTest extends CommonCustomAdviceTestCases<ToString> {
+    ToStringCustomMethodUnitTest() {
+      super(new Signature(ToString.CustomToString.class, String.class, This.class));
+    }
   }
 }

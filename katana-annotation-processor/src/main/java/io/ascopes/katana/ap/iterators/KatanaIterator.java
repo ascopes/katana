@@ -15,26 +15,47 @@ import java.util.stream.StreamSupport;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public interface StreamableIterator<E> extends Iterator<E> {
+public abstract class KatanaIterator<E> implements Iterator<E> {
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
-  boolean hasNext();
+  public abstract boolean hasNext();
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
-  E next() throws NoSuchElementException;
+  public abstract E next() throws NoSuchElementException;
 
-  int characteristics();
+  /**
+   * Get the spliterator characteristics.
+   *
+   * @return the characteristics bitfield.
+   */
+  public abstract int characteristics();
 
+  /**
+   * Get a spliterator for this iterator.
+   *
+   * @return the spliterator.
+   */
   @SuppressWarnings("MagicConstant")
-  default Spliterator<E> spliterator() {
+  public final Spliterator<E> spliterator() {
     return Spliterators.spliteratorUnknownSize(this, this.characteristics());
   }
 
-  default Stream<E> stream() {
+  /**
+   * Cast this iterator to a stream.
+   *
+   * @return the stream.
+   */
+  public final Stream<E> stream() {
     return StreamSupport.stream(this.spliterator(), false);
   }
 
-  static NoSuchElementException noMoreElementsException(String name) {
+  protected static NoSuchElementException noMoreElementsException(String name) {
     return new NoSuchElementException("There are no more " + name + " to iterate over");
   }
 }

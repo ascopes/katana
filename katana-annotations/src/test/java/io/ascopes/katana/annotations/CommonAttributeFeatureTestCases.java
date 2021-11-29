@@ -1,7 +1,7 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.internal.AttributeFeature;
-import io.ascopes.katana.annotations.internal.CustomizableAttributeFeature;
+import io.ascopes.katana.annotations.features.AttributeFeature;
+import io.ascopes.katana.annotations.features.CustomizableAttributeFeature;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -76,7 +76,7 @@ abstract class CommonAttributeFeatureTestCases<T extends Enum<T>>
         () -> BDDAssertions
             .assertThat(custom)
             .get()
-            .matches(CustomizableAttributeFeature::isCustomImpl)
+            .matches(CustomizableAttributeFeature::isCustom)
             .matches(not(AttributeFeature::isIncludeAll))
             .matches(not(AttributeFeature::isExcludeAll))
             .matches(not(AttributeFeature::isDisabled))

@@ -53,8 +53,12 @@ public final class NamingUtils {
     String name = method.getSimpleName().toString();
     int prefixLength = prefix.length();
 
-    // The prefix may be empty if we are using fluent naming.
-    if (name.length() - prefixLength <= 0 || !name.startsWith(prefix)) {
+    if (prefixLength == 0) {
+      // The prefix may be empty if we are using fluent naming.
+      return Result.ok(method.getSimpleName().toString());
+    }
+
+    if (name.length() - prefixLength < 0 || !name.startsWith(prefix)) {
       return Result.ignore();
     }
 

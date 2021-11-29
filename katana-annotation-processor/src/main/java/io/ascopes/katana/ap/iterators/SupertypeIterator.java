@@ -18,7 +18,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class SupertypeIterator implements StreamableIterator<TypeElement> {
+public final class SupertypeIterator extends KatanaIterator<TypeElement> {
 
   private final Types typeUtils;
   private final Queue<TypeElement> upcoming;
@@ -54,7 +54,7 @@ public final class SupertypeIterator implements StreamableIterator<TypeElement> 
     TypeElement next = this.upcoming.poll();
 
     if (next == null) {
-      throw StreamableIterator.noMoreElementsException("superinterfaces");
+      throw KatanaIterator.noMoreElementsException("superinterfaces");
     }
 
     if (!(next.getSuperclass() instanceof NoType)) {

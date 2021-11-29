@@ -49,30 +49,7 @@ public final class LoggerFactory {
     if (args.length == 0) {
       message = format;
     } else {
-      StringBuilder messageBuilder = new StringBuilder();
-      int size = format.length();
-      int argumentIndex = 0;
-      char currentChar;
-      char nextChar;
-      for (int formatIndex = 0; formatIndex < size; ++formatIndex) {
-        currentChar = format.charAt(formatIndex);
-        nextChar = formatIndex + 1 == size
-            ? '\0'
-            : format.charAt(formatIndex + 1);
-        if (currentChar != '{' && nextChar != '}') {
-          messageBuilder.append(currentChar);
-          if (currentChar == '\n') {
-            // Indent additional lines.
-            messageBuilder.append("    ");
-          }
-          continue;
-        }
-
-        ++formatIndex;
-        Object arg = args[argumentIndex++];
-        messageBuilder.append(arg);
-      }
-      message = messageBuilder.toString();
+      message = String.format(format.replace("{}", "%s"), args);
     }
 
     this.outputStream.printf(

@@ -1,8 +1,10 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.internal.CustomizableAttributeFeature;
-import io.ascopes.katana.annotations.internal.ExclusionAdvice;
-import io.ascopes.katana.annotations.internal.InclusionAdvice;
+import io.ascopes.katana.annotations.advices.CustomMethodAdvice;
+import io.ascopes.katana.annotations.advices.CustomMethodAdvice.This;
+import io.ascopes.katana.annotations.features.CustomizableAttributeFeature;
+import io.ascopes.katana.annotations.advices.ExclusionAdvice;
+import io.ascopes.katana.annotations.advices.InclusionAdvice;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,8 +17,13 @@ import java.lang.annotation.Target;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-@ExclusionAdvice(ToString.Exclude.class)
-@InclusionAdvice(ToString.Include.class)
+@CustomMethodAdvice(
+    annotation = ToString.CustomToString.class,
+    returns = String.class,
+    consumes = This.class
+)
+@ExclusionAdvice(annotation = ToString.Exclude.class)
+@InclusionAdvice(annotation = ToString.Include.class)
 @SuppressWarnings("unused")
 public enum ToString implements CustomizableAttributeFeature {
   /**
@@ -53,18 +60,13 @@ public enum ToString implements CustomizableAttributeFeature {
 
   /**
    * Use custom implementations for the {@link Object#toString()}. This requires a static method to
-   * be defined with the following signature:
+   * be defined and be annotated with {@link CustomToString}.
    *
-   * <p><code>public static String asString(ThisInterface self)</code>
-   *
-   * <p>...where {@code ThisInterface} is the name of the interface you are using this annotation
-   * in.
-   *
-   * <p>Not specifying this method is an error if you use this setting.
+   * <p>Not specifying this method is an error.
    */
   CUSTOM {
     @Override
-    public boolean isCustomImpl() {
+    public boolean isCustom() {
       return true;
     }
   };
@@ -86,6 +88,19 @@ public enum ToString implements CustomizableAttributeFeature {
   @Retention(RetentionPolicy.SOURCE)
   @Target(ElementType.METHOD)
   public @interface Exclude {
+    // Marker annotation only.
+  }
+
+  /**
+   * Annotation to mark a static method as being the custom toString implementation.
+   *
+   * <p>The method must take the interface it is defined in as the sole argument, and return a
+   * non-null {@link String}.
+   */
+  @Documented
+  @Retention(RetentionPolicy.SOURCE)
+  @Target(ElementType.METHOD)
+  public @interface CustomToString {
     // Marker annotation only.
   }
 }

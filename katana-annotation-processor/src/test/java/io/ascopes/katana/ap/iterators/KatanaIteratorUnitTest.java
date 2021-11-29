@@ -13,11 +13,11 @@ import static java.util.Spliterator.ORDERED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-class StreamableIteratorUnitTest {
+class KatanaIteratorUnitTest {
 
   @Test
   void spliterator_returns_valid_spliterator() {
-    StreamableIteratorImpl iterator = new StreamableIteratorImpl();
+    KatanaIteratorImpl iterator = new KatanaIteratorImpl();
     Spliterator<String> spliterator = iterator.spliterator();
 
     assertThat(spliterator.tryAdvance(spliteratorExpect("foo")))
@@ -38,13 +38,13 @@ class StreamableIteratorUnitTest {
 
   @Test
   void stream_returns_valid_stream() {
-    assertThat(new StreamableIteratorImpl().stream())
+    assertThat(new KatanaIteratorImpl().stream())
         .containsExactly("foo", "bar", "baz");
   }
 
   @Test
   void noMoreElementsException_returns_NoMoreElementsException() {
-    assertThat(StreamableIterator.noMoreElementsException("lemons"))
+    assertThat(KatanaIterator.noMoreElementsException("lemons"))
         .hasMessage("There are no more lemons to iterate over");
   }
 
@@ -56,7 +56,7 @@ class StreamableIteratorUnitTest {
     return actual -> fail("Did not expect any element, but received '" + actual + "'");
   }
 
-  static class StreamableIteratorImpl implements StreamableIterator<String> {
+  static class KatanaIteratorImpl extends KatanaIterator<String> {
 
     private final Iterator<String> innerIterator = Arrays
         .asList("foo", "bar", "baz")
