@@ -27,4 +27,12 @@ shift 1
 echo "Using image ${image}"
 
 set -x
-docker run --rm -w ${rootdir} -v ${rootdir}:${rootdir} ${image} ${rootdir}/mvnw $@
+docker run \
+  -u $(id -u ${USER}):$(id -g ${USER}) \
+  --rm \
+  -w ${rootdir} \
+  -v ${rootdir}:${rootdir} \
+  ${image} \
+  ${rootdir}/mvnw $@
+
+
