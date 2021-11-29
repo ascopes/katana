@@ -39,11 +39,11 @@ abstract class AbstractInitTracker implements InitTracker {
     int offset = 0;
     for (Attribute attribute : attributeSet) {
       Objects.requireNonNull(attribute);
-      CodeBlock bitflag = this.shl(one, this.cast(++offset));
+      CodeBlock bitflag = this.shl(one, this.cast(offset++));
       this.attributes.put(attribute, bitflag);
     }
 
-    this.allMask = this.sub(this.shl(one, this.cast(++offset)), one);
+    this.allMask = this.sub(this.shl(one, this.cast(offset)), one);
     this.trackingFieldName = Objects.requireNonNull(trackingFieldName);
   }
 
