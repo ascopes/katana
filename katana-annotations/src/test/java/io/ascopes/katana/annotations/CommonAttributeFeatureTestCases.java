@@ -5,14 +5,13 @@ import io.ascopes.katana.annotations.internal.CustomizableAttributeFeature;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import org.assertj.core.api.Assumptions;
 import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 @SuppressWarnings("unused")
-abstract class CommonAttributeFeatureTestCases<T extends Enum<T> & AttributeFeature>
+abstract class CommonAttributeFeatureTestCases<T extends Enum<T>>
     extends TypeAware<T> {
 
   private final Class<T> attributeFeatureType;
@@ -45,7 +44,7 @@ abstract class CommonAttributeFeatureTestCases<T extends Enum<T> & AttributeFeat
 
   @TestFactory
   Stream<DynamicTest> DISABLED_has_isDisabled_as_true_if_DISABLED_defined() {
-    Optional<T> disabled = this.getEnumConstantNamed("DISABLED");
+    Optional<AttributeFeature> disabled = this.getEnumConstantNamed("DISABLED");
 
     if (!disabled.isPresent()) {
       return Stream.empty();
@@ -84,10 +83,12 @@ abstract class CommonAttributeFeatureTestCases<T extends Enum<T> & AttributeFeat
     ));
   }
 
-  protected Optional<T> getEnumConstantNamed(String name) {
+  protected Optional<AttributeFeature> getEnumConstantNamed(String name) {
     for (T enumMember : this.attributeFeatureType.getEnumConstants()) {
       if (enumMember.name().equals(name)) {
-        return Optional.of(enumMember);
+        return Optional
+            .of(enumMember)
+            .map(AttributeFeature.class::cast);
       }
     }
 

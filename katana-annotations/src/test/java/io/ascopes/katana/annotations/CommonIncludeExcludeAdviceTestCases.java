@@ -1,13 +1,12 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.internal.AttributeFeature;
 import io.ascopes.katana.annotations.internal.ExclusionAdvice;
 import io.ascopes.katana.annotations.internal.InclusionAdvice;
 import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
-abstract class CommonIncludeExcludeAdviceTestCases<T extends Enum<T> & AttributeFeature>
+abstract class CommonIncludeExcludeAdviceTestCases<T extends Enum<T>>
     extends TypeAware<T> {
 
   private final Class<T> attributeFeatureType;
