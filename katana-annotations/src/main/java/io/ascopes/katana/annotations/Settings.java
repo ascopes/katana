@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Annotation to override defaults for code generation.
  *
  * <p>There are six ways to specify settings for your models:
-
+ *
  * <ol>
  *   <li>
  *     Apply it to a specific generated model, by specifying it in {@link MutableModel#value()}
@@ -59,16 +59,16 @@ public @interface Settings {
   //////////////////////////////
 
   /**
-   * The pattern to use for package names. An asterisk "{@code *}" can be used to substitute
-   * the interface package (e.g. {@code "*.impl"}).
+   * The pattern to use for package names. An asterisk "{@code *}" can be used to substitute the
+   * interface package (e.g. {@code "*.impl"}).
    *
    * @return the pattern string.
    */
   String packageName() default "*.impl";
 
   /**
-   * The pattern to use for class names. An asterisk "{@code *}" can be used to substitute
-   * the interface name (e.g. {@code "*Impl"} or {@code "Immutable*Impl"}).
+   * The pattern to use for class names. An asterisk "{@code *}" can be used to substitute the
+   * interface name (e.g. {@code "*Impl"} or {@code "Immutable*Impl"}).
    *
    * @return the pattern string.
    */
@@ -81,16 +81,16 @@ public @interface Settings {
   ////////////////////////
 
   /**
-   * Whether to make all internal fields transient by default, or whether to make them
-   * non-transient by default.
+   * Whether to make all internal fields transient by default, or whether to make them non-transient
+   * by default.
    *
    * @return the transience preference.
    */
   Transient fieldTransience() default Transient.EXCLUDE_ALL;
 
   /**
-   * The default visibility to give fields. This can be overridden per field using the
-   * {@link FieldVisibility annotation} on a getter.
+   * The default visibility to give fields. This can be overridden per field using the {@link
+   * FieldVisibility annotation} on a getter.
    *
    * @return the field visibility.
    */
@@ -108,8 +108,8 @@ public @interface Settings {
   boolean allArgsConstructor() default false;
 
   /**
-   * True if a default constructor should be added. For mutable types this is a no-args
-   * constructor, and for immutable types this is the same as {@link #allArgsConstructor()}.
+   * True if a default constructor should be added. For mutable types this is a no-args constructor,
+   * and for immutable types this is the same as {@link #allArgsConstructor()}.
    *
    * @return true or false.
    */
@@ -121,6 +121,10 @@ public @interface Settings {
    * @return true or false.
    */
   boolean copyConstructor() default false;
+
+  /////////////////////////////////////
+  //// Builder generation settings ////
+  /////////////////////////////////////
 
   /**
    * True if a builder should be added.
@@ -137,37 +141,58 @@ public @interface Settings {
   String builderName() default "Builder";
 
   /**
-   * True if a {@code toBuilder} method should be added to models that have a supported
-   * builder. This is ignored if {@link #builder()} is false.
+   * Name of the builder initialization method. This is ignored if {@link #builder()} is false.
+   *
+   * @return the builder initialization method name.
+   */
+  String builderMethodName() default "builder";
+
+  /**
+   * Name of the builder "build" method. This is ignored if {@link #builder()} is false.
+   *
+   * @return the name of the method that builds a model instance from a builder.
+   */
+  String buildMethodName() default "build";
+
+  /**
+   * True if a {@code toBuilder} method should be added to models that have a supported builder.
+   * This is ignored if {@link #builder()} is false.
    *
    * @return true or false.
    */
-  boolean toBuilder() default false;
+  boolean toBuilderMethodEnabled() default false;
+
+  /**
+   * Name of the toBuilder method. This is ignored if {@link #toBuilderMethodEnabled()} or {@link
+   * #builder()} are false.
+   *
+   * @return the toBuilder method name.
+   */
+  String toBuilderMethodName() default "toBuilder";
 
   ///////////////////////////
   //// Accessor settings ////
   ///////////////////////////
 
   /**
-   * The list of fully qualified class names to treat as boolean types. This will always
-   * include the primitive type implicitly, and this should not be added explicitly to this
-   * array.
+   * The list of fully qualified class names to treat as boolean types. This will always include the
+   * primitive type implicitly, and this should not be added explicitly to this array.
    *
    * @return an array of unique class names.
    */
   Class<?>[] booleanTypes() default {Boolean.class, AtomicBoolean.class};
 
   /**
-   * The name for boolean getter methods. If this is empty, the getter will be treated as
-   * a fluent accessor (no prefix, camelcase).
+   * The name for boolean getter methods. If this is empty, the getter will be treated as a fluent
+   * accessor (no prefix, camelcase).
    *
    * @return the prefix string.
    */
   String booleanGetterPrefix() default "is";
 
   /**
-   * The name for regular getter methods. If this is empty, the getter will be treated as
-   * a fluent accessor (no prefix, camelcase).
+   * The name for regular getter methods. If this is empty, the getter will be treated as a fluent
+   * accessor (no prefix, camelcase).
    *
    * @return the prefix string.
    */
@@ -185,8 +210,8 @@ public @interface Settings {
   Setters setters() default Setters.INCLUDE_ALL;
 
   /**
-   * The prefix for setter methods. If this is empty, the setter will be implemented as
-   * a fluent mutator (no prefix, camelcase).
+   * The prefix for setter methods. If this is empty, the setter will be implemented as a fluent
+   * mutator (no prefix, camelcase).
    *
    * @return the prefix string.
    */
@@ -197,16 +222,15 @@ public @interface Settings {
   /////////////////////////////////////////////////
 
   /**
-   * The policy for generating {@link Object#equals} and {@link Object#hashCode()}
-   * overrides.
+   * The policy for generating {@link Object#equals} and {@link Object#hashCode()} overrides.
    *
    * @return the equality policy.
    */
   Equality equalityMode() default Equality.INCLUDE_ALL;
 
   /**
-   * The name of the static equals method name to look for if {@link #equalityMode()} is set
-   * to {@link Equality#CUSTOM}. The method must have the signature {@code static boolean
+   * The name of the static equals method name to look for if {@link #equalityMode()} is set to
+   * {@link Equality#CUSTOM}. The method must have the signature {@code static boolean
    * isEqualTo(ThisInterface self, Object other)}, such that "{@code isEqualTo}" is the value of
    * this setting, and {@code ThisInterface} is the interface you annotated.
    *
@@ -215,8 +239,8 @@ public @interface Settings {
   String equalsMethodName() default "isEqualTo";
 
   /**
-   * The name of the static hashCode method name to look for if {@link #equalityMode()} is
-   * set to {@link Equality#CUSTOM}. The method must have the signature {@code static int
+   * The name of the static hashCode method name to look for if {@link #equalityMode()} is set to
+   * {@link Equality#CUSTOM}. The method must have the signature {@code static int
    * hashCodeOf(ThisInterface self)}, such that "{@code hashCodeOf}" is the value of this setting,
    * and {@code ThisInterface} is the interface you annotated.
    *
@@ -236,8 +260,8 @@ public @interface Settings {
   ToString toStringMode() default ToString.INCLUDE_ALL;
 
   /**
-   * The name of the static toString method name to look for if {@link #toStringMode()} is
-   * set to {@link ToString#CUSTOM}. The method must have the signature {@code static String
+   * The name of the static toString method name to look for if {@link #toStringMode()} is set to
+   * {@link ToString#CUSTOM}. The method must have the signature {@code static String
    * asString(ThisInterface self)}, such that "{@code asString}" is the value of this setting, and
    * {@code ThisInterface} is the interface you annotated.
    *

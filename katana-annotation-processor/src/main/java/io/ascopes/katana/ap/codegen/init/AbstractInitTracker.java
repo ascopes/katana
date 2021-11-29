@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedSet;
+import org.checkerframework.checker.optional.qual.MaybePresent;
 
 
 /**
@@ -19,13 +20,15 @@ abstract class AbstractInitTracker implements InitTracker {
 
   private final Map<Attribute, CodeBlock> attributes;
   private final CodeBlock allMask;
+  private final String trackingFieldName;
 
   /**
    * Initialize this abstract tracker.
    *
-   * @param attributeSet the required attributes to track.
+   * @param attributeSet      the required attributes to track.
+   * @param trackingFieldName the tracking field name to use.
    */
-  AbstractInitTracker(SortedSet<Attribute> attributeSet) {
+  AbstractInitTracker(SortedSet<Attribute> attributeSet, String trackingFieldName) {
     Objects.requireNonNull(attributeSet);
 
     // Maintain the order of the input, just to keep results deterministic.
@@ -36,23 +39,39 @@ abstract class AbstractInitTracker implements InitTracker {
     int offset = 0;
     for (Attribute attribute : attributeSet) {
       Objects.requireNonNull(attribute);
-      CodeBlock bitflag = this.shl(one, this.cast(offset));
+      CodeBlock bitflag = this.shl(one, this.cast(++offset));
       this.attributes.put(attribute, bitflag);
     }
 
-    this.allMask = this.shl(one, this.cast(offset));
+    this.allMask = this.sub(this.shl(one, this.cast(++offset)), one);
+    this.trackingFieldName = Objects.requireNonNull(trackingFieldName);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public final Optional<CodeBlock> getInitializedCheckFor(
-      CodeBlock trackingVariable,
-      Attribute attribute
-  ) {
-    Objects.requireNonNull(trackingVariable);
+  public final boolean isEmpty() {
+    return this.attributes.isEmpty();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public String getFieldName() {
+    return this.trackingFieldName;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  @MaybePresent
+  public final Optional<CodeBlock> getInitializedExpr(String scope, Attribute attribute) {
+    Objects.requireNonNull(scope);
     Objects.requireNonNull(attribute);
+    CodeBlock trackingVariable = this.getTrackingVariableReference(scope);
 
     return this
         .getLiteralFor(attribute)
@@ -63,25 +82,36 @@ abstract class AbstractInitTracker implements InitTracker {
    * {@inheritDoc}
    */
   @Override
-  public final Optional<CodeBlock> getUninitializedCheckFor(
-      CodeBlock trackingVariable,
-      Attribute attribute
-  ) {
-    Objects.requireNonNull(trackingVariable);
+  @MaybePresent
+  public final Optional<CodeBlock> getUninitializedExpr(String scope, Attribute attribute) {
+    Objects.requireNonNull(scope);
     Objects.requireNonNull(attribute);
+    CodeBlock trackingVariable = this.getTrackingVariableReference(scope);
 
     return this
         .getLiteralFor(attribute)
         .map(mask -> this.eq(trackingVariable, this.or(trackingVariable, mask)));
   }
 
+  @Override
+  @MaybePresent
+  public Optional<CodeBlock> getUpdateInitializedExpr(String scope, Attribute attribute) {
+    Objects.requireNonNull(scope);
+    Objects.requireNonNull(attribute);
+    CodeBlock trackingVariable = this.getTrackingVariableReference(scope);
+
+    return this
+        .getLiteralFor(attribute)
+        .map(mask -> this.assign(trackingVariable, this.or(trackingVariable, mask)));
+  }
+
   /**
    * {@inheritDoc}
    */
   @Override
-  public final CodeBlock getAnyUninitializedCheckFor(CodeBlock trackingVariable) {
-    Objects.requireNonNull(trackingVariable);
-
+  public final CodeBlock getAnyUninitializedExpr(String scope) {
+    Objects.requireNonNull(scope);
+    CodeBlock trackingVariable = this.getTrackingVariableReference(scope);
     return this.eq(trackingVariable, this.or(trackingVariable, this.allMask));
   }
 
@@ -100,6 +130,17 @@ abstract class AbstractInitTracker implements InitTracker {
    * @return the resultant code block.
    */
   abstract CodeBlock cast(int value);
+
+  /**
+   * Subtraction {@code -} operator.
+   *
+   * <p>Returned values should always be surrounded by parenthesis.
+   *
+   * @param left  the left oprand.
+   * @param right the right oprand.
+   * @return the resultant code block.
+   */
+  abstract CodeBlock sub(CodeBlock left, CodeBlock right);
 
   /**
    * And {@code &amp;} operator.
@@ -151,7 +192,15 @@ abstract class AbstractInitTracker implements InitTracker {
    */
   abstract CodeBlock eq(CodeBlock left, CodeBlock right);
 
+  private CodeBlock assign(CodeBlock variable, CodeBlock expression) {
+    return CodeBlock.of("$L = $L", variable, expression);
+  }
+
   private Optional<CodeBlock> getLiteralFor(Attribute attribute) {
     return Optional.ofNullable(this.attributes.get(attribute));
+  }
+
+  private CodeBlock getTrackingVariableReference(String scope) {
+    return CodeBlock.of("$L.$N", scope, this.trackingFieldName);
   }
 }

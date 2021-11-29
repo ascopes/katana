@@ -194,8 +194,8 @@ public final class Result<T> {
   }
 
   /**
-   * Return the value in this result if it is OK. If the result is not OK then return the
-   * given value instead.
+   * Return the value in this result if it is OK. If the result is not OK then return the given
+   * value instead.
    *
    * @param ifNotOk value to use if not OK.
    * @return the value of this result if it was OK, or the result of the supplier otherwise.

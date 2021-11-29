@@ -1,6 +1,5 @@
 package io.ascopes.katana.ap.codegen.components;
 
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import io.ascopes.katana.ap.descriptors.Attribute;
@@ -8,9 +7,6 @@ import io.ascopes.katana.ap.descriptors.Constructor;
 import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 
@@ -105,39 +101,8 @@ public final class ConstructorFactory {
         .constructorBuilder()
         .addModifiers(Modifier.PUBLIC);
 
-    for (Attribute attribute : model.getAttributes()) {
-      methodBuilder.addStatement(
-          "this.$N = $L",
-          attribute.getIdentifier(),
-          this.defaultValueFor(attribute)
-      );
-    }
-
     MethodSpec method = methodBuilder.build();
     this.logger.trace("Generated no-args constructor\n{}", method);
     return method;
-  }
-
-  private CodeBlock defaultValueFor(Attribute attribute) {
-    switch (attribute.getGetterToOverride().getReturnType().getKind()) {
-      case BOOLEAN:
-        return CodeBlock.of("$L", false);
-      case CHAR:
-        return CodeBlock.of("$L", '\0');
-      case BYTE:
-        return CodeBlock.of("$L", (byte) 0);
-      case SHORT:
-        return CodeBlock.of("$L", (short) 0);
-      case INT:
-        return CodeBlock.of("$L", 0);
-      case LONG:
-        return CodeBlock.of("$L", 0L);
-      case FLOAT:
-        return CodeBlock.of("$L", 0.0F);
-      case DOUBLE:
-        return CodeBlock.of("$L", 0.0D);
-      default:
-        return CodeBlock.of("$L", new Object[]{null});
-    }
   }
 }

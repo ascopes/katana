@@ -197,7 +197,7 @@ public final class ModelFactory {
 
   private Result<Model.Builder> generateAttributes(Model.Builder builder) {
     return this.attributeFactory
-        .create(builder.getMethods(), builder.getSettingsCollection())
+        .create(builder.getMethods(), builder.getSettingsCollection(), builder.isMutable())
         .peek(attr -> attr.ifOkThen(builder::attribute))
         .collect(ResultCollector.discarding())
         .ifOkReplace(() -> Result.ok(builder));
@@ -247,8 +247,11 @@ public final class ModelFactory {
     if (settings.getBuilder().getValue()) {
       BuilderStrategy builderStrategy = BuilderStrategy
           .builder()
-          .name(settings.getBuilderName().getValue())
-          .toBuilderEnabled(settings.getToBuilder().getValue())
+          .builderName(settings.getBuilderName().getValue())
+          .toBuilderMethodEnabled(settings.getToBuilderMethodEnabled().getValue())
+          .toBuilderMethodName(settings.getToBuilderMethodName().getValue())
+          .builderMethodName(settings.getBuilderMethodName().getValue())
+          .buildMethodName(settings.getBuildMethodName().getValue())
           .build();
 
       builder.builderStrategy(builderStrategy);

@@ -2,6 +2,7 @@ package io.ascopes.katana.ap;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
+import io.ascopes.katana.ap.logging.LoggerFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,7 @@ class BareModelTest {
   @BeforeEach
   void setUp() {
     this.processor = new KatanaProcessor();
+    LoggerFactory.globalLevel("TRACE");
   }
 
   @Test
@@ -34,11 +36,13 @@ class BareModelTest {
                 "test.BareModel",
                 "package test;",
                 "import io.ascopes.katana.annotations.MutableModel;",
+                "import io.ascopes.katana.annotations.Settings;",
                 "import io.ascopes.katana.annotations.ImmutableModel;",
                 "import java.util.concurrent.atomic.AtomicBoolean;",
                 "",
                 "@MutableModel",
                 "@ImmutableModel",
+                "@Settings(builder = true)",
                 "public interface BareModel {",
                 "  String getFoo();",
                 "  int getBar();",

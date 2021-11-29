@@ -39,7 +39,7 @@ public final class InterfaceSearcher {
    * Find all model interfaces for a given model annotation type in the given round environment.
    *
    * @param annotationType the model annotation type to look for.
-   * @param roundEnv the round environment.
+   * @param roundEnv       the round environment.
    * @return a stream of all discovered interfaces.
    */
   public Stream<TypeElement> findAllInterfacesWithAnnotation(

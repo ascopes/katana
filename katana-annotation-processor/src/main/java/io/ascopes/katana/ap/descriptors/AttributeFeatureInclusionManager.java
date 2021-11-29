@@ -34,7 +34,7 @@ public class AttributeFeatureInclusionManager {
   /**
    * Initialize this manager.
    *
-   * @param diagnostics compiler diagnostics to use.
+   * @param diagnostics  compiler diagnostics to use.
    * @param elementUtils element utilities to use for introspection.
    */
   public AttributeFeatureInclusionManager(

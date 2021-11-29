@@ -24,7 +24,7 @@ public final class JavaFileWriter {
   /**
    * Initialize the file writer.
    *
-   * @param filer the filer to use.
+   * @param filer       the filer to use.
    * @param diagnostics the diagnostics to report errors with.
    */
   public JavaFileWriter(Filer filer, Diagnostics diagnostics) {
@@ -36,7 +36,7 @@ public final class JavaFileWriter {
   /**
    * Write out the given file with the given name.
    *
-   * @param name the name of the file, used for logging.
+   * @param name     the name of the file, used for logging.
    * @param javaFile the actual file to write out.
    * @return an empty OK result, or a failed result if an error occurred.
    */

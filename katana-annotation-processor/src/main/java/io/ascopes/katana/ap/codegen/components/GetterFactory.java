@@ -29,7 +29,7 @@ public final class GetterFactory {
    * Create a getter for the given attribute.
    *
    * @param attribute the attribute to create the getter for.
-   * @param settings the settings to use.
+   * @param settings  the settings to use.
    * @return the generated method spec.
    */
   public MethodSpec create(Attribute attribute, SettingsCollection settings) {

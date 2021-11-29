@@ -87,8 +87,8 @@ public final class Setting<T> {
   }
 
   /**
-   * Get the annotation value for this setting, if known and if a declaring element and mirror
-   * is known.
+   * Get the annotation value for this setting, if known and if a declaring element and mirror is
+   * known.
    *
    * <p>If the setting was left as a Katana framework default value, then this will not be present.
    *

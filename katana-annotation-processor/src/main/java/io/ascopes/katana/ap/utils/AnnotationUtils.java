@@ -57,7 +57,7 @@ public final class AnnotationUtils {
    * considered here.
    *
    * @param mirror the mirror to look at.
-   * @param name the name of the attribute.
+   * @param name   the name of the attribute.
    * @return the value of the attribute in an OK result, or an ignored result if not found.
    */
   public static Result<? extends AnnotationValue> getValue(

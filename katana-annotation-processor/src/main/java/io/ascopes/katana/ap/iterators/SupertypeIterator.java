@@ -28,7 +28,7 @@ public final class SupertypeIterator implements StreamableIterator<TypeElement> 
    * Initialize this iterator.
    *
    * @param typeUtils the type utilities to use for introspection.
-   * @param root the type root to start at.
+   * @param root      the type root to start at.
    */
   public SupertypeIterator(Types typeUtils, TypeElement root) {
     this.typeUtils = typeUtils;

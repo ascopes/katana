@@ -31,7 +31,7 @@ public final class SetterFactory {
    * Create a setter for the given attribute.
    *
    * @param attribute the attribute to generate the setter for.
-   * @param settings the settings to use.
+   * @param settings  the settings to use.
    * @return the generated method spec.
    */
   public MethodSpec create(Attribute attribute, SettingsCollection settings) {

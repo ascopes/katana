@@ -34,7 +34,7 @@ public final class AvailableMethodsIterator implements StreamableIterator<Execut
    * calculated during construction, rather than lazily as needed.
    *
    * @param typeUtils the type utilities to use for introspection.
-   * @param root the type root to start at.
+   * @param root      the type root to start at.
    */
   public AvailableMethodsIterator(Types typeUtils, TypeElement root) {
     // TODO: make this lazy, somehow. If not, this might need profiling perhaps.

@@ -30,7 +30,7 @@ public final class FieldFactory {
    * Create a field definition for a given attribute.
    *
    * @param attribute the attribute to generate the field for.
-   * @param settings the settings to use.
+   * @param settings  the settings to use.
    * @return the generated field spec.
    */
   public FieldSpec create(Attribute attribute, SettingsCollection settings) {

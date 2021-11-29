@@ -17,10 +17,11 @@ final class IntInitTrackerImpl extends AbstractInitTracker {
   /**
    * Initialize this tracker.
    *
-   * @param attributeSet the attribute set of required attributes.
+   * @param attributeSet      the attribute set of required attributes.
+   * @param trackingFieldName the tracking field name.
    */
-  IntInitTrackerImpl(SortedSet<Attribute> attributeSet) {
-    super(attributeSet);
+  IntInitTrackerImpl(SortedSet<Attribute> attributeSet, String trackingFieldName) {
+    super(attributeSet, trackingFieldName);
   }
 
   /**
@@ -29,6 +30,14 @@ final class IntInitTrackerImpl extends AbstractInitTracker {
   @Override
   CodeBlock cast(int value) {
     return CodeBlock.of("$L", value);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  CodeBlock sub(CodeBlock left, CodeBlock right) {
+    return CodeBlock.of("($L - $L)", left, right);
   }
 
   /**

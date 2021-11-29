@@ -45,23 +45,26 @@ public final class AttributeFactory {
    *
    * @param methodClassification the classified methods on the model interface to consider.
    * @param settings             the settings to use.
+   * @param mutable              true if the model is mutable, false otherwise.
    * @return the stream of attributes. Each wrapped in an OK result if successfully created or an
    *     empty failed result if something went wrong.
    */
   public Stream<Result<Attribute>> create(
       MethodClassification methodClassification,
-      SettingsCollection settings
+      SettingsCollection settings,
+      boolean mutable
   ) {
     return methodClassification
         .getGetters()
         .keySet()
         .stream()
-        .map(attr -> this.buildFor(attr, methodClassification, settings));
+        .map(attr -> this.buildFor(attr, methodClassification, mutable, settings));
   }
 
   private Result<Attribute> buildFor(
       String attributeName,
       MethodClassification methodClassification,
+      boolean mutable,
       SettingsCollection settings
   ) {
     // Expect this to always be present.
@@ -79,7 +82,7 @@ public final class AttributeFactory {
             .identifier(identifierName)
             .type(typeName)
             .getter(getter))
-        .ifOkFlatMap(builder -> this.processFinal(builder, settings))
+        .ifOkFlatMap(builder -> this.processFinal(builder, mutable, settings))
         .ifOkFlatMap(builder -> this.processTransience(builder, settings))
         .ifOkFlatMap(builder -> this.processFieldVisibility(builder, settings))
         .ifOkFlatMap(builder -> this.processSetter(builder, settings))
@@ -91,11 +94,11 @@ public final class AttributeFactory {
 
   private Result<Attribute.Builder> processFinal(
       Attribute.Builder builder,
-      // TODO(ascopes): handle final
+      boolean mutable,
       @SuppressWarnings("unused") SettingsCollection settings
   ) {
-    return Result.ok(false)
-        .ifOkMap(builder::finalField);
+    return Result
+        .ok(builder.finalField(!mutable));
   }
 
   private Result<Attribute.Builder> processTransience(

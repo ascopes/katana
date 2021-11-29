@@ -18,34 +18,52 @@ import org.checkerframework.checker.optional.qual.MaybePresent;
 public interface InitTracker {
 
   /**
+   * Determine if the tracker is empty or not.
+   *
+   * @return true if the tracker is empty.
+   */
+  boolean isEmpty();
+
+  /**
    * Get the expression to determine if an attribute is initialised. An empty optional if the
    * attribute is not tracked.
    *
-   * @param trackingVariable the tracking variable.
-   * @param attribute        the attribute to check if uninitialised.
+   * @param scope     the scope of the tracking variable (might be 'this' or a variable name).
+   * @param attribute the attribute to check if uninitialised.
    * @return the expression, or an empty optional if the attribute is not tracked.
    */
   @MaybePresent
-  Optional<CodeBlock> getInitializedCheckFor(CodeBlock trackingVariable, Attribute attribute);
+  Optional<CodeBlock> getInitializedExpr(String scope, Attribute attribute);
 
   /**
    * Get the expression to determine if an attribute is uninitialised. An empty optional if the
    * attribute is not tracked.
    *
-   * @param trackingVariable the tracking variable.
-   * @param attribute        the attribute to check if uninitialised.
+   * @param scope     the scope of the tracking variable (might be 'this' or a variable name).
+   * @param attribute the attribute to check if uninitialised.
    * @return the expression, or an empty optional if the attribute is not tracked.
    */
   @MaybePresent
-  Optional<CodeBlock> getUninitializedCheckFor(CodeBlock trackingVariable, Attribute attribute);
+  Optional<CodeBlock> getUninitializedExpr(String scope, Attribute attribute);
+
+  /**
+   * Get the expression to update a tracking variable to denote that a given field is initialized.
+   * An empty optional if the attribute is not tracked.
+   *
+   * @param scope     the scope of the tracking variable (might be 'this' or a variable name).
+   * @param attribute the attribute to update the tracking variable for.
+   * @return the expression, or an empty optional if the attribute is not tracked.
+   */
+  @MaybePresent
+  Optional<CodeBlock> getUpdateInitializedExpr(String scope, Attribute attribute);
 
   /**
    * Get the expression to determine if any required attributes are not assigned.
    *
-   * @param trackingVariable the tracking variable to consider.
+   * @param scope the scope of the tracking variable (might be 'this' or a variable name).
    * @return the expression.
    */
-  CodeBlock getAnyUninitializedCheckFor(CodeBlock trackingVariable);
+  CodeBlock getAnyUninitializedExpr(String scope);
 
   /**
    * Get the initial value to assign to a tracking variable.
@@ -61,4 +79,10 @@ public interface InitTracker {
    */
   TypeName getTypeName();
 
+  /**
+   * Get the name of the tracking field.
+   *
+   * @return the name of the tracking field.
+   */
+  String getFieldName();
 }

@@ -26,7 +26,7 @@ public final class PackageIterator implements StreamableIterator<PackageElement>
    * Initialize this iterator.
    *
    * @param elementUtils the element utilities to use for introspection.
-   * @param start the first element to start from.
+   * @param start        the first element to start from.
    */
   public PackageIterator(Elements elementUtils, Element start) {
     this.elementUtils = elementUtils;

@@ -56,14 +56,13 @@
       </dependency>
 
       <dependency>
-        <!-- Bug detection annotations -->
+        <!-- Bug detection annotations. -->
         <groupId>org.checkerframework</groupId>
         <artifactId>checker-qual</artifactId>
         <version>3.19.0</version>
       </dependency>
 
       <!-- Test dependencies -->
-
       <dependency>
         <!-- Easy parsing of generated code to verify outputs in integration tests -->
         <groupId>com.github.javaparser</groupId>

@@ -25,11 +25,11 @@ public final class SettingSchema<T> {
   /**
    * Initialize the setting schema.
    *
-   * @param name the name of the setting.
-   * @param type the raw type of the setting.
+   * @param name                  the name of the setting.
+   * @param type                  the raw type of the setting.
    * @param immutableDefaultValue the default value for the setting for immutable models.
-   * @param mutableDefaultValue the default value for the setting for mutable models.
-   * @param builderSetter the setter on the builder to apply settings for this schema to.
+   * @param mutableDefaultValue   the default value for the setting for mutable models.
+   * @param builderSetter         the setter on the builder to apply settings for this schema to.
    */
   public SettingSchema(
       String name,
@@ -47,7 +47,7 @@ public final class SettingSchema<T> {
 
   /**
    * Get the setting name.
-   * 
+   *
    * @return the name of the setting.
    */
   public String getName() {
@@ -66,7 +66,7 @@ public final class SettingSchema<T> {
   /**
    * Get the raw type of the setting, cast to the actual parameterized type we want.
    *
-   * @return the cast parameterized setting type. 
+   * @return the cast parameterized setting type.
    */
   @SuppressWarnings("unchecked")
   public Class<T> getParameterizedTypeish() {
@@ -79,7 +79,7 @@ public final class SettingSchema<T> {
 
   /**
    * Get the default value for immutable models.
-   * 
+   *
    * @return the default value for immutable models.
    */
   public T getImmutableDefaultValue() {

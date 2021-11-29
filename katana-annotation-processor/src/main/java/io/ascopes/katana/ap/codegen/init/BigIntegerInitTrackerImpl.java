@@ -19,10 +19,11 @@ final class BigIntegerInitTrackerImpl extends AbstractInitTracker {
   /**
    * Initialize this tracker.
    *
-   * @param attributeSet the attribute set of required attributes.
+   * @param attributeSet      the attribute set of required attributes.
+   * @param trackingFieldName the tracking field name.
    */
-  BigIntegerInitTrackerImpl(SortedSet<Attribute> attributeSet) {
-    super(attributeSet);
+  BigIntegerInitTrackerImpl(SortedSet<Attribute> attributeSet, String trackingFieldName) {
+    super(attributeSet, trackingFieldName);
   }
 
   /**
@@ -38,6 +39,14 @@ final class BigIntegerInitTrackerImpl extends AbstractInitTracker {
       default:
         return CodeBlock.of("$T.valueOf($L)", BigInteger.class, (long) value);
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  CodeBlock sub(CodeBlock left, CodeBlock right) {
+    return CodeBlock.of("$L.sub($L)", left, right);
   }
 
   /**

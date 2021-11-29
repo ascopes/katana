@@ -262,7 +262,7 @@ JavaFile buildSchemaConstants(
             .add('new $T<$T>(\n', settingsSchema, it.genericType)
             .indent()
             .add('$S', it.name).add(",\n")
-            .add('$T.class', it.rawType).add(",\n")
+            .add('$T.class', TypeName.get(it.rawType).box()).add(",\n")
             .add(it.immutableDefaultValue).add(",\n")
             .add(it.mutableDefaultValue).add(",\n")
             .add('$T::$N', builderType, it.name).add("\n")

@@ -271,6 +271,7 @@ public final class Diagnostics {
    * Final stage in message rendering.
    */
   public interface FinishStage {
+
     /**
      * Commit the rendered message to the compiler diagnostics.
      */

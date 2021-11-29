@@ -79,7 +79,7 @@ public final class SettingsResolver {
     // the @Settings annotation.
     SettingsSchemas
         .schemas()
-        .map(schema -> this.determineSettingFor(schema, mutable, allEntries))
+        .map(schema -> this.wrappedDetermineSettingFor(schema, mutable, allEntries))
         .forEach(setting -> setting.getSettingSchema().getBuilderSetter().accept(builder, setting));
 
     return Result.ok(builder.build());
@@ -110,6 +110,18 @@ public final class SettingsResolver {
         .of(modelAnnotationEntries, interfaceEntries, packageEntries)
         .flatMap(Functors.flattenStream())
         .collect(Collectors.toList());
+  }
+
+  private <T> Setting<T> wrappedDetermineSettingFor(
+      SettingSchema<T> schema,
+      boolean mutable,
+      List<SettingsAnnotation> annotations
+  ) {
+    try {
+      return this.determineSettingFor(schema, mutable, annotations);
+    } catch (Exception ex) {
+      throw new RuntimeException("Failed to parse setting " + schema.getName(), ex);
+    }
   }
 
   private <T> Setting<T> determineSettingFor(

@@ -3,7 +3,11 @@ package io.ascopes.katana.ap.codegen.init;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
+import java.util.Comparator;
 import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Factory for initialization trackers.
@@ -23,24 +27,29 @@ public final class InitTrackerFactory {
   }
 
   /**
-   * Create a new tracker for the given set of required attributes.
+   * Create a new tracker for the given stream of required attributes.
    *
-   * @param attributes the attributes to track. This must be a sorted set to ensure deterministic
-   *                   behaviour between builds (which makes debugging and testing far simpler).
+   * @param attributes        the stream of attributes to track.
+   * @param trackingFieldName the tracking field name.
    * @return a tracker of the most efficient size to use for the given attributes.
    */
-  public InitTracker createTracker(SortedSet<Attribute> attributes) {
-    if (attributes.size() < Integer.SIZE) {
+  public InitTracker createTracker(Stream<Attribute> attributes, String trackingFieldName) {
+    SortedSet<Attribute> attributeSet = attributes
+        .collect(Collectors.toCollection(() -> new TreeSet<>(
+            Comparator.comparing(Attribute::toString))
+        ));
+
+    if (attributeSet.size() < Integer.SIZE) {
       this.logger.debug("Using an int tracker for tracking initialized attributes");
-      return new IntInitTrackerImpl(attributes);
+      return new IntInitTrackerImpl(attributeSet, trackingFieldName);
     }
 
-    if (attributes.size() < Long.SIZE) {
+    if (attributeSet.size() < Long.SIZE) {
       this.logger.debug("Using a long tracker for tracking initialized attributes");
-      return new LongInitTrackerImpl(attributes);
+      return new LongInitTrackerImpl(attributeSet, trackingFieldName);
     }
 
     this.logger.debug("Using a BigInteger tracker for tracking initialized attributes");
-    return new BigIntegerInitTrackerImpl(attributes);
+    return new BigIntegerInitTrackerImpl(attributeSet, trackingFieldName);
   }
 }

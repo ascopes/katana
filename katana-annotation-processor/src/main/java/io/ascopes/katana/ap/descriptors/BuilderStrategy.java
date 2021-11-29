@@ -14,12 +14,18 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  */
 public final class BuilderStrategy {
 
-  private final String name;
-  private final boolean toBuilderEnabled;
+  private final String builderName;
+  private final boolean toBuilderMethodEnabled;
+  private final String toBuilderMethodName;
+  private final String builderMethodName;
+  private final String buildMethodName;
 
   private BuilderStrategy(Builder builder) {
-    this.name = Objects.requireNonNull(builder.name);
-    this.toBuilderEnabled = Objects.requireNonNull(builder.toBuilderEnabled);
+    this.builderName = Objects.requireNonNull(builder.builderName);
+    this.toBuilderMethodEnabled = Objects.requireNonNull(builder.toBuilderMethodEnabled);
+    this.toBuilderMethodName = Objects.requireNonNull(builder.toBuilderMethodName);
+    this.builderMethodName = Objects.requireNonNull(builder.builderMethodName);
+    this.buildMethodName = Objects.requireNonNull(builder.buildMethodName);
   }
 
   /**
@@ -27,8 +33,8 @@ public final class BuilderStrategy {
    *
    * @return the name of the builder type.
    */
-  public String getName() {
-    return this.name;
+  public String getBuilderName() {
+    return this.builderName;
   }
 
   /**
@@ -36,8 +42,35 @@ public final class BuilderStrategy {
    *
    * @return true if the {@code toBuilder} method is enabled, or false if it is disabled.
    */
-  public boolean isToBuilderEnabled() {
-    return this.toBuilderEnabled;
+  public boolean isToBuilderMethodEnabled() {
+    return this.toBuilderMethodEnabled;
+  }
+
+  /**
+   * Get the toBuilder method name.
+   *
+   * @return the name of the toBuilder method.
+   */
+  public String getToBuilderMethodName() {
+    return this.toBuilderMethodName;
+  }
+
+  /**
+   * Get the builder static method name.
+   *
+   * @return the name of the builder method.
+   */
+  public String getBuilderMethodName() {
+    return this.builderMethodName;
+  }
+
+  /**
+   * Get the build method name.
+   *
+   * @return the name of the build method.
+   */
+  public String getBuildMethodName() {
+    return this.buildMethodName;
   }
 
   /**
@@ -46,8 +79,11 @@ public final class BuilderStrategy {
   @Override
   public String toString() {
     return "BuilderStrategy{"
-        + "name=" + StringUtils.quoted(this.name) + ", "
-        + "toBuilderEnabled=" + this.toBuilderEnabled
+        + "name=" + StringUtils.quoted(this.builderName) + ", "
+        + "toBuilderEnabled=" + this.toBuilderMethodEnabled + ", "
+        + "toBuilderMethodName=" + StringUtils.quoted(this.toBuilderMethodName) + ", "
+        + "builderMethodName=" + StringUtils.quoted(this.builderMethodName) + ", "
+        + "buildMethodName=" + StringUtils.quoted(this.buildMethodName)
         + '}';
   }
 
@@ -66,9 +102,11 @@ public final class BuilderStrategy {
   @MustCall("build")
   public static final class Builder implements ObjectBuilder<BuilderStrategy> {
 
-    private @MonotonicNonNull String name;
-    private @MonotonicNonNull Boolean toBuilderEnabled;
-    // TODO(ascopes): toBuilderMethodName?
+    private @MonotonicNonNull String builderName;
+    private @MonotonicNonNull Boolean toBuilderMethodEnabled;
+    private @MonotonicNonNull String toBuilderMethodName;
+    private @MonotonicNonNull String buildMethodName;
+    private @MonotonicNonNull String builderMethodName;
 
     private Builder() {
     }
@@ -76,22 +114,55 @@ public final class BuilderStrategy {
     /**
      * Set the name for the builder type.
      *
-     * @param name the name of the builder type.
+     * @param builderName the name of the builder type.
      * @return this builder.
      */
-    public Builder name(String name) {
-      this.name = Objects.requireNonNull(name);
+    public Builder builderName(String builderName) {
+      this.builderName = Objects.requireNonNull(builderName);
       return this;
     }
 
     /**
      * Set whether the toBuilder method is enabled or not.
      *
-     * @param toBuilderEnabled true if the toBuilder method is enabled, false otherwise.
+     * @param toBuilderMethodEnabled true if the toBuilder method is enabled, false otherwise.
      * @return this builder.
      */
-    public Builder toBuilderEnabled(Boolean toBuilderEnabled) {
-      this.toBuilderEnabled = Objects.requireNonNull(toBuilderEnabled);
+    public Builder toBuilderMethodEnabled(Boolean toBuilderMethodEnabled) {
+      this.toBuilderMethodEnabled = Objects.requireNonNull(toBuilderMethodEnabled);
+      return this;
+    }
+
+    /**
+     * Set the toBuilder method name.
+     *
+     * @param toBuilderMethodName the name of the toBuilder method.
+     * @return this builder.
+     */
+    public Builder toBuilderMethodName(String toBuilderMethodName) {
+      this.toBuilderMethodName = Objects.requireNonNull(toBuilderMethodName);
+      return this;
+    }
+
+    /**
+     * Set the builder static method name.
+     *
+     * @param builderMethodName the name of the builder method.
+     * @return this builder.
+     */
+    public Builder builderMethodName(String builderMethodName) {
+      this.builderMethodName = Objects.requireNonNull(builderMethodName);
+      return this;
+    }
+
+    /**
+     * Set the toBuilder method name.
+     *
+     * @param buildMethodName the name of the build method.
+     * @return this builder.
+     */
+    public Builder buildMethodName(String buildMethodName) {
+      this.buildMethodName = Objects.requireNonNull(buildMethodName);
       return this;
     }
 
