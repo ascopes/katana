@@ -22,46 +22,84 @@ public final class BuilderStrategy {
     this.toBuilderEnabled = Objects.requireNonNull(builder.toBuilderEnabled);
   }
 
+  /**
+   * Get the builder type name.
+   *
+   * @return the name of the builder type.
+   */
   public String getName() {
     return this.name;
   }
 
+  /**
+   * Determine whether the {@code toBuilder} method is enabled or not.
+   *
+   * @return true if the {@code toBuilder} method is enabled, or false if it is disabled.
+   */
   public boolean isToBuilderEnabled() {
     return this.toBuilderEnabled;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String toString() {
-    return "BuilderStrategy{" +
-        "name=" + StringUtils.quoted(this.name) + ", " +
-        "toBuilderEnabled=" + this.toBuilderEnabled +
-        '}';
+    return "BuilderStrategy{"
+        + "name=" + StringUtils.quoted(this.name) + ", "
+        + "toBuilderEnabled=" + this.toBuilderEnabled
+        + '}';
   }
 
+  /**
+   * Create a new BuilderStrategy builder.
+   *
+   * @return the new builder.
+   */
   public static Builder builder() {
     return new Builder();
   }
 
-  // This is a BuilderStrategyBuilder, who says I can't use annoying names in my code?
+  /**
+   * A builder for {@link BuilderStrategy} descriptors..
+   */
   @MustCall("build")
   public static final class Builder implements ObjectBuilder<BuilderStrategy> {
 
     private @MonotonicNonNull String name;
     private @MonotonicNonNull Boolean toBuilderEnabled;
+    // TODO(ascopes): toBuilderMethodName?
 
     private Builder() {
     }
 
+    /**
+     * Set the name for the builder type.
+     *
+     * @param name the name of the builder type.
+     * @return this builder.
+     */
     public Builder name(String name) {
       this.name = Objects.requireNonNull(name);
       return this;
     }
 
+    /**
+     * Set whether the toBuilder method is enabled or not.
+     *
+     * @param toBuilderEnabled true if the toBuilder method is enabled, false otherwise.
+     * @return this builder.
+     */
     public Builder toBuilderEnabled(Boolean toBuilderEnabled) {
       this.toBuilderEnabled = Objects.requireNonNull(toBuilderEnabled);
       return this;
     }
 
+    /**
+     * Construct the BuilderStrategy from this builder.
+     *
+     * @return the constructed BuilderStrategy.
+     */
     @Override
     public BuilderStrategy build() {
       return new BuilderStrategy(this);

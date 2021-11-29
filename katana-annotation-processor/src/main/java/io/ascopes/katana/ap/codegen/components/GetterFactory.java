@@ -18,10 +18,20 @@ public final class GetterFactory {
 
   private final Logger logger;
 
+  /**
+   * Initialize this factory.
+   */
   public GetterFactory() {
     this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
+  /**
+   * Create a getter for the given attribute.
+   *
+   * @param attribute the attribute to create the getter for.
+   * @param settings the settings to use.
+   * @return the generated method spec.
+   */
   public MethodSpec create(Attribute attribute, SettingsCollection settings) {
     MethodSpec.Builder builder = MethodSpec
         .overriding(attribute.getGetterToOverride())

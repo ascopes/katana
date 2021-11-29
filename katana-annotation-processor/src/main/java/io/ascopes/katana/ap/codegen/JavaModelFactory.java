@@ -30,6 +30,9 @@ public final class JavaModelFactory {
   private final ConstructorFactory constructorFactory;
   private final BuilderFactory builderFactory;
 
+  /**
+   * Initialize this factory.
+   */
   public JavaModelFactory() {
     this.logger = LoggerFactory.loggerFor(this.getClass());
     this.fieldFactory = new FieldFactory();
@@ -39,6 +42,12 @@ public final class JavaModelFactory {
     this.builderFactory = new BuilderFactory();
   }
 
+  /**
+   * Create a Java source file for the given model.
+   *
+   * @param model the model to use.
+   * @return the generated source file.
+   */
   public JavaFile create(Model model) {
     this.logger.debug("Building Java file for {}", model);
     TypeSpec typeSpec = this.buildModelTypeSpecFrom(model);
@@ -88,7 +97,9 @@ public final class JavaModelFactory {
   }
 
   private void applyConstructors(TypeSpec.Builder typeSpecBuilder, Model model) {
-    typeSpecBuilder.addMethods(this.constructorFactory.create(model));
+    this.constructorFactory
+        .create(model)
+        .forEach(typeSpecBuilder::addMethod);
   }
 
   private void applyBuilders(TypeSpec.Builder typeSpecBuilder, Model model) {

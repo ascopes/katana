@@ -9,7 +9,9 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.Stream.Builder;
 import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
@@ -30,10 +32,16 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
 public final class ResultCollector<T, C>
     implements Collector<Result<T>, ResultCollector<T, C>.State, Result<C>> {
 
-  private final Collector<T, ?, C> finalCollector;
+  private static final Object SENTINEL = new Object();
 
-  private ResultCollector(Collector<T, ?, C> finalCollector) {
+  private final Collector<T, ?, C> finalCollector;
+  private final Supplier<? extends Stream.Builder<T>> builderFactory;
+
+  private ResultCollector(
+      Collector<T, ?, C> finalCollector,
+      Supplier<? extends Stream.Builder<T>> builderFactory) {
     this.finalCollector = Objects.requireNonNull(finalCollector);
+    this.builderFactory = Objects.requireNonNull(builderFactory);
   }
 
   /**
@@ -103,23 +111,93 @@ public final class ResultCollector<T, C>
    */
   public final class State {
 
-    private final Stream.Builder<T> builder = Stream.builder();
-    private final AtomicBoolean failed = new AtomicBoolean();
+    private final AtomicBoolean failed;
+    private final Stream.Builder<T> builder;
 
     private State() {
-      // Internal detail only.
+      this.failed = new AtomicBoolean(false);
+      this.builder = Objects.requireNonNull(ResultCollector.this.builderFactory.get());
+    }
+  }
+
+  /**
+   * Stream builder that discards everything.
+   *
+   * @param <T> the input argument type.
+   */
+  private static final class DiscardingStreamBuilder<T> implements Builder<T> {
+
+    @Override
+    public void accept(T arg) {
+      // Do nothing.
+    }
+
+    @Override
+    public Stream<T> build() {
+      return Stream.empty();
+    }
+  }
+
+  /**
+   * Collector which just discards any inputs and returns a hard-coded reference to a dummy object.
+   *
+   * @param <T> the input object type.
+   */
+  private static final class DiscardingCollector<T> implements Collector<T, Object, Object> {
+
+    @Override
+    public Supplier<Object> supplier() {
+      return () -> SENTINEL;
+    }
+
+    @Override
+    public BiConsumer<Object, T> accumulator() {
+      return (sentinel, next) -> {
+      };
+    }
+
+    @Override
+    public BinaryOperator<Object> combiner() {
+      return (sentinel1, sentinel2) -> sentinel1;
+    }
+
+    @Override
+    public Function<Object, Object> finisher() {
+      return Function.identity();
+    }
+
+    @Override
+    public Set<Characteristics> characteristics() {
+      return Collections.singleton(Characteristics.IDENTITY_FINISH);
     }
   }
 
   /**
    * Aggregate a stream of results into a single result of whatever the given collector provides.
    *
-   * @param collector the collector to aggregate with.
-   * @param <T>       the input type.
-   * @param <C>       the output type.
+   * @param then the collector to aggregate with.
+   * @param <T>  the input type.
+   * @param <C>  the output type.
    * @return the collector.
    */
-  public static <T, C> ResultCollector<T, C> aggregating(Collector<T, ?, C> collector) {
-    return new ResultCollector<>(collector);
+  public static <T, C> Collector<Result<T>, ?, Result<C>> aggregating(Collector<T, ?, C> then) {
+    return new ResultCollector<>(then, Stream::builder);
+  }
+
+  /**
+   * Discard each value within each result, only returning an empty result that fails if any input
+   * element was failed.
+   *
+   * <p>This attempts to allocate as little as possible.
+   *
+   * @param <T> the input type.
+   * @return the collector.
+   */
+  public static <T> Collector<Result<T>, ?, Result<Void>> discarding() {
+    // TODO: unit test
+    return Collectors.collectingAndThen(
+        new ResultCollector<>(new DiscardingCollector<>(), DiscardingStreamBuilder::new),
+        Result::thenDiscardValue
+    );
   }
 }

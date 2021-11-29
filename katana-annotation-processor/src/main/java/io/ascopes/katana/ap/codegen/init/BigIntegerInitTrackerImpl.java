@@ -16,10 +16,18 @@ import java.util.SortedSet;
  */
 final class BigIntegerInitTrackerImpl extends AbstractInitTracker {
 
+  /**
+   * Initialize this tracker.
+   *
+   * @param attributeSet the attribute set of required attributes.
+   */
   BigIntegerInitTrackerImpl(SortedSet<Attribute> attributeSet) {
     super(attributeSet);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   CodeBlock cast(int value) {
     switch (value) {
@@ -32,26 +40,41 @@ final class BigIntegerInitTrackerImpl extends AbstractInitTracker {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   CodeBlock and(CodeBlock left, CodeBlock right) {
     return CodeBlock.of("$L.and($L)", left, right);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   CodeBlock or(CodeBlock left, CodeBlock right) {
     return CodeBlock.of("$L.or($L)", left, right);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   CodeBlock shl(CodeBlock left, CodeBlock right) {
     return CodeBlock.of("$L.shiftLeft($L)", left, right);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   CodeBlock eq(CodeBlock left, CodeBlock right) {
     return CodeBlock.of("$L.equals($L)", left, right);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public TypeName getTypeName() {
     return ClassName.get(BigInteger.class);

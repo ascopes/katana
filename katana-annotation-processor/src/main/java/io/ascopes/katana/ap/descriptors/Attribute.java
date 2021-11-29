@@ -24,8 +24,8 @@ public final class Attribute {
   private final String identifier;
   private final TypeName type;
   private final Visibility fieldVisibility;
-  private final boolean final_;
-  private final boolean transient_;
+  private final boolean finalField;
+  private final boolean transientField;
   private final ExecutableElement getterToOverride;
   private final boolean setterEnabled;
   private final boolean includeInToString;
@@ -39,8 +39,8 @@ public final class Attribute {
     this.identifier = Objects.requireNonNull(builder.identifier);
     this.type = Objects.requireNonNull(builder.type);
     this.fieldVisibility = Objects.requireNonNull(builder.fieldVisibility);
-    this.final_ = Objects.requireNonNull(builder.final_);
-    this.transient_ = Objects.requireNonNull(builder.transient_);
+    this.finalField = Objects.requireNonNull(builder.finalField);
+    this.transientField = Objects.requireNonNull(builder.transientField);
     this.getterToOverride = Objects.requireNonNull(builder.getter);
     this.setterEnabled = Objects.requireNonNull(builder.setterEnabled);
     this.includeInToString = Objects.requireNonNull(builder.includeInToString);
@@ -50,53 +50,104 @@ public final class Attribute {
     this.deprecatedAnnotation = builder.deprecatedAnnotation;
   }
 
+  /**
+   * Get the attribute name.
+   *
+   * @return the name of the attribute.
+   */
   public String getName() {
     return this.name;
   }
 
+  /**
+   * Get the identifier name for the attribute.
+   *
+   * @return the identifier for the attribute.
+   */
   public String getIdentifier() {
     return this.identifier;
   }
 
+  /**
+   * Get the name of the type for the attribute.
+   *
+   * @return the attribute type name.
+   */
   public TypeName getType() {
     return this.type;
   }
 
+  /**
+   * Get the visibility for the field.
+   *
+   * @return the visibility of the field.
+   */
   public Visibility getFieldVisibility() {
     return Objects.requireNonNull(this.fieldVisibility);
   }
 
-  public boolean isFinal() {
-    return this.final_;
+  /**
+   * Determine whether the field is marked as final or not.
+   *
+   * @return true if final, false otherwise.
+   */
+  public boolean isFinalField() {
+    return this.finalField;
   }
 
-  public boolean isTransient() {
-    return this.transient_;
+  /**
+   * Determine whether the field is marked as transient or not.
+   *
+   * @return true if transient, false otherwise.
+   */
+  public boolean isTransientField() {
+    return this.transientField;
   }
 
+  /**
+   * Get the getter method to override.
+   *
+   * @return the getter to override.
+   */
   public ExecutableElement getGetterToOverride() {
     return this.getterToOverride;
   }
 
+  /**
+   * Get the deprecated annotation from the overridden getter, if it is present.
+   *
+   * @return the deprecated annotation, or an empty optional if not present.
+   */
   public Optional<AnnotationMirror> getDeprecatedAnnotation() {
     return Optional.ofNullable(this.deprecatedAnnotation);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String toString() {
-    return "Attribute{" +
-        "identifier=" + StringUtils.quoted(this.identifier) + ", " +
-        "type=" + StringUtils.quoted(this.getterToOverride.getReturnType()) + ", " +
-        "get=true, " +
-        "set=" + this.setterEnabled +
-        '}';
+    return "Attribute{"
+        + "identifier=" + StringUtils.quoted(this.identifier) + ", "
+        + "type=" + StringUtils.quoted(this.getterToOverride.getReturnType()) + ", "
+        + "get=true, "
+        + "set=" + this.setterEnabled
+        + '}';
   }
 
+  /**
+   * Create a builder for a new Attribute.
+   *
+   * @return the builder.
+   */
   @MustCall("build")
   public static Builder builder() {
     return new Builder();
   }
 
+  /**
+   * The builder for an attribute.
+   */
   @SuppressWarnings("UnusedReturnValue")
   @MustCall("build")
   public static final class Builder implements ObjectBuilder<Attribute> {
@@ -105,8 +156,8 @@ public final class Attribute {
     private @MonotonicNonNull String identifier;
     private @MonotonicNonNull TypeName type;
     private @MonotonicNonNull Visibility fieldVisibility;
-    private @MonotonicNonNull Boolean final_;
-    private @MonotonicNonNull Boolean transient_;
+    private @MonotonicNonNull Boolean finalField;
+    private @MonotonicNonNull Boolean transientField;
     private @MonotonicNonNull ExecutableElement getter;
     private @MonotonicNonNull Boolean setterEnabled;
     private @MonotonicNonNull Boolean includeInToString;
@@ -118,69 +169,151 @@ public final class Attribute {
     private Builder() {
     }
 
+    /**
+     * Get the getter in the builder.
+     *
+     * @return the getter in the builder.
+     */
     ExecutableElement getGetter() {
       return Objects.requireNonNull(this.getter);
     }
 
-    String getName() {
-      return Objects.requireNonNull(this.name);
-    }
-
-    public Builder name(String name) {
-      this.name = Objects.requireNonNull(name);
-      return this;
-    }
-
-    public Builder identifier(String identifier) {
-      this.identifier = Objects.requireNonNull(identifier);
-      return this;
-    }
-
-    public Builder type(TypeName type) {
-      this.type = Objects.requireNonNull(type);
-      return this;
-    }
-
-    public Builder fieldVisibility(Visibility fieldVisibility) {
-      this.fieldVisibility = Objects.requireNonNull(fieldVisibility);
-      return this;
-    }
-
-    public Builder final_(Boolean final_) {
-      this.final_ = Objects.requireNonNull(final_);
-      return this;
-    }
-
-    public Builder transient_(Boolean transient_) {
-      this.transient_ = Objects.requireNonNull(transient_);
-      return this;
-    }
-
+    /**
+     * Set the getter to override.
+     *
+     * @param getter the getter to override.
+     * @return this builder.
+     */
     public Builder getter(ExecutableElement getter) {
       this.getter = Objects.requireNonNull(getter);
       return this;
     }
 
+    /**
+     * Get the name in the builder.
+     *
+     * @return the name in the builder.
+     */
+    String getName() {
+      return Objects.requireNonNull(this.name);
+    }
+
+    /**
+     * Set the name of the attribute.
+     *
+     * @param name the name of the attribute.
+     * @return this builder.
+     */
+    public Builder name(String name) {
+      this.name = Objects.requireNonNull(name);
+      return this;
+    }
+
+    /**
+     * Set the identifier for the attribute field.
+     *
+     * @param identifier the identifier for the attribute field.
+     * @return this builder.
+     */
+    public Builder identifier(String identifier) {
+      this.identifier = Objects.requireNonNull(identifier);
+      return this;
+    }
+
+    /**
+     * Set the type name of the attribute.
+     *
+     * @param type the type name for the attribute.
+     * @return this builder.
+     */
+    public Builder type(TypeName type) {
+      this.type = Objects.requireNonNull(type);
+      return this;
+    }
+
+    /**
+     * Set the visibility for the field.
+     *
+     * @param fieldVisibility the visibility for the field.
+     * @return this builder.
+     */
+    public Builder fieldVisibility(Visibility fieldVisibility) {
+      this.fieldVisibility = Objects.requireNonNull(fieldVisibility);
+      return this;
+    }
+
+    /**
+     * Set whether this field is final or not.
+     *
+     * @param finalField whether the field is final or not.
+     * @return this builder.
+     */
+    public Builder finalField(Boolean finalField) {
+      this.finalField = Objects.requireNonNull(finalField);
+      return this;
+    }
+
+    /**
+     * Set whether this field is transient or not.
+     *
+     * @param transientField whether the field is transient or not.
+     * @return this builder.
+     */
+    public Builder transientField(Boolean transientField) {
+      this.transientField = Objects.requireNonNull(transientField);
+      return this;
+    }
+
+    /**
+     * Set whether this attribute has a setter or not.
+     *
+     * @param setterEnabled whether the field has a setter or not.
+     * @return this builder.
+     */
     public Builder setterEnabled(Boolean setterEnabled) {
       this.setterEnabled = Objects.requireNonNull(setterEnabled);
       return this;
     }
 
+    /**
+     * Set whether this attribute is included in a generated toString override or not.
+     *
+     * @param includeInToString whether this attribute is included in a toString or not.
+     * @return this builder.
+     */
     public Builder includeInToString(Boolean includeInToString) {
       this.includeInToString = Objects.requireNonNull(includeInToString);
       return this;
     }
 
+    /**
+     * Set whether this attribute is included in a generated equals and hashCode override or not.
+     *
+     * @param includeInEqualsAndHashCode whether this attribute is included in an equals and
+     *                                   hashCode or not.
+     * @return this builder.
+     */
     public Builder includeInEqualsAndHashCode(Boolean includeInEqualsAndHashCode) {
       this.includeInEqualsAndHashCode = Objects.requireNonNull(includeInEqualsAndHashCode);
       return this;
     }
 
+    /**
+     * Set the deprecated annotation that was applied to the getter.
+     *
+     * @param deprecatedAnnotation the nullable deprecated annotation.
+     * @return this builder.
+     */
     public Builder deprecatedAnnotation(@Nullable AnnotationMirror deprecatedAnnotation) {
       this.deprecatedAnnotation = deprecatedAnnotation;
       return this;
     }
 
+    /**
+     * Build a new attribute from this builder.
+     *
+     * @return the generated attribute.
+     */
     @Override
     public Attribute build() {
       return new Attribute(this);

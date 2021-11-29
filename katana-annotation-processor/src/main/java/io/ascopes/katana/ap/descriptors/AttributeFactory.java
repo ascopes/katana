@@ -8,10 +8,8 @@ import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
-import io.ascopes.katana.ap.utils.ResultCollector;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -28,6 +26,12 @@ public final class AttributeFactory {
   private final AttributeFeatureInclusionManager attributeFeatureInclusionManager;
   private final Elements elementUtils;
 
+  /**
+   * Initialize this factory.
+   *
+   * @param attributeFeatureInclusionManager the inclusion manager to use.
+   * @param elementUtils                     the element utilities to use for introspection.
+   */
   public AttributeFactory(
       AttributeFeatureInclusionManager attributeFeatureInclusionManager,
       Elements elementUtils
@@ -36,7 +40,15 @@ public final class AttributeFactory {
     this.elementUtils = elementUtils;
   }
 
-  public Result<Set<Attribute>> create(
+  /**
+   * Create a stream of attributes for a given method classification and settings.
+   *
+   * @param methodClassification the classified methods on the model interface to consider.
+   * @param settings             the settings to use.
+   * @return the stream of attributes. Each wrapped in an OK result if successfully created or an
+   *     empty failed result if something went wrong.
+   */
+  public Stream<Result<Attribute>> create(
       MethodClassification methodClassification,
       SettingsCollection settings
   ) {
@@ -44,8 +56,7 @@ public final class AttributeFactory {
         .getGetters()
         .keySet()
         .stream()
-        .map(attr -> this.buildFor(attr, methodClassification, settings))
-        .collect(ResultCollector.aggregating(Collectors.toSet()));
+        .map(attr -> this.buildFor(attr, methodClassification, settings));
   }
 
   private Result<Attribute> buildFor(
@@ -84,7 +95,7 @@ public final class AttributeFactory {
       @SuppressWarnings("unused") SettingsCollection settings
   ) {
     return Result.ok(false)
-        .ifOkMap(builder::final_);
+        .ifOkMap(builder::finalField);
   }
 
   private Result<Attribute.Builder> processTransience(
@@ -93,7 +104,7 @@ public final class AttributeFactory {
   ) {
     return this.attributeFeatureInclusionManager
         .check(builder.getName(), settings.getFieldTransience(), builder.getGetter())
-        .ifOkMap(builder::transient_);
+        .ifOkMap(builder::transientField);
   }
 
   private Result<Attribute.Builder> processFieldVisibility(

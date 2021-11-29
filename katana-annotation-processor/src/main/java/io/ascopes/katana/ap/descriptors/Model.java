@@ -59,43 +59,94 @@ public final class Model {
     this.deprecatedAnnotation = builder.deprecatedAnnotation;
   }
 
+  /**
+   * Get the package name for the generated model.
+   *
+   * @return the package name for the generated model.
+   */
   public String getPackageName() {
     return this.packageName;
   }
 
+  /**
+   * Get the class name for the generated model.
+   *
+   * @return the class name for the generated model.
+   */
   public String getClassName() {
     return this.className;
   }
 
+  /**
+   * Get the qualified name for the generated model.
+   *
+   * @return the qualified name for the generated model.
+   */
   public String getQualifiedName() {
     return this.qualifiedName;
   }
 
+  /**
+   * Determine whether the model is mutable or not.
+   *
+   * @return true if mutable, false if immutable.
+   */
   public boolean isMutable() {
     return this.mutable;
   }
 
+  /**
+   * Get the super-interface that defined this model.
+   *
+   * @return the super-interface that defined this model.
+   */
   public TypeElement getSuperInterface() {
     return this.superInterface;
   }
 
+  /**
+   * Get the settings collection for settings to use with this model.
+   *
+   * @return the settings collection.
+   */
   public SettingsCollection getSettingsCollection() {
     return this.settingsCollection;
   }
 
+  /**
+   * Get the set of constructors to use for this model.
+   *
+   * @return the set of constructors.
+   */
   public Set<Constructor> getConstructors() {
     return this.constructors;
   }
 
+  /**
+   * Get the attributes declared on this model.
+   *
+   * @return the attributes declared on this model.
+   */
   public SortedSet<Attribute> getAttributes() {
     return this.attributes;
   }
 
+  /**
+   * Get the builder strategy to use to generate a builder, if one is enabled.
+   *
+   * @return the builder strategy, or an empty optional if not enabled.
+   */
   @MaybePresent
   public Optional<BuilderStrategy> getBuilderStrategy() {
     return Optional.ofNullable(this.builderStrategy);
   }
 
+  /**
+   * Get the deprecated annotation to apply to the generated model type, if one is provided on the
+   * super-interface.
+   *
+   * @return the deprecated annotation, or an empty optional if not provided.
+   */
   @MaybePresent
   public Optional<AnnotationMirror> getDeprecatedAnnotation() {
     return Optional.ofNullable(this.deprecatedAnnotation);
@@ -115,11 +166,19 @@ public final class Model {
         + '}';
   }
 
+  /**
+   * Create a builder for a new model.
+   *
+   * @return the builder.
+   */
   @MustCall("build")
   public static Builder builder() {
     return new Builder();
   }
 
+  /**
+   * Builder for Model objects.
+   */
   @SuppressWarnings("UnusedReturnValue")
   @MustCall("build")
   public static final class Builder implements ObjectBuilder<Model> {
@@ -145,93 +204,195 @@ public final class Model {
       this.attributes = new TreeSet<>(Comparator.comparing(Attribute::getName));
     }
 
-    TypeElement getSuperInterface() {
-      return Objects.requireNonNull(this.superInterface);
-    }
-
-    boolean isMutable() {
-      return Objects.requireNonNull(this.mutable);
-    }
-
-    AnnotationMirror getAnnotationMirror() {
-      return Objects.requireNonNull(this.annotationMirror);
-    }
-
-    SettingsCollection getSettingsCollection() {
-      return Objects.requireNonNull(this.settingsCollection);
-    }
-
-    MethodClassification getMethods() {
-      return Objects.requireNonNull(this.methods);
-    }
-
-    public Builder attributes(Set<Attribute> attributes) {
-      Objects.requireNonNull(attributes, "attribute set was null");
-      for (Attribute attribute : attributes) {
-        this.attributes.add(Objects.requireNonNull(attribute, "attribute was null"));
-      }
-      return this;
-    }
-
-    public Builder constructors(Set<Constructor> constructors) {
-      Objects.requireNonNull(constructors, "constructors set was null");
-      for (Constructor constructor : constructors) {
-        this.constructors.add(Objects.requireNonNull(constructor, "constructor was null"));
-      }
-      return this;
-    }
-
+    /**
+     * Set the package name.
+     *
+     * <p>Empty packages are denoted by an empty string {@code ""}.
+     *
+     * @param packageName the package name to set.
+     * @return this builder.
+     */
     public Builder packageName(String packageName) {
-      this.packageName = packageName;
+      this.packageName = Objects.requireNonNull(packageName);
       return this;
     }
 
+    /**
+     * Set the class name.
+     *
+     * @param className the class name to set.
+     * @return this builder.
+     */
     public Builder className(String className) {
       this.className = Objects.requireNonNull(className);
       return this;
     }
 
+    /**
+     * Set the qualified name.
+     *
+     * @param qualifiedName the qualified name to set.
+     * @return this builder.
+     */
     public Builder qualifiedName(String qualifiedName) {
       this.qualifiedName = Objects.requireNonNull(qualifiedName);
       return this;
     }
 
+    /**
+     * Get the super-interface set on this builder.
+     *
+     * @return the super-interface.
+     */
+    TypeElement getSuperInterface() {
+      return Objects.requireNonNull(this.superInterface);
+    }
+
+    /**
+     * Set the super-interface that defined this model.
+     *
+     * @param superInterface the super-interface.
+     * @return this builder.
+     */
+    public Builder superInterface(TypeElement superInterface) {
+      this.superInterface = Objects.requireNonNull(superInterface);
+      return this;
+    }
+
+    /**
+     * Get the annotation mirror for the model annotation that was applied that triggered this model
+     * to be built.
+     *
+     * @return the annotation mirror.
+     */
+    AnnotationMirror getAnnotationMirror() {
+      return Objects.requireNonNull(this.annotationMirror);
+    }
+
+    /**
+     * Set the annotation mirror for the model annotation that was applied that triggered this model
+     * to be built.
+     *
+     * @param annotationMirror the annotation mirror.
+     * @return this builder.
+     */
+    public Builder annotationMirror(AnnotationMirror annotationMirror) {
+      this.annotationMirror = Objects.requireNonNull(annotationMirror);
+      return this;
+    }
+
+    /**
+     * Get the collection of settings that are set in this builder.
+     *
+     * @return the settings collection.
+     */
+    SettingsCollection getSettingsCollection() {
+      return Objects.requireNonNull(this.settingsCollection);
+    }
+
+    /**
+     * Set the collection of settings to use for the model.
+     *
+     * @param settingsCollection the settings collection.
+     * @return this builder.
+     */
+    public Builder settingsCollection(SettingsCollection settingsCollection) {
+      this.settingsCollection = settingsCollection;
+      return this;
+    }
+
+    /**
+     * Get the collection of classified methods set in this builder.
+     *
+     * @return the method classification collection.
+     */
+    MethodClassification getMethods() {
+      return Objects.requireNonNull(this.methods);
+    }
+
+    /**
+     * Set the classified methods for the model in this builder.
+     *
+     * @param methods the classified methods to set.
+     * @return this builder.
+     */
+    public Builder methods(MethodClassification methods) {
+      this.methods = methods;
+      return this;
+    }
+
+    /**
+     * Add an attribute.
+     *
+     * @param attribute the attribute to add.
+     * @return this builder.
+     */
+    public Builder attribute(Attribute attribute) {
+      Objects.requireNonNull(attribute);
+      this.attributes.add(attribute);
+      return this;
+    }
+
+    /**
+     * Add a constructor.
+     *
+     * @param constructor the constructor to add.
+     * @return this builder.
+     */
+    public Builder constructor(Constructor constructor) {
+      Objects.requireNonNull(constructor);
+      this.constructors.add(constructor);
+      return this;
+    }
+
+    /**
+     * Get whether this model is mutable or not.
+     *
+     * @return true if mutable, false if immutable.
+     */
+    boolean isMutable() {
+      return Objects.requireNonNull(this.mutable);
+    }
+
+    /**
+     * Set whether this model is mutable or not.
+     *
+     * @param mutable true if mutable, false if immutable.
+     * @return this builder.
+     */
     public Builder mutable(Boolean mutable) {
       // Box to enable us to error later if it was not explicitly set.
       this.mutable = Objects.requireNonNull(mutable);
       return this;
     }
 
-    public Builder superInterface(TypeElement superInterface) {
-      this.superInterface = Objects.requireNonNull(superInterface);
-      return this;
-    }
-
-    public Builder annotationMirror(AnnotationMirror annotationMirror) {
-      this.annotationMirror = Objects.requireNonNull(annotationMirror);
-      return this;
-    }
-
-    public Builder settingsCollection(SettingsCollection settingsCollection) {
-      this.settingsCollection = settingsCollection;
-      return this;
-    }
-
-    public Builder methods(MethodClassification methods) {
-      this.methods = methods;
-      return this;
-    }
-
+    /**
+     * Set the builder strategy.
+     *
+     * @param builderStrategy the nullable builder strategy to set.
+     * @return this builder.
+     */
     public Builder builderStrategy(@Nullable BuilderStrategy builderStrategy) {
       this.builderStrategy = builderStrategy;
       return this;
     }
 
+    /**
+     * Set the model-level deprecation annotation.
+     *
+     * @param deprecatedAnnotation the nullable annotation mirror to set.
+     * @return this builder.
+     */
     public Builder deprecatedAnnotation(@Nullable AnnotationMirror deprecatedAnnotation) {
       this.deprecatedAnnotation = deprecatedAnnotation;
       return this;
     }
 
+    /**
+     * Build a Model instance from this builder.
+     *
+     * @return the constructed Model object.
+     */
     @Override
     public Model build() {
       return new Model(this);

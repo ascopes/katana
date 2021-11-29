@@ -19,10 +19,20 @@ public final class FieldFactory {
 
   private final Logger logger;
 
+  /**
+   * Initialize the factory.
+   */
   public FieldFactory() {
     this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
+  /**
+   * Create a field definition for a given attribute.
+   *
+   * @param attribute the attribute to generate the field for.
+   * @param settings the settings to use.
+   * @return the generated field spec.
+   */
   public FieldSpec create(Attribute attribute, SettingsCollection settings) {
     FieldSpec.Builder builder = FieldSpec
         .builder(attribute.getType(), attribute.getIdentifier())
@@ -33,11 +43,11 @@ public final class FieldFactory {
         .map(CodeGenUtils::copyDeprecatedFrom)
         .ifPresent(builder::addAnnotation);
 
-    if (attribute.isFinal()) {
+    if (attribute.isFinalField()) {
       builder.addModifiers(Modifier.FINAL);
     }
 
-    if (attribute.isTransient()) {
+    if (attribute.isTransientField()) {
       builder.addModifiers(Modifier.TRANSIENT);
     }
 

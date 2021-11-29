@@ -21,12 +21,25 @@ public final class JavaFileWriter {
   private final Filer filer;
   private final Diagnostics diagnostics;
 
+  /**
+   * Initialize the file writer.
+   *
+   * @param filer the filer to use.
+   * @param diagnostics the diagnostics to report errors with.
+   */
   public JavaFileWriter(Filer filer, Diagnostics diagnostics) {
     this.logger = LoggerFactory.loggerFor(this.getClass());
     this.filer = filer;
     this.diagnostics = diagnostics;
   }
 
+  /**
+   * Write out the given file with the given name.
+   *
+   * @param name the name of the file, used for logging.
+   * @param javaFile the actual file to write out.
+   * @return an empty OK result, or a failed result if an error occurred.
+   */
   public Result<Void> writeOutFile(String name, JavaFile javaFile) {
     try {
       this.logger.info("Writing out generated source for {}", name);

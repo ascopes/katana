@@ -31,44 +31,58 @@ import javax.tools.Diagnostic.Kind;
 public final class MethodClassificationFactory {
 
   private final Diagnostics diagnostics;
-  private final Logger logger;
   private final Elements elementUtils;
   private final Types typeUtils;
+  private final Logger logger;
 
+  /**
+   * Initialize this factory.
+   *
+   * @param diagnostics  diagnostics to use for reporting compilation errors.
+   * @param elementUtils the element utilities to use for introspection.
+   * @param typeUtils    the type utilities to use for introspection.
+   */
   public MethodClassificationFactory(
       Diagnostics diagnostics,
       Elements elementUtils,
       Types typeUtils
   ) {
     this.diagnostics = diagnostics;
-    this.logger = LoggerFactory.loggerFor(this.getClass());
     this.elementUtils = elementUtils;
     this.typeUtils = typeUtils;
+    this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
+  /**
+   * Create a method classification collection for the given interface model type and the given
+   * settings.
+   *
+   * @param interfaceType the interface type to scan.
+   * @param settings      the settings to consider.
+   * @return the method classification in an OK result, or a failed result if an error occurred.
+   */
   public Result<MethodClassification> create(
-      TypeElement selfType,
+      TypeElement interfaceType,
       SettingsCollection settings
   ) {
     MethodClassification.Builder builder = MethodClassification.builder();
 
     boolean failed = false;
 
-    for (
-        AvailableMethodsIterator it = new AvailableMethodsIterator(this.typeUtils, selfType);
-        it.hasNext();
-    ) {
+    AvailableMethodsIterator it = new AvailableMethodsIterator(this.typeUtils, interfaceType);
+
+    while (it.hasNext()) {
       ExecutableElement method = it.next();
 
       failed |= this
           .processAsGetter(builder, method, settings)
-          .ifIgnoredReplace(() -> this.processEquals(builder, method, settings, selfType))
-          .ifIgnoredReplace(() -> this.processHashCode(builder, method, settings, selfType))
-          .ifIgnoredReplace(() -> this.processToString(builder, method, settings, selfType))
+          .ifIgnoredReplace(() -> this.processEquals(builder, method, settings, interfaceType))
+          .ifIgnoredReplace(() -> this.processHashCode(builder, method, settings, interfaceType))
+          .ifIgnoredReplace(() -> this.processToString(builder, method, settings, interfaceType))
           // TODO(ascopes): reimplement setter + wither types in the future.
           .ifIgnoredReplace(() -> this.processAsStaticMethod(builder, method))
           .ifIgnoredReplace(() -> {
-            this.failUnimplementableMethods(selfType, method);
+            this.failUnimplementableMethods(interfaceType, method);
             return Result.fail();
           })
           .isNotOk();

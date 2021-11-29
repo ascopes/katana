@@ -20,10 +20,20 @@ public final class SetterFactory {
 
   private final Logger logger;
 
+  /**
+   * Initialize this factory.
+   */
   public SetterFactory() {
     this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
+  /**
+   * Create a setter for the given attribute.
+   *
+   * @param attribute the attribute to generate the setter for.
+   * @param settings the settings to use.
+   * @return the generated method spec.
+   */
   public MethodSpec create(Attribute attribute, SettingsCollection settings) {
     String setterName = NamingUtils.addPrefixCamelCase(
         settings.getSetterPrefix().getValue(),

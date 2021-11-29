@@ -24,11 +24,22 @@ public final class BuilderFactory {
   private final InitTrackerFactory initTrackerFactory;
   private final Logger logger;
 
+  /**
+   * Initialize this factory.
+   */
   public BuilderFactory() {
     this.initTrackerFactory = new InitTrackerFactory();
     this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
+  /**
+   * Create a set of builder components used to define a builder and initialize the model from the
+   * builder, using a given model.
+   *
+   * @param model    the model to generate the builder for.
+   * @param strategy the strategy to use to create the builder.
+   * @return the generated builder components.
+   */
   public BuilderComponents create(Model model, BuilderStrategy strategy) {
     InitTracker initTracker = this.initTrackerFactory.createTracker(model.getAttributes());
 
@@ -36,7 +47,10 @@ public final class BuilderFactory {
     throw new UnsupportedOperationException();
   }
 
-  public final static class BuilderComponents {
+  /**
+   * Collection of source code fragments for implementing builders.
+   */
+  public static final class BuilderComponents {
 
     private final MethodSpec builderInitializer;
     private final MethodSpec builderConstructor;
@@ -55,19 +69,40 @@ public final class BuilderFactory {
       this.toBuilderMethod = Objects.requireNonNull(toBuilderMethod);
     }
 
+    /**
+     * The static method that returns a new builder.
+     *
+     * @return the builder creation method.
+     */
     public MethodSpec getBuilderInitializer() {
       return this.builderInitializer;
     }
 
+    /**
+     * The private constructor that consumes a builder and initializes the model type.
+     *
+     * @return the constructor.
+     */
     public MethodSpec getBuilderConstructor() {
       return this.builderConstructor;
     }
 
+    /**
+     * The method to convert an existing model back into a builder as a copy.
+     *
+     * @return the method to convert the model instance to a builder, if enabled. If disabled, an
+     *     empty optional is returned.
+     */
     @MaybePresent
     public Optional<MethodSpec> getToBuilderMethod() {
       return Optional.ofNullable(this.toBuilderMethod);
     }
 
+    /**
+     * The type spec for the builder implementation.
+     *
+     * @return the builder type spec.
+     */
     public TypeSpec getBuilderType() {
       return this.builderType;
     }

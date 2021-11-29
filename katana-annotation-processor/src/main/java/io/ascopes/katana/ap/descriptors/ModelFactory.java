@@ -10,8 +10,7 @@ import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
-import java.util.HashSet;
-import java.util.Set;
+import io.ascopes.katana.ap.utils.ResultCollector;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
@@ -36,6 +35,15 @@ public final class ModelFactory {
   private final Elements elementUtils;
   private final Logger logger;
 
+  /**
+   * Initialize this factory.
+   *
+   * @param settingsResolver the settings resolver to use.
+   * @param methodClassifier the method classifier to use.
+   * @param attributeFactory the attribute factory to use.
+   * @param diagnostics      the diagnostics to report compilation errors with.
+   * @param elementUtils     the element utilities to use for introspection.
+   */
   public ModelFactory(
       SettingsResolver settingsResolver,
       MethodClassificationFactory methodClassifier,
@@ -51,6 +59,14 @@ public final class ModelFactory {
     this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
+  /**
+   * Create a model descriptor from a given model annotation and an annotated interface.
+   *
+   * @param modelAnnotation  the model annotation type to use (e.g. ImmutableModel or
+   *                         MutableModel).
+   * @param annotatedElement the annotated interface to generate the model from.
+   * @return the generated model descriptor, or an empty optional if an error occurred.
+   */
   public Result<Model> create(
       TypeElement modelAnnotation,
       TypeElement annotatedElement
@@ -182,31 +198,37 @@ public final class ModelFactory {
   private Result<Model.Builder> generateAttributes(Model.Builder builder) {
     return this.attributeFactory
         .create(builder.getMethods(), builder.getSettingsCollection())
-        .ifOkMap(builder::attributes);
+        .peek(attr -> attr.ifOkThen(builder::attribute))
+        .collect(ResultCollector.discarding())
+        .ifOkReplace(() -> Result.ok(builder));
   }
 
   private Result<Model.Builder> determineConstructors(Model.Builder builder) {
     SettingsCollection settings = builder.getSettingsCollection();
 
-    Set<Constructor> constructorSet = new HashSet<>();
-
     if (settings.getCopyConstructor().getValue()) {
-      constructorSet.add(Constructor.COPY);
+      this.addConstructor(builder, Constructor.COPY);
     }
 
     if (settings.getAllArgsConstructor().getValue()) {
-      constructorSet.add(Constructor.ALL_ARGS);
+      this.addConstructor(builder, Constructor.ALL_ARGS);
     }
 
     if (settings.getDefaultArgsConstructor().getValue()) {
       // No-args constructor on an immutable type makes absolutely zero sense here.
-      constructorSet.add(builder.isMutable() ? Constructor.NO_ARGS : Constructor.ALL_ARGS);
+      Constructor constructor = builder.isMutable()
+          ? Constructor.NO_ARGS
+          : Constructor.ALL_ARGS;
+
+      this.addConstructor(builder, constructor);
     }
 
-    this.logger.trace("Will implement constructors: {}", constructorSet);
-    builder.constructors(constructorSet);
-
     return Result.ok(builder);
+  }
+
+  private void addConstructor(Model.Builder builder, Constructor constructor) {
+    this.logger.trace("Will implement {} constructor", constructor);
+    builder.constructor(constructor);
   }
 
   private Result<Model.Builder> determineBuilders(Model.Builder builder) {

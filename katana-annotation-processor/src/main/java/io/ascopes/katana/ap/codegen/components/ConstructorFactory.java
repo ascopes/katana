@@ -11,6 +11,7 @@ import io.ascopes.katana.ap.logging.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 
 /**
@@ -23,29 +24,39 @@ public final class ConstructorFactory {
 
   private final Logger logger;
 
+  /**
+   * Initialize this factory.
+   */
   public ConstructorFactory() {
     this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
-  public Iterable<MethodSpec> create(Model model) {
-    Set<Constructor> constructorsToBuild = model.getConstructors();
-    List<MethodSpec> generatedConstructors = new ArrayList<>();
+  /**
+   * Create constructors for the given model.
+   *
+   * <p>This will not include constructors generated for builder integration.
+   *
+   * @param model the model to use.
+   * @return a stream of generated method specs.
+   */
+  public Stream<MethodSpec> create(Model model) {
+    return model
+        .getConstructors()
+        .stream()
+        .map(constructor -> this.createConstructor(model, constructor));
+  }
 
-    for (Constructor constructor : constructorsToBuild) {
-      switch (constructor) {
-        case COPY:
-          generatedConstructors.add(this.createCopyConstructor(model));
-          break;
-        case NO_ARGS:
-          generatedConstructors.add(this.createNoArgsConstructor(model));
-          break;
-        case ALL_ARGS:
-          generatedConstructors.add(this.createAllArgsConstructor(model));
-          break;
-      }
+  private MethodSpec createConstructor(Model model, Constructor constructor) {
+    switch (constructor) {
+      case COPY:
+        return this.createCopyConstructor(model);
+      case NO_ARGS:
+        return this.createNoArgsConstructor(model);
+      case ALL_ARGS:
+        return this.createAllArgsConstructor(model);
+      default:
+        throw new UnsupportedOperationException("Unknown constructor type " + constructor);
     }
-
-    return generatedConstructors;
   }
 
   private MethodSpec createCopyConstructor(Model model) {

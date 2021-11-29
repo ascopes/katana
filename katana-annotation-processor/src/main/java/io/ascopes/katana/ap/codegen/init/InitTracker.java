@@ -18,36 +18,46 @@ import org.checkerframework.checker.optional.qual.MaybePresent;
 public interface InitTracker {
 
   /**
+   * Get the expression to determine if an attribute is initialised. An empty optional if the
+   * attribute is not tracked.
+   *
    * @param trackingVariable the tracking variable.
    * @param attribute        the attribute to check if uninitialised.
-   * @return the expression to determine if an attribute is initialised. An empty optional if the
-   * attribute is not tracked.
+   * @return the expression, or an empty optional if the attribute is not tracked.
    */
   @MaybePresent
   Optional<CodeBlock> getInitializedCheckFor(CodeBlock trackingVariable, Attribute attribute);
 
   /**
+   * Get the expression to determine if an attribute is uninitialised. An empty optional if the
+   * attribute is not tracked.
+   *
    * @param trackingVariable the tracking variable.
    * @param attribute        the attribute to check if uninitialised.
-   * @return the expression to determine if an attribute is uninitialised. An empty optional if the
-   * attribute is not tracked.
+   * @return the expression, or an empty optional if the attribute is not tracked.
    */
   @MaybePresent
   Optional<CodeBlock> getUninitializedCheckFor(CodeBlock trackingVariable, Attribute attribute);
 
   /**
+   * Get the expression to determine if any required attributes are not assigned.
+   *
    * @param trackingVariable the tracking variable to consider.
-   * @return the expression to determine if any required attributes are not assigned.
+   * @return the expression.
    */
   CodeBlock getAnyUninitializedCheckFor(CodeBlock trackingVariable);
 
   /**
-   * @return initial value to assign to a tracking variable.
+   * Get the initial value to assign to a tracking variable.
+   *
+   * @return the expression.
    */
   CodeBlock getTrackingVariableInitialValue();
 
   /**
-   * @return the type name of the tracking variable.
+   * Get the type name of the tracking variable.
+   *
+   * @return the type name.
    */
   TypeName getTypeName();
 

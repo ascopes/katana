@@ -20,6 +20,11 @@ abstract class AbstractInitTracker implements InitTracker {
   private final Map<Attribute, CodeBlock> attributes;
   private final CodeBlock allMask;
 
+  /**
+   * Initialize this abstract tracker.
+   *
+   * @param attributeSet the required attributes to track.
+   */
   AbstractInitTracker(SortedSet<Attribute> attributeSet) {
     Objects.requireNonNull(attributeSet);
 
@@ -97,30 +102,52 @@ abstract class AbstractInitTracker implements InitTracker {
   abstract CodeBlock cast(int value);
 
   /**
-   * And {@code &} operator.
-   * <p>
-   * Returned values should always be surrounded by parenthesis.
+   * And {@code &amp;} operator.
+   *
+   * <p>Returned values should always be surrounded by parenthesis.
+   *
+   * @param left  the left oprand.
+   * @param right the right oprand.
+   * @return a code block representing the expression of the bitwise-and of the left and right
+   *     oprands.
    */
   abstract CodeBlock and(CodeBlock left, CodeBlock right);
 
   /**
    * Or {@code |} operator.
-   * <p>
-   * Returned values should always be surrounded by parenthesis.
+   *
+   * <p>Returned values should always be surrounded by parenthesis.
+   *
+   * @param left  the left oprand.
+   * @param right the right oprand.
+   * @return a code block representing the expression of the bitwise-or of the left and right
+   *     oprands.
    */
   abstract CodeBlock or(CodeBlock left, CodeBlock right);
 
   /**
-   * Bitshift left {@code <<} operator.
-   * <p>
-   * Returned values should always be surrounded by parenthesis.
+   * Left-bitshift {@code &lt;&lt;} operator.
+   *
+   * <p>Returned values should always be surrounded by parenthesis.
+   *
+   * @param left  the left oprand.
+   * @param right the right oprand.
+   * @return a code block representing the expression of the left bitshift of the left and right
+   *     oprands.
    */
   abstract CodeBlock shl(CodeBlock left, CodeBlock right);
 
   /**
    * Equality {@code ==} operator.
-   * <p>
-   * Returned values should always be surrounded by parenthesis.
+   *
+   * <p>This is expected to be equivalent to {@link Object#equals(Object)} instead of a literal
+   * {@code ==} operation, when reference types are being compared.
+   *
+   * <p>Returned values should always be surrounded by parenthesis.
+   *
+   * @param left  the left oprand.
+   * @param right the right oprand.
+   * @return a code block representing the expression of the equality of the left and right oprands.
    */
   abstract CodeBlock eq(CodeBlock left, CodeBlock right);
 

@@ -15,11 +15,16 @@ public final class InitTrackerFactory {
 
   private final Logger logger;
 
+  /**
+   * Initialize this factory.
+   */
   public InitTrackerFactory() {
     this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
   /**
+   * Create a new tracker for the given set of required attributes.
+   *
    * @param attributes the attributes to track. This must be a sorted set to ensure deterministic
    *                   behaviour between builds (which makes debugging and testing far simpler).
    * @return a tracker of the most efficient size to use for the given attributes.
