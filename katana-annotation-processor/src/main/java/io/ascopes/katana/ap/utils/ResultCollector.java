@@ -30,8 +30,6 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
 public final class ResultCollector<T, C>
     implements Collector<Result<T>, ResultCollector<T, C>.State, Result<C>> {
 
-  private static final Object SENTINEL = new Object();
-
   private final Collector<T, ?, C> finalCollector;
   private final Supplier<? extends Stream.Builder<T>> builderFactory;
 
