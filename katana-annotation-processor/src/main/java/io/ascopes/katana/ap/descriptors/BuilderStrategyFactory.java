@@ -12,6 +12,13 @@ import io.ascopes.katana.ap.utils.Result;
  */
 public final class BuilderStrategyFactory {
 
+  /**
+   * Create a builder strategy from the given settings.
+   *
+   * @param settings the settings to use.
+   * @return the strategy, an ignored result if builders are disabled, or a failed result if we
+   *     could not parse anything.
+   */
   public Result<BuilderStrategy> create(SettingsCollection settings) {
     // Edge case I probably won't account for.
     //

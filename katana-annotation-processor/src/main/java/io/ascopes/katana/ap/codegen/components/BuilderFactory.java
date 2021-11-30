@@ -228,8 +228,7 @@ public final class BuilderFactory {
               "$1T<$2T> $3L = new $1T<>()",
               LinkedHashSet.class,
               String.class,
-              UNINITIALIZED_SET_VARIABLE
-          );
+              UNINITIALIZED_SET_VARIABLE);
 
       for (Attribute attribute : model.getAttributes()) {
         initTracker

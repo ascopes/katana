@@ -120,6 +120,16 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>3.1.0</version>
 
+        <executions>
+          <execution>
+            <id>checkstyle</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+
         <configuration>
           <!--suppress UnresolvedMavenProperty -->
           <configLocation>${maven.multiModuleProjectDirectory}/checkstyle.xml</configLocation>

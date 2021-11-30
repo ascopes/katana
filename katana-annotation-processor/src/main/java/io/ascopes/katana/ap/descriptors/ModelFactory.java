@@ -284,6 +284,10 @@ public final class ModelFactory {
       case DISABLE:
         candidate.getBuilder().equalityStrategy(null);
         return Result.ok();
+
+      default:
+        // Checkstyle wants this.
+        break;
     }
 
     Result<ExecutableElement> equalsMethod = this.featureManager

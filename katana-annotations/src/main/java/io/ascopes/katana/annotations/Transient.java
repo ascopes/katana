@@ -1,8 +1,8 @@
-  package io.ascopes.katana.annotations;
+package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.features.AttributeFeature;
 import io.ascopes.katana.annotations.advices.ExclusionAdvice;
 import io.ascopes.katana.annotations.advices.InclusionAdvice;
+import io.ascopes.katana.annotations.features.AttributeFeature;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -12,8 +12,8 @@ import java.lang.annotation.Target;
 /**
  * Annotation for custom method implementations that describes the signature of the things that
  * the annotated advice can decorate.
- * <p>
- * Used for marking features like custom toString providers in a type-safe way.
+ *
+ * <p>Used for marking features like custom toString providers in a type-safe way.
  *
  * <p>This should be applied to the feature type itself.
  *
