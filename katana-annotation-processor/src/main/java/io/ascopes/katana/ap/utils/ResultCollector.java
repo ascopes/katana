@@ -87,7 +87,7 @@ public final class ResultCollector<T, C>
   @Override
   public Function<ResultCollector<T, C>.State, Result<C>> finisher() {
     return state -> state.failed.get()
-        ? Result.fail()
+        ? Result.fail("bang")
         : Result.ok(state.builder.build().collect(this.finalCollector));
   }
 

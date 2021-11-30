@@ -155,7 +155,7 @@ public final class ModelFactory {
           packageNameSetting.getAnnotationValue().orElse(null)
       );
 
-      return Result.fail();
+      return Result.fail("Illegal package name pattern");
     }
 
     candidate
@@ -184,7 +184,7 @@ public final class ModelFactory {
           classNameSetting.getAnnotationValue().orElse(null)
       );
 
-      return Result.fail();
+      return Result.fail("Illegal class name pattern");
     }
 
     candidate
@@ -228,8 +228,8 @@ public final class ModelFactory {
         .create(candidate.getMethodClassification(), candidate.getSettings(), candidate.isMutable())
         .collect(ResultCollector.aggregating(Collectors.toList()));
 
-    if (result.isNotOk()) {
-      return Result.fail();
+    if (result.isFailed()) {
+      return Result.fail(result);
     }
 
     for (Attribute attribute : result.unwrap()) {
@@ -322,8 +322,12 @@ public final class ModelFactory {
             candidate.getMethodClassification()
         );
 
-    if (equalsMethod.isNotOk() || hashCodeMethod.isNotOk()) {
-      return Result.fail();
+    if (equalsMethod.isFailed()) {
+      return Result.fail(equalsMethod);
+    }
+
+    if (hashCodeMethod.isFailed()) {
+      return Result.fail(hashCodeMethod);
     }
 
     EqualityStrategy strategy = new CustomEqualityStrategy(

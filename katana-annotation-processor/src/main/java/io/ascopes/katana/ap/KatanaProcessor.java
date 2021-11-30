@@ -130,8 +130,9 @@ public final class KatanaProcessor extends AbstractProcessor {
         .flatMap(annotationType -> this.generateModelsForAnnotation(annotationType, roundEnv))
         .map(model -> model.ifOkFlatMap(this::buildJavaFile))
         .forEach(result -> {
-          if (result.isNotOk()) {
+          if (result.isFailed()) {
             failed.incrementAndGet();
+            this.logger.error("Failed to create model. Result was {}", result);
           }
           processed.incrementAndGet();
         });

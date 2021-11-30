@@ -72,19 +72,19 @@ public final class MethodClassificationFactory {
         failed |= this.getBooleanAttrName(method, settings)
             .orElseGet(() -> this.getAttrName(method, settings))
             .ifOkCheck(attrName -> this.applyGetter(builder, attrName, method))
-            .isNotOk();
+            .isFailed();
       } else {
         failed |= this.processAsStaticMethod(builder, method)
             .orElseGet(() -> {
               this.failUnimplementableMethods(interfaceType, method);
-              return Result.fail();
+              return Result.fail("Cannot implement unknown method " + method);
             })
-            .isNotOk();
+            .isFailed();
       }
     }
 
     return failed
-        ? Result.fail()
+        ? Result.fail("One or more methods had invalid descriptions")
         : Result.ok(builder.build());
   }
 
@@ -122,7 +122,7 @@ public final class MethodClassificationFactory {
           }
 
           this.failNonBooleanGetter(method, settings);
-          return Result.fail();
+          return Result.fail("Boolean getter name used for non-boolean attribute");
         });
 
     if (!result.isPresent()) {
@@ -154,7 +154,7 @@ public final class MethodClassificationFactory {
         .getExistingGetter(attrName)
         .map(existingMethod -> {
           this.failMethodAlreadyExists(existingMethod, newMethod);
-          return Result.<Void>fail();
+          return Result.<Void>fail("Attribute already has a getter defined");
         })
         .orElseGet(Result::ok)
         .ifOk(() -> builder.getter(attrName, newMethod));

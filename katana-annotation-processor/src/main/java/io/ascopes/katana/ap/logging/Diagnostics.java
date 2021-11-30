@@ -11,6 +11,7 @@ import io.ascopes.katana.ap.utils.HandlebarsHelpers;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -159,6 +160,8 @@ public final class Diagnostics {
             + stackTraceToString(ex.getStackTrace());
 
         Diagnostics.this.logger.error("Failed to generate error template.\n{}", stackTrace);
+
+        throw new RuntimeException(ex);
       }
     }
   }
@@ -166,7 +169,7 @@ public final class Diagnostics {
   private static String stackTraceToString(StackTraceElement[] stack) {
     StringBuilder builder = new StringBuilder();
     for (StackTraceElement stackTraceElement : stack) {
-      builder.append(stackTraceElement.toString()).append("\n");
+      builder.append("\t").append(stackTraceElement.toString()).append("\n");
     }
     return builder.toString();
   }

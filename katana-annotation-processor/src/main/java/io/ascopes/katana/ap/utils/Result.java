@@ -20,15 +20,30 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
  */
 @ReportInherit
 public final class Result<T> {
-
-  private static final Result<Void> CLEARED = new Result<>(null);
-  private static final Result<?> FAILED = new Result<>(null);
-
   @PolyNull
   private final T value;
 
-  private Result(@PolyNull T value) {
+  @PolyNull
+  private final String reason;
+
+  private final StackTraceElement from;
+
+  private Result() {
+    this.value = null;
+    this.reason = null;
+    this.from = null;
+  }
+
+  private Result(T value) {
     this.value = value;
+    this.reason = null;
+    this.from = null;
+  }
+
+  private Result(String reason, StackTraceElement from) {
+    this.value = null;
+    this.reason = reason;
+    this.from = from;
   }
 
   /**
@@ -40,7 +55,7 @@ public final class Result<T> {
   public T unwrap() throws IllegalStateException {
     this.assertNotCleared();
     if (this.isFailed()) {
-      throw new IllegalStateException("Cannot unwrap a failed result!");
+      throw new IllegalStateException(this.reason);
     }
 
     return Objects.requireNonNull(this.value);
@@ -70,7 +85,7 @@ public final class Result<T> {
    * @return true if the result is failed.
    */
   public boolean isFailed() {
-    return this == FAILED;
+    return this.reason != null;
   }
 
   /**
@@ -99,23 +114,6 @@ public final class Result<T> {
     this.assertNotCleared();
     if (this.isOk()) {
       then.accept(this.unwrap());
-    }
-    return this;
-  }
-
-  /**
-   * Same as {@link #ifOkCheck(Function)}, except no parameter is input.
-   *
-   * @param then the logic to invoke if this was OK.
-   * @return the result.
-   */
-  public Result<T> ifOkCheck(Supplier<Result<?>> then) {
-    // TODO(ascopes): unit test
-    if (this.isOk()) {
-      Result<?> next = then.get();
-      if (!next.isOk()) {
-        return castFailedOrIgnored(next);
-      }
     }
     return this;
   }
@@ -193,47 +191,6 @@ public final class Result<T> {
 
 
   /**
-   * Discard any value if this result is OK. OK results remain as being OK, but you will no longer
-   * have any value within it. Other results stay as they are.
-   *
-   * @return a cleared result value that has no meaning other than the status.
-   */
-  public Result<Void> dropValue() {
-    return this.isOk()
-        ? CLEARED
-        : castFailedOrIgnored(this);
-  }
-
-  /**
-   * Return the value in this result if it is OK. If the result is not OK then return the given
-   * value instead.
-   *
-   * @param ifNotOk value to use if not OK.
-   * @return the value of this result if it was OK, or the result of the supplier otherwise.
-   */
-  public @PolyNull T elseReturn(@PolyNull T ifNotOk) {
-    this.assertNotCleared();
-    return this.isOk()
-        ? this.unwrap()
-        : ifNotOk;
-  }
-
-  /**
-   * Return the value in this result if it is OK. If the result is not OK then invoke the given
-   * supplier and use that value instead.
-   *
-   * @param ifNotOk supplier to perform to get some result if this result is not OK.
-   * @return the value of this result if it was OK, or the result of the supplier otherwise.
-   */
-  public @PolyNull T elseGet(Supplier<@PolyNull T> ifNotOk) {
-    this.assertNotCleared();
-    Objects.requireNonNull(ifNotOk);
-    return this.isOk()
-        ? this.unwrap()
-        : ifNotOk.get();
-  }
-
-  /**
    * {@inheritDoc}
    */
   @Override
@@ -252,15 +209,7 @@ public final class Result<T> {
    */
   @Override
   public int hashCode() {
-    if (this == CLEARED) {
-      return Integer.MIN_VALUE + 1;
-    }
-
-    if (this == FAILED) {
-      return Integer.MIN_VALUE + 2;
-    }
-
-    return Objects.hash(this.value);
+    return Objects.hash(this.value, this.reason);
   }
 
   /**
@@ -268,17 +217,17 @@ public final class Result<T> {
    */
   @Override
   public String toString() {
-    if (this == FAILED) {
-      return "Result{failed}";
+    if (this.reason != null) {
+      return "Result{failed, " + StringUtils.quoted(this.reason) + ", " + this.from + "}";
     }
-    if (this == CLEARED) {
-      return "Result{ok}";
+    if (this.value == null) {
+      return "Result{ok, no value}";
     }
-    return "Result{ok, " + this.value + "}";
+    return "Result{ok, " + StringUtils.quoted(this.value) + "}";
   }
 
   private void assertNotCleared() {
-    if (this == CLEARED) {
+    if (this.value == null && this.reason == null) {
       throw new IllegalStateException("Cannot unwrap an empty OK result!");
     }
   }
@@ -289,7 +238,7 @@ public final class Result<T> {
    * @return an OK result that has no value.
    */
   public static Result<Void> ok() {
-    return CLEARED;
+    return new Result<>();
   }
 
   /**
@@ -304,10 +253,25 @@ public final class Result<T> {
   /**
    * Generate a failed result.
    *
+   * @param reason the reason for failing.
    * @return a failed result with no value.
    */
-  public static <T> Result<T> fail() {
-    return castFailedOrIgnored(FAILED);
+  public static <T> Result<T> fail(String reason) {
+    StackTraceElement frame = Thread.currentThread().getStackTrace()[2];
+    return new Result<>(reason, frame);
+  }
+
+  /**
+   * Generate a failed result from another failed result, taking the reason message.
+   *
+   * @param failedResult the failed result to copy.
+   * @return a failed result with no value.
+   */
+  public static <T> Result<T> fail(Result<?> failedResult) {
+    if (!failedResult.isFailed()) {
+      throw new IllegalStateException("Cannot create a failed result from a non-failed result");
+    }
+    return new Result<>(failedResult.reason, failedResult.from);
   }
 
   @SuppressWarnings("unchecked")

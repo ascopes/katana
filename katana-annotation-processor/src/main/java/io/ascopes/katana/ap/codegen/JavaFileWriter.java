@@ -56,7 +56,7 @@ public final class JavaFileWriter {
           .param("stacktrace", ex)
           .log();
 
-      return Result.fail();
+      return Result.fail("Failed to write out file");
     }
   }
 }

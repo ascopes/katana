@@ -36,7 +36,7 @@ class ResultCollectorUnitTest {
             Result.ok("bar"),
             Result.ok("baz"),
             Result.ok("bork"),
-            Result.<String>fail(),
+            Result.<String>fail("bang"),
             Result.ok("qux")
         )
         .sequential()
@@ -97,7 +97,7 @@ class ResultCollectorUnitTest {
             Result.ok("bar"),
             Result.ok("baz"),
             Result.ok("bork"),
-            Result.<String>fail(),
+            Result.<String>fail("bang"),
             Result.ok("qux")
         )
         .parallel()

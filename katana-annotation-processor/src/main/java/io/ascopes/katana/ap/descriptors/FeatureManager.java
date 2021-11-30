@@ -96,7 +96,10 @@ public class FeatureManager {
           includeAnnotation,
           excludeAnnotation
       );
-      return Result.fail();
+
+      return Result.fail(
+          "Feature " + featureClass.getCanonicalName() + " was included and excluded"
+      );
     }
 
     if (value.isIncludeAll() && hasAnnotation(getter, excludeAnnotation)) {
@@ -225,7 +228,7 @@ public class FeatureManager {
     if (candidateMethods.isEmpty()) {
       this.failNoCustomMethodFound(interfaceType, advice);
       // Don't bother processing further, other stuff might break.
-      return Result.fail();
+      return Result.fail("No custom method found for " + methodAnnotationType.getCanonicalName());
     }
 
     // Guaranteed to be available.
@@ -233,7 +236,7 @@ public class FeatureManager {
 
     if (!this.isSubSignature(advice, method)) {
       this.failInvalidCustomSignature(method, advice);
-      return Result.fail();
+      return Result.fail("Invalid signature found for " + methodAnnotationType.getCanonicalName());
     }
 
     return Result.ok(method);
