@@ -217,13 +217,18 @@ public final class Result<T> {
    */
   @Override
   public String toString() {
-    if (this.reason != null) {
-      return "Result{failed, " + StringUtils.quoted(this.reason) + ", " + this.from + "}";
+    if (this.isOk()) {
+      if (this.value == null) {
+        return "Result{ok, empty}";
+      }
+      return "Result{ok, value=" + this.value + "}";
     }
-    if (this.value == null) {
-      return "Result{ok, no value}";
-    }
-    return "Result{ok, " + StringUtils.quoted(this.value) + "}";
+
+    return "Result{"
+        + "failed, "
+        + "reason=" + StringUtils.quoted(this.reason) + ", "
+        + "raisedAt=" + StringUtils.quoted(this.from)
+        + "}";
   }
 
   private void assertNotCleared() {

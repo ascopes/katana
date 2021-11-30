@@ -143,7 +143,7 @@ public final class Diagnostics {
         String path = this.directory + "/" + this.template;
         String message = Diagnostics.this.handlebars.compile(path).apply(this.params);
 
-        Diagnostics.this.logger.debug("Reporting error to compiler [{}]: {}", path, message);
+        Diagnostics.this.logger.debug("Reporting error to compiler [{}]:\n{}", path, message);
 
         Diagnostics.this.messager.printMessage(
             this.kind,
@@ -159,7 +159,7 @@ public final class Diagnostics {
             + "\n"
             + stackTraceToString(ex.getStackTrace());
 
-        Diagnostics.this.logger.error("Failed to generate error template.\n{}", stackTrace);
+        Diagnostics.this.logger.error("Failed to generate error template:\n{}", stackTrace);
 
         throw new RuntimeException(ex);
       }

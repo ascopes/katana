@@ -52,8 +52,11 @@ public final class LoggerFactory {
       message = String.format(format.replace("{}", "%s"), args);
     }
 
+    // Indent additional lines to make code snippets easier to read.
+    message = String.join("\n  |    ", message.split("\n"));
+
     this.outputStream.printf(
-        "[ %6s ] %s (up %.3fs) - %s - %s%n",
+        "[ %1.1s ] %s (up %.3fs) - %s - %s%n",
         level.name(),
         LocalDateTime.now(this.clock),
         this.runtimeMxBean.getUptime() / 1_000.0,

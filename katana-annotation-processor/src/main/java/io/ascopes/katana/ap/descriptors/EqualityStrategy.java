@@ -1,5 +1,6 @@
 package io.ascopes.katana.ap.descriptors;
 
+import io.ascopes.katana.ap.utils.StringUtils;
 import java.util.Objects;
 import javax.lang.model.element.ExecutableElement;
 
@@ -42,6 +43,11 @@ public abstract class EqualityStrategy {
     public boolean isIncludeAll() {
       return this.includeAll;
     }
+
+    @Override
+    public String toString() {
+      return "GeneratedEqualityStrategy{includeAll=" + this.includeAll + '}';
+    }
   }
 
   /**
@@ -83,6 +89,14 @@ public abstract class EqualityStrategy {
      */
     public ExecutableElement getHashCodeMethod() {
       return this.hashCodeMethod;
+    }
+
+    @Override
+    public String toString() {
+      return "CustomEqualityStrategy{"
+          + "equalsMethod=" + StringUtils.quoted(this.equalsMethod)
+          + "hashCodeMethod=" + StringUtils.quoted(this.hashCodeMethod)
+          + '}';
     }
   }
 }

@@ -165,10 +165,15 @@ public final class Model {
   @Override
   public String toString() {
     return "Model{"
-        + "packageName=" + StringUtils.quoted(this.packageName) + ", "
-        + "className=" + StringUtils.quoted(this.className) + ", "
-        + "attributes=" + this.attributes + ", "
+        + "qualifiedName=" + StringUtils.quoted(this.getQualifiedName()) + ", "
         + "superInterface=" + StringUtils.quoted(this.superInterface.getQualifiedName()) + ", "
+        + "constructors=" + this.constructors + ", "
+        + "attributes=" + this.attributes + ", "
+        + "indent=" + StringUtils.quoted(this.indent) + ", "
+        + "setterPrefix=" + StringUtils.quoted(this.setterPrefix) + ", "
+        + "builderStrategy=" + this.builderStrategy + ", "
+        + "equalityStrategy=" + this.equalityStrategy + ", "
+        + "deprecatedAnnotation=" + this.deprecatedAnnotation
         + '}';
   }
 

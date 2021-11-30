@@ -53,9 +53,9 @@ public final class BuilderFactory {
 
     Stream<Attribute> requiredAttrs = model
         .getAttributes()
-        .stream();
-    // TODO: specify whether fields are required in a builder or not.
-    //.filter(Attribute::isFinalField);
+        .stream()
+        // TODO: specify whether fields are required in a builder or not.
+        .filter(Attribute::isFinalField);
 
     InitTracker initTracker = this.initTrackerFactory.createTracker(requiredAttrs, TRACKING_FIELD);
 
@@ -81,7 +81,7 @@ public final class BuilderFactory {
         .classBuilder(this.builderTypeName(model, strategy))
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
         .addMethod(this.createPrivateBuilderConstructor())
-        .addMethod(this.createBuilderBuildMethod(this.modelTypeName(model), strategy));
+        .addMethod(this.createBuilderBuildMethod(model.getQualifiedName(), strategy));
 
     this.createFields(model)
         .forEach(builder::addField);
@@ -93,31 +93,43 @@ public final class BuilderFactory {
       builder.addField(this.createTrackingVariable(initTracker));
     }
 
-    return builder.build();
+    TypeSpec type = builder.build();
+
+    this.logger.trace("Created builder type:\n{}", type);
+    return type;
   }
 
   private FieldSpec createTrackingVariable(InitTracker initTracker) {
-    return FieldSpec
+    FieldSpec field = FieldSpec
         .builder(initTracker.getTypeName(), initTracker.getFieldName())
         .addModifiers(Modifier.PRIVATE, Modifier.TRANSIENT)
         .initializer(initTracker.getTrackingVariableInitialValue())
         .build();
+
+    this.logger.trace("Created initialization tracking variable:\n{}", field);
+    return field;
   }
 
   private MethodSpec createPrivateBuilderConstructor() {
-    return MethodSpec
+    MethodSpec method = MethodSpec
         .constructorBuilder()
         .addModifiers(Modifier.PRIVATE)
         .build();
+
+    this.logger.trace("Generated private builder constructor:\n{}", method);
+    return method;
   }
 
   private MethodSpec createBuilderBuildMethod(ClassName modelTypeName, BuilderStrategy strategy) {
-    return MethodSpec
+    MethodSpec method = MethodSpec
         .methodBuilder(strategy.getBuildMethodName())
         .returns(modelTypeName)
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
         .addStatement("return new $T($L)", modelTypeName, THIS)
         .build();
+
+    this.logger.trace("Generated builder build method:\n{}", method);
+    return method;
   }
 
   private Stream<FieldSpec> createFields(Model model) {
@@ -128,10 +140,13 @@ public final class BuilderFactory {
   }
 
   private FieldSpec createField(Attribute attribute) {
-    return FieldSpec
+    FieldSpec field = FieldSpec
         .builder(attribute.getType(), attribute.getIdentifier())
         .addModifiers(Modifier.PRIVATE)
         .build();
+
+    this.logger.trace("Generated field for builder:\n{}", field);
+    return field;
   }
 
   private Stream<MethodSpec> createSetters(
@@ -187,13 +202,15 @@ public final class BuilderFactory {
 
     builder.addStatement("return $L", THIS);
 
-    return builder.build();
+    MethodSpec method = builder.build();
+    this.logger.trace("Generated builder setter method:\n{}", method);
+    return method;
   }
 
   private MethodSpec createModelBuilderStaticMethod(Model model, BuilderStrategy strategy) {
     ClassName builderTypeName = this.builderTypeName(model, strategy);
 
-    return MethodSpec
+    MethodSpec method = MethodSpec
         // TODO(ascopes): allow customizing this name.
         // TODO(ascopes): handle collisions with this name.
         .methodBuilder(strategy.getBuilderMethodName())
@@ -201,6 +218,9 @@ public final class BuilderFactory {
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
         .addStatement("return new $T()", builderTypeName)
         .build();
+
+    this.logger.trace("Generated builder static method for model:\n{}", method);
+    return method;
   }
 
   private MethodSpec createModelBuilderConstructor(
@@ -266,9 +286,12 @@ public final class BuilderFactory {
       );
     }
 
-    return methodBuilder
+    MethodSpec method = methodBuilder
         .addCode(codeBlockBuilder.build())
         .build();
+
+    this.logger.trace("Generated model constructor for builder:\n{}", method);
+    return method;
   }
 
   private MethodSpec createToBuilderMethod(Model model, BuilderStrategy strategy) {
@@ -279,7 +302,7 @@ public final class BuilderFactory {
 
     CodeBlock.Builder codeBlockBuilder = CodeBlock
         .builder()
-        .add("return $T.$N()\n", this.modelTypeName(model), strategy.getBuilderMethodName());
+        .add("return $T.$N()\n", model.getQualifiedName(), strategy.getBuilderMethodName());
 
     for (Attribute attribute : model.getAttributes()) {
       codeBlockBuilder.add(".$1N($2L.$1N)\n", attribute.getIdentifier(), THIS);
@@ -287,16 +310,15 @@ public final class BuilderFactory {
 
     codeBlockBuilder.addStatement(".$N()", strategy.getBuildMethodName());
 
-    return methodBuilder
+    MethodSpec method = methodBuilder
         .addCode(codeBlockBuilder.build())
         .build();
-  }
 
-  private ClassName modelTypeName(Model model) {
-    return ClassName.get(model.getPackageName(), model.getClassName());
+    this.logger.trace("Generated toBuilder method for model:\n{}", method);
+    return method;
   }
 
   private ClassName builderTypeName(Model model, BuilderStrategy strategy) {
-    return this.modelTypeName(model).nestedClass(strategy.getBuilderTypeName());
+    return model.getQualifiedName().nestedClass(strategy.getBuilderTypeName());
   }
 }
