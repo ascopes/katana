@@ -8,6 +8,7 @@ import io.ascopes.katana.ap.settings.Setting;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -67,16 +68,19 @@ public final class MethodClassificationFactory {
     while (it.hasNext()) {
       ExecutableElement method = it.next();
 
-      failed |= this
-          .takeIfValidGetterSignature(method)
-          .ifOkCheck(() -> this
-              .getBooleanAttrName(method, settings)
-              .ifIgnoredReplace(() -> this.getAttrName(method, settings))
-              .ifOkCheck(attrName -> this.applyGetter(builder, attrName, method)))
-          .ifIgnoredReplace(() -> this.processAsStaticMethod(builder, method))
-          .ifIgnored(() -> this.failUnimplementableMethods(interfaceType, method))
-          .failIfIgnored()
-          .isFailed();
+      if (this.isValidGetterSignature(method)) {
+        failed |= this.getBooleanAttrName(method, settings)
+            .orElseGet(() -> this.getAttrName(method, settings))
+            .ifOkCheck(attrName -> this.applyGetter(builder, attrName, method))
+            .isNotOk();
+      } else {
+        failed |= this.processAsStaticMethod(builder, method)
+            .orElseGet(() -> {
+              this.failUnimplementableMethods(interfaceType, method);
+              return Result.fail();
+            })
+            .isNotOk();
+      }
     }
 
     return failed
@@ -84,54 +88,61 @@ public final class MethodClassificationFactory {
         : Result.ok(builder.build());
   }
 
-  private Result<ExecutableElement> takeIfValidGetterSignature(ExecutableElement method) {
+  private boolean isValidGetterSignature(ExecutableElement method) {
     if (!this.isInstanceScoped(method)) {
       this.logger.trace("Ignoring {} as getter, method not instance-scoped", method);
-      return Result.ignore();
+      return false;
     }
 
     if (!method.getParameters().isEmpty()) {
       this.logger.trace("Ignoring {} as getter, method had parameters present", method);
-      return Result.ignore();
+      return false;
     }
 
     if (method.getReturnType().getKind() == TypeKind.VOID) {
       this.logger.trace("Ignoring {} as getter, method had no return type", method);
-      return Result.ignore();
+      return false;
     }
 
-    return Result.ok(method);
+    return true;
   }
 
-  private Result<String> getBooleanAttrName(ExecutableElement method, SettingsCollection settings) {
+  private Optional<Result<String>> getBooleanAttrName(
+      ExecutableElement method,
+      SettingsCollection settings
+  ) {
     String booleanGetterPrefix = settings.getBooleanGetterPrefix().getValue();
 
-    Result<String> attrName = NamingUtils
-        .removePrefixCamelCase(method, booleanGetterPrefix);
+    Optional<Result<String>> result = NamingUtils
+        .removePrefixCamelCase(method, booleanGetterPrefix)
+        .map(attrName -> {
+          if (this.isBooleanReturnType(method, settings)) {
+            this.logger.trace("{} is boolean getter for attribute {}", method, attrName);
+            return Result.ok(attrName);
+          }
 
-    if (attrName.isIgnored()) {
+          this.failNonBooleanGetter(method, settings);
+          return Result.fail();
+        });
+
+    if (!result.isPresent()) {
       this.logger.trace(
           "Ignoring {} as boolean getter, it does not match the naming strategy",
           method
       );
-      return Result.ignore();
     }
 
-    if (!this.isBooleanReturnType(method, settings)) {
-      this.failNonBooleanGetter(method, settings);
-      return Result.fail();
-    }
-
-    return attrName
-        .ifOk(name -> this.logger.trace("{} is boolean getter for attribute {}", method, name));
+    return result;
   }
 
   private Result<String> getAttrName(ExecutableElement method, SettingsCollection settings) {
     String getterPrefix = settings.getGetterPrefix().getValue();
 
-    return NamingUtils
+    String attrName = NamingUtils
         .removePrefixCamelCase(method, getterPrefix)
-        .ifOk(name -> this.logger.trace("{} is getter for attribute {}", method, name));
+        .orElseThrow(() -> new RuntimeException("Unreachable!"));
+    this.logger.trace("{} is a getter for attribute {}", method, attrName);
+    return Result.ok(attrName);
   }
 
   private Result<Void> applyGetter(
@@ -149,20 +160,20 @@ public final class MethodClassificationFactory {
         .ifOk(() -> builder.getter(attrName, newMethod));
   }
 
-  private Result<ExecutableElement> processAsStaticMethod(
+  private Optional<Result<ExecutableElement>> processAsStaticMethod(
       MethodClassification.Builder builder,
       ExecutableElement method
   ) {
     // I know that this never occurs, but this keeps the interface consistent if I choose to
     // add stuff in the future.
     if (this.isInstanceScoped(method)) {
-      this.logger.trace("{} is not a static method");
-      return Result.ignore();
+      this.logger.trace("{} is not a static method", method);
+      return Optional.empty();
     }
 
-    this.logger.trace("{} is a static method");
+    this.logger.trace("{} is a static method", method);
     builder.staticMethod(method);
-    return Result.ok(method);
+    return Optional.of(Result.ok(method));
   }
 
   private String signatureOf(ExecutableElement element) {
@@ -256,13 +267,13 @@ public final class MethodClassificationFactory {
         .log();
   }
 
-  private void failUnimplementableMethods(TypeElement selfType, ExecutableElement method) {
+  private void failUnimplementableMethods(TypeElement interfaceType, ExecutableElement method) {
     this.diagnostics
         .builder()
         .kind(Kind.ERROR)
         .element(method)
         .template("unimplementableMethods")
-        .param("type", selfType.getQualifiedName())
+        .param("type", interfaceType.getQualifiedName())
         .param("method", method)
         .log();
   }

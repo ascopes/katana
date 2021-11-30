@@ -4,7 +4,7 @@ import io.ascopes.katana.ap.logging.Diagnostics;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
-import io.ascopes.katana.ap.utils.Result;
+import java.util.Optional;
 import java.util.stream.Stream;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -50,48 +50,49 @@ public final class InterfaceSearcher {
 
     for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(annotationType)) {
       this.tryUpcastAnnotatedType(annotationType, annotatedElement)
-          .ifOk(interfaces)
-          .ifOk(interfaceType -> this.logger.trace(
-              "Found interface {} matching or ascending from {}-annotated interface",
-              interfaceType.getQualifiedName(),
-              annotationType.getQualifiedName()
-          ));
+          .ifPresent(interfaceType -> {
+            this.logger.trace(
+                "Found interface {} matching or ascending from {}-annotated interface",
+                interfaceType.getQualifiedName(),
+                annotationType.getQualifiedName()
+            );
+
+            interfaces.accept(interfaceType);
+          });
     }
 
     return interfaces.build();
   }
 
-  private Result<TypeElement> tryUpcastAnnotatedType(
+  private Optional<TypeElement> tryUpcastAnnotatedType(
       TypeElement annotationType,
       Element annotatedType
   ) {
     if (annotatedType.getKind() == ElementKind.PACKAGE) {
       // We allow packages to be annotated but do not process them actively outside settings
       // resolution. Just ignore it.
-      return Result.ignore();
+      return Optional.empty();
     }
 
     if (annotatedType.getKind() != ElementKind.INTERFACE) {
       this.failNotAnInterface(annotationType, annotatedType);
-      return Result.fail();
+      return Optional.empty();
     }
 
     // I believe as of now we can assume that the element is a TypeElement, but let's just add
     // a check in to prevent future regressions and just in case I have missed anything.
     if (!(annotatedType instanceof TypeElement)) {
       this.failUnexpectedElement(annotationType, annotatedType);
-      return Result.fail();
+      return Optional.empty();
     }
 
-    return Result
-        .ok(annotatedType)
-        .ifOkMap(TypeElement.class::cast);
+    return Optional.of((TypeElement) annotatedType);
   }
 
   private void failNotAnInterface(TypeElement annotationType, Element annotatedElement) {
     AnnotationMirror mirror = AnnotationUtils
         .findAnnotationMirror(annotatedElement, annotationType)
-        .elseReturn(null);
+        .orElse(null);
 
     this.diagnostics
         .builder()
@@ -110,7 +111,7 @@ public final class InterfaceSearcher {
     // contextual info in case the user files a bugreport for us.
     AnnotationMirror mirror = AnnotationUtils
         .findAnnotationMirror(annotatedElement, annotationType)
-        .elseReturn(null);
+        .orElse(null);
 
     this.diagnostics
         .builder()

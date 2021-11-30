@@ -1,8 +1,9 @@
 #!/usr/bin/env groovy
-//file:noinspection GrMethodMayBeStatic
-
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
+
+//file:noinspection GrMethodMayBeStatic
+
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
@@ -14,13 +15,13 @@ import com.squareup.javapoet.WildcardTypeName
 import io.ascopes.katana.annotations.Settings
 import io.ascopes.katana.annotations.advices.ImmutableDefaultAdvice
 import io.ascopes.katana.annotations.advices.MutableDefaultAdvice
-import javax.lang.model.element.Modifier
 import java.lang.annotation.Annotation
 import java.lang.reflect.Method
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.stream.Collectors
 import java.util.stream.Stream
+import javax.lang.model.element.Modifier
 
 /*
  * Build script which looks at the @Settings annotation in katana-annotations and will generate

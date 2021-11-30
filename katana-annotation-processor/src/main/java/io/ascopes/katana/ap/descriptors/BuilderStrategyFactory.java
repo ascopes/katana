@@ -1,7 +1,7 @@
 package io.ascopes.katana.ap.descriptors;
 
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
-import io.ascopes.katana.ap.utils.Result;
+import java.util.Optional;
 
 
 /**
@@ -16,10 +16,9 @@ public final class BuilderStrategyFactory {
    * Create a builder strategy from the given settings.
    *
    * @param settings the settings to use.
-   * @return the strategy, an ignored result if builders are disabled, or a failed result if we
-   *     could not parse anything.
+   * @return the strategy, or an empty optional if ignored.
    */
-  public Result<BuilderStrategy> create(SettingsCollection settings) {
+  public Optional<BuilderStrategy> create(SettingsCollection settings) {
     // Edge case I probably won't account for.
     //
     // I wake up one day and decide "hey, lets make a model that has a builder, but also make it
@@ -31,7 +30,7 @@ public final class BuilderStrategyFactory {
     // head over how to best deal with this for a few days, then alter the code in this method
     // to do something.... probably.
     if (!settings.getBuilder().getValue()) {
-      return Result.ignore();
+      return Optional.empty();
     }
 
     BuilderStrategy builderStrategy = BuilderStrategy
@@ -43,6 +42,6 @@ public final class BuilderStrategyFactory {
         .buildMethodName(settings.getBuildMethodName().getValue())
         .build();
 
-    return Result.ok(builderStrategy);
+    return Optional.of(builderStrategy);
   }
 }

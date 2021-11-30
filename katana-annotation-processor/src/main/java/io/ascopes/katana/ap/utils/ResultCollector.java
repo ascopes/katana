@@ -9,9 +9,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.Stream.Builder;
 import org.checkerframework.common.util.report.qual.ReportInherit;
 
 /**
@@ -58,15 +56,12 @@ public final class ResultCollector<T, C>
   @Override
   public BiConsumer<ResultCollector<T, C>.State, Result<T>> accumulator() {
     return (state, next) -> {
-      if (state.failed.get()) {
-        return;
-      }
-      if (next.isFailed()) {
-        state.failed.set(true);
-        return;
-      }
-      if (!next.isIgnored()) {
-        state.builder.add(next.unwrap());
+      if (!state.failed.get()) {
+        if (next.isFailed()) {
+          state.failed.set(true);
+        } else {
+          state.builder.add(next.unwrap());
+        }
       }
     };
   }
@@ -130,74 +125,5 @@ public final class ResultCollector<T, C>
    */
   public static <T, C> Collector<Result<T>, ?, Result<C>> aggregating(Collector<T, ?, C> then) {
     return new ResultCollector<>(then, Stream::builder);
-  }
-
-  /**
-   * Discard each value within each result, only returning an empty result that fails if any input
-   * element was failed.
-   *
-   * <p>This attempts to allocate as little as possible.
-   *
-   * @param <T> the input type.
-   * @return the collector.
-   */
-  public static <T> Collector<Result<T>, ?, Result<Void>> discarding() {
-    // TODO: unit test
-    return Collectors.collectingAndThen(
-        new ResultCollector<>(new DiscardingCollector<>(), DiscardingStreamBuilder::new),
-        Result::dropValue
-    );
-  }
-
-  /**
-   * Stream builder that discards everything.
-   *
-   * @param <T> the input argument type.
-   */
-  private static final class DiscardingStreamBuilder<T> implements Builder<T> {
-
-    @Override
-    public void accept(T arg) {
-      // Do nothing.
-    }
-
-    @Override
-    public Stream<T> build() {
-      return Stream.empty();
-    }
-  }
-
-  /**
-   * Collector which just discards any inputs and returns a hard-coded reference to a dummy object.
-   *
-   * @param <T> the input object type.
-   */
-  private static final class DiscardingCollector<T> implements Collector<T, Object, Object> {
-
-    @Override
-    public Supplier<Object> supplier() {
-      return () -> SENTINEL;
-    }
-
-    @Override
-    public BiConsumer<Object, T> accumulator() {
-      return (sentinel, next) -> {
-      };
-    }
-
-    @Override
-    public BinaryOperator<Object> combiner() {
-      return (sentinel1, sentinel2) -> sentinel1;
-    }
-
-    @Override
-    public Function<Object, Object> finisher() {
-      return Function.identity();
-    }
-
-    @Override
-    public Set<Characteristics> characteristics() {
-      return Collections.singleton(Characteristics.IDENTITY_FINISH);
-    }
   }
 }

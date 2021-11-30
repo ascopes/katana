@@ -37,12 +37,13 @@ class BareModelIntegrationTest {
                 "package test;",
                 "import io.ascopes.katana.annotations.MutableModel;",
                 "import io.ascopes.katana.annotations.Settings;",
+                "import io.ascopes.katana.annotations.ToString;",
                 "import io.ascopes.katana.annotations.ImmutableModel;",
                 "import java.util.concurrent.atomic.AtomicBoolean;",
                 "",
                 "@MutableModel",
                 "@ImmutableModel",
-                "@Settings(builder = true)",
+                "@Settings(builder = true, toStringMode = ToString.CUSTOM)",
                 "public interface BareModel {",
                 "  String getFoo();",
                 "  int getBar();",
@@ -51,6 +52,12 @@ class BareModelIntegrationTest {
                 "  Boolean isQux();",
                 "  @Deprecated",
                 "  boolean getQuxx();",
+                "  ",
+                "  @ToString.CustomToString",
+                "  static String asString(BareModel model) {",
+                "    return \"hello world!\";",
+                "  }",
+                "  ",
                 "}"
             )
         );

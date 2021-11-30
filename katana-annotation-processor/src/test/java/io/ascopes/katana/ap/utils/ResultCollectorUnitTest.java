@@ -29,73 +29,15 @@ class ResultCollectorUnitTest {
   }
 
   @Test
-  void can_collect_ignored_results_only_sequential() {
-    Result<List<String>> results = Stream
-        .of(
-            Result.<String>ignore(),
-            Result.<String>ignore(),
-            Result.<String>ignore()
-        )
-        .sequential()
-        .collect(ResultCollector.aggregating(Collectors.toList()));
-
-    BDDAssertions
-        .assertThat(results.isOk())
-        .isTrue();
-
-    BDDAssertions
-        .assertThat(results.unwrap())
-        .isEmpty();
-  }
-
-  @Test
-  void can_collect_successful_and_ignored_results_sequential() {
+  void can_not_collect_successful_results_if_failures_present_sequential() {
     Result<List<String>> results = Stream
         .of(
             Result.ok("foo"),
-            Result.<String>ignore(),
             Result.ok("bar"),
-            Result.<String>ignore(),
             Result.ok("baz"),
-            Result.<String>ignore(),
-            Result.<String>ignore(),
-            Result.<String>ignore(),
-            Result.ok("bork"),
-            Result.<String>ignore(),
-            Result.<String>ignore(),
-            Result.ok("qux"),
-            Result.<String>ignore()
-        )
-        .sequential()
-        .collect(ResultCollector.aggregating(Collectors.toList()));
-
-    BDDAssertions
-        .assertThat(results.isOk())
-        .isTrue();
-
-    BDDAssertions
-        .assertThat(results.unwrap())
-        .containsExactly("foo", "bar", "baz", "bork", "qux");
-  }
-
-  @Test
-  void can_not_collect_successful_and_ignored_results_if_failures_present_sequential() {
-    Result<List<String>> results = Stream
-        .of(
-            Result.ok("foo"),
-            Result.<String>ignore(),
-            Result.ok("bar"),
-            Result.<String>ignore(),
-            Result.ok("baz"),
-            Result.<String>ignore(),
-            Result.<String>ignore(),
-            Result.<String>ignore(),
             Result.ok("bork"),
             Result.<String>fail(),
-            Result.<String>ignore(),
-            Result.<String>ignore(),
-            Result.ok("qux"),
-            Result.<String>ignore()
+            Result.ok("qux")
         )
         .sequential()
         .collect(ResultCollector.aggregating(Collectors.toList()));
@@ -113,18 +55,10 @@ class ResultCollectorUnitTest {
         .thenCode(() -> Stream
             .<Result<Object>>of(
                 Result.ok("foo"),
-                Result.ignore(),
                 Result.ok("bar"),
-                Result.ignore(),
                 Result.ok("baz"),
-                Result.ignore(),
-                Result.ignore(),
-                Result.ignore(),
                 (Result<Object>) (Result) Result.ok(),
-                Result.ignore(),
-                Result.ignore(),
-                Result.ok("qux"),
-                Result.ignore()
+                Result.ok("qux")
             )
             .sequential()
             .collect(ResultCollector.aggregating(Collectors.toList())))
@@ -156,73 +90,15 @@ class ResultCollectorUnitTest {
   }
 
   @Test
-  void can_collect_ignored_results_only_parallel() {
-    Result<List<String>> results = Stream
-        .of(
-            Result.<String>ignore(),
-            Result.<String>ignore(),
-            Result.<String>ignore()
-        )
-        .parallel()
-        .collect(ResultCollector.aggregating(Collectors.toList()));
-
-    BDDAssertions
-        .assertThat(results.isOk())
-        .isTrue();
-
-    BDDAssertions
-        .assertThat(results.unwrap())
-        .isEmpty();
-  }
-
-  @Test
-  void can_collect_successful_and_ignored_results_parallel() {
+  void can_not_collect_successful_and_results_if_failures_present_parallel() {
     Result<List<String>> results = Stream
         .of(
             Result.ok("foo"),
-            Result.<String>ignore(),
             Result.ok("bar"),
-            Result.<String>ignore(),
             Result.ok("baz"),
-            Result.<String>ignore(),
-            Result.<String>ignore(),
-            Result.<String>ignore(),
-            Result.ok("bork"),
-            Result.<String>ignore(),
-            Result.<String>ignore(),
-            Result.ok("qux"),
-            Result.<String>ignore()
-        )
-        .parallel()
-        .collect(ResultCollector.aggregating(Collectors.toList()));
-
-    BDDAssertions
-        .assertThat(results.isOk())
-        .isTrue();
-
-    BDDAssertions
-        .assertThat(results.unwrap())
-        .containsExactly("foo", "bar", "baz", "bork", "qux");
-  }
-
-  @Test
-  void can_not_collect_successful_and_ignored_results_if_failures_present_parallel() {
-    Result<List<String>> results = Stream
-        .of(
-            Result.ok("foo"),
-            Result.<String>ignore(),
-            Result.ok("bar"),
-            Result.<String>ignore(),
-            Result.ok("baz"),
-            Result.<String>ignore(),
-            Result.<String>ignore(),
-            Result.<String>ignore(),
             Result.ok("bork"),
             Result.<String>fail(),
-            Result.<String>ignore(),
-            Result.<String>ignore(),
-            Result.ok("qux"),
-            Result.<String>ignore()
+            Result.ok("qux")
         )
         .parallel()
         .collect(ResultCollector.aggregating(Collectors.toList()));
@@ -240,18 +116,10 @@ class ResultCollectorUnitTest {
         .thenCode(() -> Stream
             .<Result<Object>>of(
                 Result.ok("foo"),
-                Result.ignore(),
                 Result.ok("bar"),
-                Result.ignore(),
                 Result.ok("baz"),
-                Result.ignore(),
-                Result.ignore(),
-                Result.ignore(),
                 (Result<Object>) (Result) Result.ok(),
-                Result.ignore(),
-                Result.ignore(),
-                Result.ok("qux"),
-                Result.ignore()
+                Result.ok("qux")
             )
             .parallel()
             .collect(ResultCollector.aggregating(Collectors.toList())))

@@ -4,14 +4,14 @@ import com.squareup.javapoet.TypeName;
 import io.ascopes.katana.annotations.FieldVisibility;
 import io.ascopes.katana.annotations.Visibility;
 import io.ascopes.katana.ap.descriptors.Attribute.Builder;
-import io.ascopes.katana.ap.logging.Diagnostics;
+import io.ascopes.katana.ap.logging.Logger;
+import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
 import java.util.Objects;
 import java.util.stream.Stream;
-import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
@@ -24,21 +24,21 @@ import javax.lang.model.util.Elements;
  */
 public final class AttributeFactory {
 
+  private final Logger logger;
   private final Elements elementUtils;
   private final FeatureManager featureManager;
 
   /**
    * Initialize this factory.
    *
-   * @param diagnostics    the diagnostics to use for reporting compiler errors.
    * @param featureManager the feature manager to use.
    * @param elementUtils   the element utilities to use for introspection.
    */
   public AttributeFactory(
-      Diagnostics diagnostics,
       FeatureManager featureManager,
       Elements elementUtils
   ) {
+    this.logger = LoggerFactory.loggerFor(AttributeFactory.class);
     this.elementUtils = elementUtils;
     this.featureManager = featureManager;
   }
@@ -78,7 +78,7 @@ public final class AttributeFactory {
     // Ensure we have a valid identifier.
     String identifierName = NamingUtils.transmogrifyIdentifier(attributeName);
 
-    return Result
+    Result<Attribute> result = Result
         .ok(Attribute
             .builder()
             .name(attributeName)
@@ -91,8 +91,12 @@ public final class AttributeFactory {
         .ifOkFlatMap(builder -> this.processSetter(builder, settings))
         .ifOkFlatMap(builder -> this.processToString(builder, settings))
         .ifOkFlatMap(builder -> this.processEqualsAndHashCode(builder, settings))
-        .ifOkFlatMap(this::processAttributeLevelDeprecation)
+        .ifOk(this::processAttributeLevelDeprecation)
         .ifOkMap(Builder::build);
+
+    this.logger.debug("Attribute creation for {} had result {}", attributeName, result);
+
+    return result;
   }
 
   private Result<Attribute.Builder> processFinal(
@@ -117,15 +121,14 @@ public final class AttributeFactory {
       Attribute.Builder builder,
       SettingsCollection settings
   ) {
-    TypeElement visibilityAnnotationType = this.elementUtils
-        .getTypeElement(FieldVisibility.class.getCanonicalName());
+    FieldVisibility fieldVisibility = builder.getGetter().getAnnotation(FieldVisibility.class);
+    Visibility visibility;
 
-    Visibility visibility = AnnotationUtils
-        .findAnnotationMirror(builder.getGetter(), visibilityAnnotationType)
-        .ifOkFlatMap(mirror -> AnnotationUtils.getValue(mirror, "value"))
-        .ifOkMap(AnnotationValue::getValue)
-        .ifOkMap(Visibility.class::cast)
-        .elseGet(() -> settings.getFieldVisibility().getValue());
+    if (fieldVisibility == null) {
+      visibility = settings.getFieldVisibility().getValue();
+    } else {
+      visibility = fieldVisibility.value();
+    }
 
     return Result
         .ok(builder.fieldVisibility(visibility));
@@ -160,14 +163,13 @@ public final class AttributeFactory {
         .ifOkMap(builder::includeInEqualsAndHashCode);
   }
 
-  private Result<Attribute.Builder> processAttributeLevelDeprecation(Attribute.Builder builder) {
+  private void processAttributeLevelDeprecation(Attribute.Builder builder) {
     TypeElement deprecatedAnnotation = this.elementUtils
         .getTypeElement(Deprecated.class.getCanonicalName());
 
-    return AnnotationUtils
+    AnnotationUtils
         .findAnnotationMirror(builder.getGetter(), deprecatedAnnotation)
-        .ifOkMap(builder::deprecatedAnnotation)
-        .ifIgnoredReplace(builder);
+        .ifPresent(builder::deprecatedAnnotation);
   }
 
   private static final class AttributeCandidate {

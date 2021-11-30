@@ -1,6 +1,7 @@
 package io.ascopes.katana.ap.utils;
 
 import java.util.Objects;
+import java.util.Optional;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ExecutableElement;
 import org.checkerframework.common.util.report.qual.ReportCreation;
@@ -45,26 +46,25 @@ public final class NamingUtils {
    *
    * @param method the method to convert.
    * @param prefix the prefix.
-   * @return an ignored result if no name remains, or if the prefix is not present. Otherwise, the
-   *     name is returned in an OK result.
+   * @return an empty optional if no prefix is found, or the result in an optional.
    */
-  public static Result<String> removePrefixCamelCase(ExecutableElement method, String prefix) {
+  public static Optional<String> removePrefixCamelCase(ExecutableElement method, String prefix) {
     // TODO(ascopes): unit tests
     String name = method.getSimpleName().toString();
     int prefixLength = prefix.length();
 
     if (prefixLength == 0) {
       // The prefix may be empty if we are using fluent naming.
-      return Result.ok(method.getSimpleName().toString());
+      return Optional.of(method.getSimpleName().toString());
     }
 
     if (name.length() - prefixLength < 0 || !name.startsWith(prefix)) {
-      return Result.ignore();
+      return Optional.empty();
     }
 
     String unprefixed = name.substring(prefixLength);
     char firstChar = Character.toLowerCase(unprefixed.charAt(0));
-    return Result.ok(firstChar + unprefixed.substring(1));
+    return Optional.of(firstChar + unprefixed.substring(1));
   }
 
   /**

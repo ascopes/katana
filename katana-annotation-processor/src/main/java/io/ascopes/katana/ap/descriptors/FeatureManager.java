@@ -141,7 +141,7 @@ public class FeatureManager {
         getter,
         featureClass.getCanonicalName()
     );
-    return Result.ignore();
+    return Result.ok(false);
   }
 
   /**
@@ -163,10 +163,7 @@ public class FeatureManager {
     CustomMethodAdvice advice = this
         .getCustomMethodAdviceFor(featureType, methodAnnotation);
 
-    TypeElement methodAnnotationType = this.elementUtils
-        .getTypeElement(methodAnnotation.getCanonicalName());
-
-    return this.getCorrectCustomMethod(interfaceType, knownMethods, methodAnnotationType, advice);
+    return this.getCorrectCustomMethod(interfaceType, knownMethods, methodAnnotation, advice);
   }
 
   private CustomMethodAdvice getCustomMethodAdviceFor(
@@ -215,14 +212,14 @@ public class FeatureManager {
   private Result<ExecutableElement> getCorrectCustomMethod(
       TypeElement interfaceType,
       MethodClassification knownMethods,
-      TypeElement methodAnnotationType,
+      Class<? extends Annotation> methodAnnotationType,
       CustomMethodAdvice advice
   ) {
     // Find all methods annotated with the method annotation.
     List<ExecutableElement> candidateMethods = knownMethods
         .getStaticMethods()
         .stream()
-        .filter(method -> AnnotationUtils.findAnnotationMirror(method, methodAnnotationType).isOk())
+        .filter(method -> method.getAnnotation(methodAnnotationType) != null)
         .collect(Collectors.toList());
 
     if (candidateMethods.isEmpty()) {
@@ -308,7 +305,7 @@ public class FeatureManager {
     @Nullable
     AnnotationMirror mirror = AnnotationUtils
         .findAnnotationMirror(getter, annotationType)
-        .elseReturn(null);
+        .orElse(null);
 
     this.diagnostics
         .builder()

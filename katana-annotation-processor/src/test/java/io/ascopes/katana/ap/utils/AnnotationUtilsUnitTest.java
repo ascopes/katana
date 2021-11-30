@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
@@ -34,14 +35,13 @@ class AnnotationUtilsUnitTest {
         ));
 
     // When
-    Result<? extends AnnotationMirror> result = AnnotationUtils
+    Optional<? extends AnnotationMirror> result = AnnotationUtils
         .findAnnotationMirror(annotatedElement, trollLolLol.typeElement);
 
     // Then
-    BDDAssertions.then(result.isOk())
-        .isTrue();
-
-    BDDAssertions.then(result.unwrap())
+    BDDAssertions.then(result)
+        .isPresent()
+        .get()
         .isSameAs(trollLolLol.mirror);
   }
 
@@ -65,12 +65,12 @@ class AnnotationUtilsUnitTest {
         ));
 
     // When
-    Result<? extends AnnotationMirror> result = AnnotationUtils
+    Optional<? extends AnnotationMirror> result = AnnotationUtils
         .findAnnotationMirror(annotatedElement, notFoundElement);
 
     // Then
-    BDDAssertions.then(result.isIgnored())
-        .isTrue();
+    BDDAssertions.then(result)
+        .isEmpty();
   }
 
   @Test
@@ -87,14 +87,13 @@ class AnnotationUtilsUnitTest {
     mockElementValuePair(elementValues, "baz", new boolean[]{false, true, false});
 
     // When
-    Result<? extends AnnotationValue> result = AnnotationUtils.getValue(mirror, "baz");
+    Optional<? extends AnnotationValue> result = AnnotationUtils.getValue(mirror, "baz");
 
     // Then
-    BDDAssertions.then(result.isOk())
-        .isTrue();
-
-    BDDAssertions.then(result.unwrap().getValue())
-        .isEqualTo(new boolean[]{false, true, false});
+    BDDAssertions.then(result)
+        .isPresent()
+        .get()
+        .hasFieldOrPropertyWithValue("value", new boolean[]{false, true, false});
   }
 
   @Test
@@ -111,11 +110,11 @@ class AnnotationUtilsUnitTest {
     mockElementValuePair(elementValues, "baz", new boolean[]{false, true, false});
 
     // When
-    Result<? extends AnnotationValue> result = AnnotationUtils.getValue(mirror, "bork");
+    Optional<? extends AnnotationValue> result = AnnotationUtils.getValue(mirror, "bork");
 
     // Then
-    BDDAssertions.then(result.isOk())
-        .isFalse();
+    BDDAssertions.then(result)
+        .isEmpty();
   }
 
   static MockAnnotationMirrorHolder mockAnnotationMirrorType(String name) {

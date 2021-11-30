@@ -23,7 +23,6 @@ public final class Result<T> {
 
   private static final Result<Void> CLEARED = new Result<>(null);
   private static final Result<?> FAILED = new Result<>(null);
-  private static final Result<?> IGNORED = new Result<>(null);
 
   @PolyNull
   private final T value;
@@ -40,8 +39,8 @@ public final class Result<T> {
    */
   public T unwrap() throws IllegalStateException {
     this.assertNotCleared();
-    if (this.isNotOk()) {
-      throw new IllegalStateException("Cannot unwrap an ignored/failed result!");
+    if (this.isFailed()) {
+      throw new IllegalStateException("Cannot unwrap a failed result!");
     }
 
     return Objects.requireNonNull(this.value);
@@ -53,7 +52,7 @@ public final class Result<T> {
    * @return true if the result is OK.
    */
   public boolean isOk() {
-    return !this.isFailed() && !this.isIgnored();
+    return !this.isFailed();
   }
 
   /**
@@ -72,15 +71,6 @@ public final class Result<T> {
    */
   public boolean isFailed() {
     return this == FAILED;
-  }
-
-  /**
-   * Determine if the result is ignored.
-   *
-   * @return true if the result is ignored.
-   */
-  public boolean isIgnored() {
-    return this == IGNORED;
   }
 
   /**
@@ -201,58 +191,6 @@ public final class Result<T> {
         : castFailedOrIgnored(this);
   }
 
-  /**
-   * Perform some logic if the result is ignored.
-   *
-   * @param then the logic to perform.
-   * @return this result.
-   */
-  public Result<T> ifIgnored(Runnable then) {
-    // TODO(ascopes): unit tests
-    if (this.isIgnored()) {
-      then.run();
-    }
-
-    return this;
-  }
-
-  /**
-   * If the result is ignored, replace it with an OK result holding the given value.
-   *
-   * @param then the result value to replace with.
-   * @return the result.
-   */
-  public Result<T> ifIgnoredReplace(T then) {
-    // TODO(ascopes): unit tests
-    return this.ifIgnoredReplace(() -> Result.ok(then));
-  }
-
-  /**
-   * If this result is ignored, perform some logic and return that. Otherwise, return this result.
-   *
-   * @param then the flat map function to perform, if this is ignored.
-   * @return the new result if this result was ignored, otherwise this result.
-   */
-  public Result<T> ifIgnoredReplace(Supplier<Result<T>> then) {
-    Objects.requireNonNull(then);
-    return this.isIgnored()
-        ? Objects.requireNonNull(then.get())
-        : this;
-  }
-
-  /**
-   * Fail if this result is ignored. Otherwise, just return this result.
-   *
-   * @return the result.
-   */
-  public Result<T> failIfIgnored() {
-    // TODO(ascopes): unit tests
-    if (this.isIgnored()) {
-      return fail();
-    }
-
-    return this;
-  }
 
   /**
    * Discard any value if this result is OK. OK results remain as being OK, but you will no longer
@@ -322,10 +260,6 @@ public final class Result<T> {
       return Integer.MIN_VALUE + 2;
     }
 
-    if (this == IGNORED) {
-      return Integer.MIN_VALUE + 3;
-    }
-
     return Objects.hash(this.value);
   }
 
@@ -336,9 +270,6 @@ public final class Result<T> {
   public String toString() {
     if (this == FAILED) {
       return "Result{failed}";
-    }
-    if (this == IGNORED) {
-      return "Result{ignored}";
     }
     if (this == CLEARED) {
       return "Result{ok}";
@@ -377,15 +308,6 @@ public final class Result<T> {
    */
   public static <T> Result<T> fail() {
     return castFailedOrIgnored(FAILED);
-  }
-
-  /**
-   * Generate an ignored result.
-   *
-   * @return an ignored result with no value.
-   */
-  public static <T> Result<T> ignore() {
-    return castFailedOrIgnored(IGNORED);
   }
 
   @SuppressWarnings("unchecked")

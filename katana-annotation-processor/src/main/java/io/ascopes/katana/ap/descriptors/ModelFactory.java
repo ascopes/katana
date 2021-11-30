@@ -16,7 +16,9 @@ import io.ascopes.katana.ap.utils.AnnotationUtils;
 import io.ascopes.katana.ap.utils.NamingUtils;
 import io.ascopes.katana.ap.utils.Result;
 import io.ascopes.katana.ap.utils.ResultCollector;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
@@ -64,7 +66,7 @@ public final class ModelFactory {
     this.featureManager = new FeatureManager(diagnostics, elementUtils, typeUtils);
     this.settingsResolver = new SettingsResolver(elementUtils, typeUtils);
     this.methodClassifier = new MethodClassificationFactory(diagnostics, typeUtils);
-    this.attributeFactory = new AttributeFactory(diagnostics, this.featureManager, elementUtils);
+    this.attributeFactory = new AttributeFactory(this.featureManager, elementUtils);
     this.builderStrategyFactory = new BuilderStrategyFactory();
   }
 
@@ -87,13 +89,13 @@ public final class ModelFactory {
 
     AnnotationMirror mirror = AnnotationUtils
         .findAnnotationMirror(interfaceType, annotationType)
-        .unwrap();
+        .orElseThrow(() -> new RuntimeException("Could not find annotation mirror"));
 
     boolean mutable = annotationType
         .getQualifiedName()
         .contentEquals(MutableModel.class.getCanonicalName());
 
-    return this.settingsResolver
+    Result<Model> result = this.settingsResolver
         .parseSettings(interfaceType, mirror, mutable)
         .ifOkFlatMap(settings -> this.methodClassifier
             .create(interfaceType, settings)
@@ -118,6 +120,10 @@ public final class ModelFactory {
         .ifOkCheck(this::setIndent)
         .ifOkMap(ModelCandidate::getBuilder)
         .ifOkMap(Builder::build);
+
+    this.logger.debug("Model creation had result {}", result);
+
+    return result;
   }
 
   private Result<Void> setInterface(ModelCandidate candidate) {
@@ -196,7 +202,7 @@ public final class ModelFactory {
 
     AnnotationUtils
         .findAnnotationMirror(candidate.getInterfaceType(), deprecatedAnnotation)
-        .ifOkMap(candidate.getBuilder()::deprecatedAnnotation);
+        .ifPresent(candidate.getBuilder()::deprecatedAnnotation);
 
     return Result.ok();
   }
@@ -218,11 +224,20 @@ public final class ModelFactory {
   private Result<Void> setAttributes(ModelCandidate candidate) {
     this.logger.trace("Setting attributes for candidate");
 
-    return this.attributeFactory
+    Result<List<Attribute>> result = this.attributeFactory
         .create(candidate.getMethodClassification(), candidate.getSettings(), candidate.isMutable())
-        .peek(attr -> attr.ifOk(candidate.getBuilder()::attribute))
-        .collect(ResultCollector.discarding())
-        .dropValue();
+        .collect(ResultCollector.aggregating(Collectors.toList()));
+
+    if (result.isNotOk()) {
+      return Result.fail();
+    }
+
+    for (Attribute attribute : result.unwrap()) {
+      this.logger.trace("Adding attribute {} to model", attribute);
+      candidate.getBuilder().attribute(attribute);
+    }
+
+    return Result.ok();
   }
 
   private Result<Void> setConstructors(ModelCandidate candidate) {
@@ -259,10 +274,11 @@ public final class ModelFactory {
   private Result<Void> setBuilderStrategy(ModelCandidate candidate) {
     this.logger.trace("Setting builder strategy for candidate");
 
-    return this.builderStrategyFactory
+    this.builderStrategyFactory
         .create(candidate.getSettings())
-        .ifOk(candidate.getBuilder()::builderStrategy)
-        .dropValue();
+        .ifPresent(candidate.getBuilder()::builderStrategy);
+
+    return Result.ok();
   }
 
   private Result<Void> setEqualityStrategy(ModelCandidate candidate) {

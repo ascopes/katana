@@ -2,6 +2,7 @@ package io.ascopes.katana.ap.utils;
 
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
@@ -28,9 +29,9 @@ public final class AnnotationUtils {
    *
    * @param annotatedElement the element to look for annotations on.
    * @param annotationType   the annotation type to look for annotations that match.
-   * @return an OK result of the annotation, if found, otherwise an ignored result.
+   * @return an optional containing the result if found.
    */
-  public static Result<? extends AnnotationMirror> findAnnotationMirror(
+  public static Optional<? extends AnnotationMirror> findAnnotationMirror(
       Element annotatedElement,
       TypeElement annotationType
   ) {
@@ -45,9 +46,7 @@ public final class AnnotationUtils {
             .asElement()
             .getSimpleName()
             .contentEquals(annotationType.getSimpleName()))
-        .findAny()
-        .map(Result::ok)
-        .orElseGet(Result::ignore);
+        .findAny();
   }
 
   /**
@@ -58,9 +57,9 @@ public final class AnnotationUtils {
    *
    * @param mirror the mirror to look at.
    * @param name   the name of the attribute.
-   * @return the value of the attribute in an OK result, or an ignored result if not found.
+   * @return the value of the attribute in an optional, if the attribute is present.
    */
-  public static Result<? extends AnnotationValue> getValue(
+  public static Optional<? extends AnnotationValue> getValue(
       AnnotationMirror mirror,
       String name
   ) {
@@ -73,8 +72,6 @@ public final class AnnotationUtils {
         .stream()
         .filter(entry -> entry.getKey().getSimpleName().contentEquals(name))
         .map(Entry::getValue)
-        .findAny()
-        .map(Result::ok)
-        .orElseGet(Result::ignore);
+        .findAny();
   }
 }

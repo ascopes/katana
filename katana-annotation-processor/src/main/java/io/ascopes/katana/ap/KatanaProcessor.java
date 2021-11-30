@@ -132,8 +132,6 @@ public final class KatanaProcessor extends AbstractProcessor {
         .forEach(result -> {
           if (result.isNotOk()) {
             failed.incrementAndGet();
-          } else if (result.isIgnored()) {
-            throw new RuntimeException("Ignored result came from somewhere. This is a bug!");
           }
           processed.incrementAndGet();
         });

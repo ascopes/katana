@@ -21,6 +21,8 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import org.checkerframework.checker.optional.qual.MaybePresent;
@@ -130,18 +132,19 @@ public final class SettingsResolver {
       List<SettingsAnnotation> annotations
   ) {
     for (SettingsAnnotation annotation : annotations) {
-      Result<? extends AnnotationValue> possibleAnnotationValue = AnnotationUtils
+      Optional<? extends AnnotationValue> possibleAnnotationValue = AnnotationUtils
           .getValue(annotation.mirror, schema.getName());
+      Optional<T> possibleValue = possibleAnnotationValue
+          .map(AnnotationValue::getValue)
+          .map(this::unwrapValue)
+          .map(schema.getParameterizedTypeish()::cast);
 
-      if (!possibleAnnotationValue.isOk()) {
+      if (!possibleAnnotationValue.isPresent() || !possibleValue.isPresent()) {
         // Attributes left unspecified are assumed to be inherited.
         continue;
       }
 
-      T actualValue = possibleAnnotationValue
-          .ifOkMap(AnnotationValue::getValue)
-          .ifOkMap(schema.getParameterizedTypeish()::cast)
-          .unwrap();
+      T actualValue = possibleValue.get();
 
       String description = "setting '" + schema.getName() + "' with"
           + " value '" + actualValue + "'"
@@ -152,7 +155,7 @@ public final class SettingsResolver {
           actualValue,
           annotation.declaringElement,
           annotation.mirror,
-          possibleAnnotationValue.unwrap()
+          possibleAnnotationValue.get()
       );
 
       return new Setting<>(
@@ -224,8 +227,7 @@ public final class SettingsResolver {
     // package level.
     Optional<SettingsAnnotation> mutabilitySpecificSettings = AnnotationUtils
         .findAnnotationMirror(packageElement, mutabilityAnnotation)
-        .ifOkMap(mirror -> this.findSettingsOnAnnotation(packageElement, mirror))
-        .elseGet(Optional::empty);
+        .flatMap(mirror -> this.findSettingsOnAnnotation(packageElement, mirror));
 
     return Stream
         .of(allModelsSettings, mutabilitySpecificSettings)
@@ -251,6 +253,53 @@ public final class SettingsResolver {
         .asElement()
         .getSimpleName()
         .contentEquals(Settings.class.getSimpleName());
+  }
+
+  private Object unwrapValue(Object value) {
+    // Represents a value of an annotation type element. A value is of one of the following types:
+    //    - a wrapper class (such as Integer) for a primitive type
+    //    - String
+    //    - TypeMirror
+    //    - VariableElement (representing an enum constant)
+    //    - AnnotationMirror
+    //    - List<? extends AnnotationValue> (representing the elements, in declared order, if the
+    //        value is an array)
+
+    if (value instanceof List) {
+      return ((List<?>) value)
+          .stream()
+          .map(this::unwrapValue)
+          .collect(Collectors.toList());
+    }
+
+    if (value instanceof VariableElement) {
+      VariableElement enumValue = (VariableElement) value;
+      DeclaredType declaredType = (DeclaredType) enumValue.asType();
+      TypeElement typeElement = (TypeElement) declaredType.asElement();
+      String className = typeElement.getQualifiedName().toString();
+      String memberName = enumValue.getSimpleName().toString();
+
+      try {
+        @SuppressWarnings("unchecked")
+        Class<Enum<?>> enumClass = (Class<Enum<?>>) Class.forName(className);
+        for (Enum<?> member : enumClass.getEnumConstants()) {
+          if (member.name().equals(memberName)) {
+            return member;
+          }
+        }
+
+        throw new RuntimeException("Could not find member " + memberName + " in enum " + className);
+      } catch (ClassNotFoundException ex) {
+        throw new RuntimeException("Could not load class for " + className);
+      }
+    }
+
+    if (value instanceof AnnotationMirror) {
+      // XXX: implement?
+      throw new UnsupportedOperationException("Cannot unwrap annotation mirror types just yet");
+    }
+
+    return value;
   }
 
   /*
