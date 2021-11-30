@@ -81,7 +81,7 @@ public final class BuilderFactory {
         .classBuilder(this.builderTypeName(model, strategy))
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
         .addMethod(this.createPrivateBuilderConstructor())
-        .addMethod(this.createBuilderBuildMethod(model.getQualifiedName(), strategy));
+        .addMethod(this.createBuilderBuildMethod(model.getQualifiedName(), strategy, initTracker));
 
     this.createFields(model)
         .forEach(builder::addField);
@@ -120,14 +120,22 @@ public final class BuilderFactory {
     return method;
   }
 
-  private MethodSpec createBuilderBuildMethod(ClassName modelTypeName, BuilderStrategy strategy) {
-    MethodSpec method = MethodSpec
+  private MethodSpec createBuilderBuildMethod(
+      ClassName modelTypeName,
+      BuilderStrategy strategy,
+      InitTracker initTracker
+  ) {
+    MethodSpec.Builder builder = MethodSpec
         .methodBuilder(strategy.getBuildMethodName())
         .returns(modelTypeName)
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-        .addStatement("return new $T($L)", modelTypeName, THIS)
-        .build();
+        .addStatement("return new $T($L)", modelTypeName, THIS);
 
+    if (!initTracker.isEmpty()) {
+      builder.addException(ClassName.get(IllegalArgumentException.class));
+    }
+
+    MethodSpec method = builder.build();
     this.logger.trace("Generated builder build method:\n{}", method);
     return method;
   }
@@ -190,7 +198,9 @@ public final class BuilderFactory {
             )
             .endControlFlow()
             .build())
-        .ifPresent(builder::addCode);
+        .ifPresent(check -> builder
+            .addException(ClassName.get(IllegalStateException.class))
+            .addCode(check));
 
     // TODO(ascopes): nullness checks?
 
@@ -275,6 +285,9 @@ public final class BuilderFactory {
           )
           .endControlFlow()
           .endControlFlow();
+
+      methodBuilder
+          .addException(IllegalArgumentException.class);
     }
 
     for (Attribute attribute : model.getAttributes()) {
