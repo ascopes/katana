@@ -43,13 +43,17 @@ class CodegenSettingSchema {
 }
 
 CodegenSettingSchema buildSchemaFor(Method method) {
-  return new CodegenSettingSchema(
+  CodegenSettingSchema schema = new CodegenSettingSchema(
       name: method.name,
       genericType: TypeName.get(method.genericReturnType).box(),
       rawType: method.returnType,
       immutableDefaultValue: getDefaultValueFor(method, ImmutableDefaultAdvice),
       mutableDefaultValue: getDefaultValueFor(method, MutableDefaultAdvice),
   )
+
+  System.out.printf("[ I ] Created codegen schema for %s: %s%n", method.getName(), schema)
+
+  return schema
 }
 
 CodeBlock getDefaultValueFor(Method method, Class<Annotation> annotation) {
@@ -149,6 +153,10 @@ CodeBlock stringifyDefaultValue(Object value, Class<?> targetType) {
   return CodeBlock.of('$L', value)
 }
 
+void dumpFile(JavaFile file) {
+  System.out.printf("[ I ] Generated file:%n%s%n", file.toString().replace("\n", "\n  |   "))
+}
+
 JavaFile buildSettingsCollectionClass(
     String packageName,
     String settingPackageName,
@@ -235,9 +243,13 @@ JavaFile buildSettingsCollectionClass(
       .addType(typeBuilder.build())
       .build()
 
-  return JavaFile
+  JavaFile file = JavaFile
       .builder(packageName, settingsCollectionType)
       .build()
+
+  dumpFile(file)
+
+  return file
 }
 
 String attributeMethod(String prefix, String name) {
@@ -304,9 +316,13 @@ JavaFile buildSchemaConstants(
       .addMethod(schemaSupplier)
       .build()
 
-  return JavaFile
+  JavaFile file = JavaFile
       .builder(packageName, type)
       .build()
+
+  dumpFile(file)
+
+  return file
 }
 
 
@@ -319,10 +335,11 @@ String getMavenProperty(String name) {
   //noinspection GrUnresolvedAccess
   String property = project.properties[name]
   String err = "Maven Property " + name + " was not set"
+  System.out.printf("[ I ] Property name='%s' value='%s'%n", name, property);
   return Objects.requireNonNull(property, err)
 }
 
-System.err.println("Generating setting schema definitions from @Settings annotation")
+System.err.println("[ I ] Generating setting schema definitions from @Settings annotation")
 
 String generatedPackageName = getMavenProperty("settings.generatedPackageName")
 String generatedOutputRoot = getMavenProperty("settings.generatedOutputRoot")
@@ -348,11 +365,11 @@ JavaFile schemaDefinition = buildSchemaConstants(
 
 // Can't use Path.of in Java 8 builds
 Path outputPath = Paths.get(generatedOutputRoot).toAbsolutePath()
-System.err.printf("Writing out generated code to %s%n", outputPath)
+System.err.printf("[ I ] Writing out generated code to %s%n", outputPath)
 
 dataClass.writeTo(outputPath)
 schemaDefinition.writeTo(outputPath)
 
-System.err.println("Done")
+System.err.println("[ I ] Done")
 
 //file:noinspection GrMethodMayBeStatic
