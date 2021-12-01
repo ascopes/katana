@@ -1,9 +1,7 @@
 #!/usr/bin/env groovy
+
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
-
-//file:noinspection GrMethodMayBeStatic
-
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
@@ -356,3 +354,5 @@ dataClass.writeTo(outputPath)
 schemaDefinition.writeTo(outputPath)
 
 System.err.println("Done")
+
+//file:noinspection GrMethodMayBeStatic
