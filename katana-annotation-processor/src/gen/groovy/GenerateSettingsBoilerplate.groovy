@@ -154,7 +154,10 @@ CodeBlock stringifyDefaultValue(Object value, Class<?> targetType) {
 }
 
 void dumpFile(JavaFile file) {
-  System.out.printf("[ I ] Generated file:%n%s%n", file.toString().replace("\n", "\n  |   "))
+  System.out.printf(
+      "[ I ] Generated file:%n%s%n", 
+      ("\n" + file).replace("\n", "\n  |   ")
+  )
 }
 
 JavaFile buildSettingsCollectionClass(
