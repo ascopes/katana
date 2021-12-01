@@ -114,39 +114,44 @@
   </dependencyManagement>
 
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.1.0</version>
-
-        <executions>
-          <execution>
-            <id>checkstyle</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-
-        <configuration>
-          <!--suppress UnresolvedMavenProperty -->
-          <configLocation>${maven.multiModuleProjectDirectory}/checkstyle.xml</configLocation>
-          <consoleOutput>true</consoleOutput>
-          <encoding>UTF-8</encoding>
-          <failsOnError>true</failsOnError>
-
-          <linkXRef>false</linkXRef>
-          <!--suppress UnresolvedMavenProperty -->
-          <suppressionsLocation>${maven.multiModuleProjectDirectory}/checkstyle-suppressions.xml</suppressionsLocation>
-          <violationSeverity>info</violationSeverity>
-        </configuration>
-      </plugin>
-    </plugins>
-
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>3.1.0</version>
+
+          <executions>
+            <execution>
+              <id>checkstyle</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+              <configuration>
+                <!--suppress UnresolvedMavenProperty -->
+                <configLocation>${maven.multiModuleProjectDirectory}/checkstyle.xml</configLocation>
+                <consoleOutput>true</consoleOutput>
+                <encoding>UTF-8</encoding>
+                <failsOnError>true</failsOnError>
+                <sourceDirectories>
+                  <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                </sourceDirectories>
+                <!--suppress UnresolvedMavenProperty -->
+                <suppressionsLocation>${maven.multiModuleProjectDirectory}/checkstyle-suppressions.xml</suppressionsLocation>
+                <violationSeverity>info</violationSeverity>
+              </configuration>
+            </execution>
+
+            <execution>
+              <!-- Disable default phase. -->
+              <id>default</id>
+              <phase>verify</phase>
+              <goals/>
+            </execution>
+          </executions>
+        </plugin>
+
         <plugin>
           <!-- Enforce the compiler version to use -->
           <groupId>org.apache.maven.plugins</groupId>
