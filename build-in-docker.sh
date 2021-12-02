@@ -10,29 +10,24 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
-fullpath() {
-  readlink -f $@
-}
+set -e
+set -x
 
-javaversion=$1
-rootdir=$(fullpath $(dirname $(fullpath ${0})))
-if echo "${javaversion}" | grep -qE "^[0-9]+$"; then
-  image=openjdk:${javaversion}-alpine
+if echo "${1}" | grep -qE '^[0-9]+$'; then
+  image="openjdk:${1}-alpine"
 else
-  image=${1}
+  image="${1}"
 fi
 
+this_dir="$(dirname "$(readlink -f "${0}")")"
+user_id="$(id -u "${USER}")"
+group_id="$(id -g "${USER}")"
 shift 1
 
-echo "Using image ${image}"
-
-set -x
 docker run \
-  -u $(id -u ${USER}):$(id -g ${USER}) \
   --rm \
-  -w ${rootdir} \
-  -v ${rootdir}:${rootdir} \
-  ${image} \
-  ${rootdir}/mvnw $@
-
-
+  -u "${user_id}:${group_id}" \
+  -v "${this_dir}:${this_dir}" \
+  -w "${this_dir}" \
+  "${image}" \
+  "${this_dir}/mvnw" $@
