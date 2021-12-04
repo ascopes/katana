@@ -12,6 +12,19 @@ import java.util.SortedSet;
  * @since 0.0.1
  */
 class BigIntegerInitTracker extends AbstractNumericInitTracker<BigInteger> {
+  private static final boolean jdk9;
+
+  static {
+    boolean hasTwo = true;
+
+    try {
+      BigInteger.class.getDeclaredField("TWO");
+    } catch (NoSuchFieldException ex) {
+      hasTwo = false;
+    }
+
+    jdk9 = hasTwo;
+  }
 
   BigIntegerInitTracker(SortedSet<Attribute> attributes) {
     super(
@@ -43,6 +56,33 @@ class BigIntegerInitTracker extends AbstractNumericInitTracker<BigInteger> {
   }
 
   static CodeBlock value(BigInteger value) {
-    return CodeBlock.of("new $T($S)", BigInteger.class, value.toString());
+    if (value.equals(BigInteger.ZERO)) {
+      return CodeBlock.of("$T.ZERO", BigInteger.class);
+    }
+
+    if (value.equals(BigInteger.ONE)) {
+      return CodeBlock.of("$T.ONE", BigInteger.class);
+    }
+
+    if (value.equals(BigInteger.valueOf(2)) && jdk9) {
+      // Only added in JDK9, micro-optimisation for poorly optimising JDKs, useless operation
+      // for anything else.
+      return CodeBlock.of("$T.TWO", BigInteger.class);
+    }
+
+    if (value.equals(BigInteger.TEN)) {
+      return CodeBlock.of("$T.TEN", BigInteger.class);
+    }
+
+    try {
+      long primitiveValue = value.longValueExact();
+      String primitiveValueBinary = Long.toString(primitiveValue, 2);
+      return CodeBlock.of("$T.valueOf(0b$L)", BigInteger.class, primitiveValueBinary);
+    } catch (ArithmeticException ex) {
+      // Bigger than a long, fall back to string representation.
+      // TODO(ascopes): can I optimise this some other way?
+      // Ideally these initializations should be near zero overhead.
+      return CodeBlock.of("new $T($S)", BigInteger.class, value.toString());
+    }
   }
 }
