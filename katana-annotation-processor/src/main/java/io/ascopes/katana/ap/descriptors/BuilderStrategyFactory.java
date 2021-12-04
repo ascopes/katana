@@ -35,11 +35,12 @@ public final class BuilderStrategyFactory {
 
     BuilderStrategy builderStrategy = BuilderStrategy
         .builder()
-        .builderTypeName(settings.getBuilderTypeName().getValue())
+        .builderClassName(settings.getBuilderClassName().getValue())
         .toBuilderMethodEnabled(settings.getToBuilderMethodEnabled().getValue())
         .toBuilderMethodName(settings.getToBuilderMethodName().getValue())
-        .builderMethodName(settings.getBuilderMethodName().getValue())
-        .buildMethodName(settings.getBuildMethodName().getValue())
+        .builderMethodName(settings.getInitBuilderMethodName().getValue())
+        .buildMethodName(settings.getBuilderBuildMethodName().getValue())
+        .builderInitCheck(settings.getBuilderInitCheck().getValue())
         .build();
 
     return Optional.of(builderStrategy);

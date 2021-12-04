@@ -2,11 +2,7 @@ package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
-import io.ascopes.katana.ap.codegen.components.BuilderFactory;
-import io.ascopes.katana.ap.codegen.components.ConstructorFactory;
-import io.ascopes.katana.ap.codegen.components.FieldFactory;
-import io.ascopes.katana.ap.codegen.components.GetterFactory;
-import io.ascopes.katana.ap.codegen.components.SetterFactory;
+import io.ascopes.katana.ap.codegen.builders.BuilderFactoryFactory;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.logging.Logger;
@@ -27,7 +23,7 @@ public final class JavaModelFactory {
   private final GetterFactory getterFactory;
   private final SetterFactory setterFactory;
   private final ConstructorFactory constructorFactory;
-  private final BuilderFactory builderFactory;
+  private final BuilderFactoryFactory builderFactoryFactory;
 
   /**
    * Initialize this factory.
@@ -38,7 +34,7 @@ public final class JavaModelFactory {
     this.getterFactory = new GetterFactory();
     this.setterFactory = new SetterFactory();
     this.constructorFactory = new ConstructorFactory();
-    this.builderFactory = new BuilderFactory();
+    this.builderFactoryFactory = new BuilderFactoryFactory();
   }
 
   /**
@@ -102,13 +98,10 @@ public final class JavaModelFactory {
 
   private void applyBuilders(TypeSpec.Builder typeSpecBuilder, Model model) {
     model.getBuilderStrategy()
-        .map(strategy -> this.builderFactory.create(model, strategy))
-        .ifPresent(components -> {
-          typeSpecBuilder.addMethod(components.getBuilderConstructor());
-          typeSpecBuilder.addMethod(components.getBuilderInitializer());
-          typeSpecBuilder.addType(components.getBuilderType());
-          components.getToBuilderMethod().ifPresent(typeSpecBuilder::addMethod);
-        });
+        .ifPresent(strategy -> this.builderFactoryFactory
+            .create(strategy)
+            .create(model, strategy)
+            .applyTo(typeSpecBuilder));
   }
 }
 

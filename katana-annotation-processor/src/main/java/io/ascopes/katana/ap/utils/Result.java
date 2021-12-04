@@ -20,6 +20,7 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
  */
 @ReportInherit
 public final class Result<T> {
+
   @PolyNull
   private final T value;
 

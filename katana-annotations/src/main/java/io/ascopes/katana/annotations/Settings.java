@@ -138,21 +138,30 @@ public @interface Settings {
    *
    * @return the name.
    */
-  String builderTypeName() default "Builder";
-
-  /**
-   * Name of the builder initialization method. This is ignored if {@link #builder()} is false.
-   *
-   * @return the builder initialization method name.
-   */
-  String builderMethodName() default "builder";
+  String builderClassName() default "Builder";
 
   /**
    * Name of the builder "build" method. This is ignored if {@link #builder()} is false.
    *
    * @return the name of the method that builds a model instance from a builder.
    */
-  String buildMethodName() default "build";
+  String builderBuildMethodName() default "build";
+
+  /**
+   * How to check for uninitialized required attributes. This is ignored if {@link #builder()} is
+   * false.
+   *
+   * @return the initialization checking strategy to use.
+   */
+  BuilderInitCheck builderInitCheck() default BuilderInitCheck.NONE;
+
+  /**
+   * Name of the builder initialization method that is defined on the generated model type. This
+   * is ignored if {@link #builder()} is false.
+   *
+   * @return the builder initialization method name.
+   */
+  String initBuilderMethodName() default "builder";
 
   /**
    * True if a {@code toBuilder} method should be added to models that have a supported builder.

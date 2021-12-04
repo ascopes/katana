@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.codegen.components;
+package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;

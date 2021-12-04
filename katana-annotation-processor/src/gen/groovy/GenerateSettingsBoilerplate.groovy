@@ -44,12 +44,12 @@ class CodegenSettingSchema {
   @Override
   String toString() {
     "CodegenSettingSchema{" +
-      "name='${this.name}', " +
-      "genericType=${this.genericType}, " +
-      "rawType=${this.rawType.canonicalName}, " +
-      "immutableDefaultValue=${this.immutableDefaultValue}, " +
-      "mutableDefaultValue=${this.mutableDefaultValue}" +
-      "}"
+        "name='${this.name}', " +
+        "genericType=${this.genericType}, " +
+        "rawType=${this.rawType.canonicalName}, " +
+        "immutableDefaultValue=${this.immutableDefaultValue}, " +
+        "mutableDefaultValue=${this.mutableDefaultValue}" +
+        "}"
   }
 }
 

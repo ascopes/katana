@@ -1,10 +1,12 @@
 package io.ascopes.katana.ap.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -19,6 +21,22 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class CollectionUtilsUnitTest {
+
+  @Test
+  void freezeList_fails_if_null() {
+    BDDAssertions
+        .thenCode(() -> CollectionUtils.freezeList(null))
+        .isInstanceOf(NullPointerException.class);
+  }
+
+  @ParameterizedTest
+  @MethodSource("mutableOperationsCollection")
+  void freezeList_produces_frozen_list(Consumer<List<Object>> operation) {
+    List<Object> list = CollectionUtils.freezeList(new ArrayList<>());
+    BDDAssertions
+        .thenCode(() -> operation.accept(list))
+        .isInstanceOf(UnsupportedOperationException.class);
+  }
 
   @Test
   void freezeSet_fails_if_null() {

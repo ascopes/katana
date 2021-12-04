@@ -11,7 +11,6 @@ import io.ascopes.katana.ap.utils.HandlebarsHelpers;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

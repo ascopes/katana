@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.codegen.components;
+package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.FieldSpec;
 import io.ascopes.katana.ap.descriptors.Attribute;

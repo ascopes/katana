@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.codegen.init;
+package io.ascopes.katana.ap.codegen.builders;
 
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.logging.Logger;
@@ -15,7 +15,7 @@ import java.util.stream.Stream;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class InitTrackerFactory {
+final class InitTrackerFactory {
 
   private final Logger logger;
 
@@ -29,11 +29,10 @@ public final class InitTrackerFactory {
   /**
    * Create a new tracker for the given stream of required attributes.
    *
-   * @param attributes        the stream of attributes to track.
-   * @param trackingFieldName the tracking field name.
+   * @param attributes the stream of attributes to track.
    * @return a tracker of the most efficient size to use for the given attributes.
    */
-  public InitTracker createTracker(Stream<Attribute> attributes, String trackingFieldName) {
+  public InitTracker createTracker(Stream<Attribute> attributes) {
     SortedSet<Attribute> attributeSet = attributes
         .collect(Collectors.toCollection(() -> new TreeSet<>(
             Comparator.comparing(Attribute::toString))
@@ -41,15 +40,15 @@ public final class InitTrackerFactory {
 
     if (attributeSet.size() < Integer.SIZE) {
       this.logger.debug("Using an int tracker for tracking initialized attributes");
-      return new IntInitTrackerImpl(attributeSet, trackingFieldName);
+      return new IntInitTracker(attributeSet);
     }
 
     if (attributeSet.size() < Long.SIZE) {
       this.logger.debug("Using a long tracker for tracking initialized attributes");
-      return new LongInitTrackerImpl(attributeSet, trackingFieldName);
+      return new LongInitTracker(attributeSet);
     }
 
     this.logger.debug("Using a BigInteger tracker for tracking initialized attributes");
-    return new BigIntegerInitTrackerImpl(attributeSet, trackingFieldName);
+    return new BigIntegerInitTracker(attributeSet);
   }
 }

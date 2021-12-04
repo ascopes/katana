@@ -1,6 +1,7 @@
 package io.ascopes.katana.ap.utils;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
@@ -22,6 +23,17 @@ public final class CollectionUtils {
 
   private CollectionUtils() {
     throw new UnsupportedOperationException("static-only class");
+  }
+
+  /**
+   * Shallow-freeze a list.
+   *
+   * @param list the list to freeze.
+   * @param <T>  the list type.
+   * @return the list, wrapped in a delegating type that makes it unmodifiable.
+   */
+  public static <T> List<T> freezeList(List<T> list) {
+    return Collections.unmodifiableList(Objects.requireNonNull(list));
   }
 
   /**

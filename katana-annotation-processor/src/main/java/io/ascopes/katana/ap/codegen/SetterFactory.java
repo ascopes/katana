@@ -1,40 +1,46 @@
-package io.ascopes.katana.ap.codegen.components;
+package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.MethodSpec;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
+import io.ascopes.katana.ap.utils.NamingUtils;
 import javax.lang.model.element.Modifier;
 
+
 /**
- * Factory for building getters.
+ * Factory for generating setters.
  *
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class GetterFactory {
+public final class SetterFactory {
 
   private final Logger logger;
 
   /**
    * Initialize this factory.
    */
-  public GetterFactory() {
+  public SetterFactory() {
     this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
   /**
-   * Create a getter for the given attribute.
+   * Create a setter for the given attribute.
    *
-   * @param attribute the attribute to create the getter for.
+   * @param attribute    the attribute to generate the setter for.
+   * @param setterPrefix the setter prefix to use.
    * @return the generated method spec.
    */
-  public MethodSpec create(Attribute attribute) {
+  public MethodSpec create(Attribute attribute, String setterPrefix) {
+    String setterName = NamingUtils.addPrefixCamelCase(setterPrefix, attribute.getName());
+
     MethodSpec.Builder builder = MethodSpec
-        .overriding(attribute.getGetterToOverride())
+        .methodBuilder(setterName)
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-        .addStatement("return this.$L", attribute.getIdentifier());
+        .addParameter(attribute.getType(), attribute.getIdentifier(), Modifier.FINAL)
+        .addStatement("this.$1L = $1L", attribute.getIdentifier());
 
     attribute
         .getDeprecatedAnnotation()
@@ -42,7 +48,7 @@ public final class GetterFactory {
         .ifPresent(builder::addAnnotation);
 
     MethodSpec method = builder.build();
-    this.logger.trace("Generated getter\n{}", method);
+    this.logger.trace("Generated setter\n{}", method);
     return method;
   }
 }
