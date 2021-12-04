@@ -11,8 +11,8 @@ import java.util.SortedSet;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-abstract class AbstractPrimitiveNumericInitTracker<N extends Number> extends
-    AbstractNumericInitTracker<N> {
+abstract class AbstractPrimitiveNumericInitTracker<N extends Number> 
+    extends AbstractNumericInitTracker<N> {
 
   AbstractPrimitiveNumericInitTracker(
       SortedSet<Attribute> attributes,
