@@ -40,9 +40,20 @@ class CodegenSettingSchema {
   Class<?> rawType
   CodeBlock immutableDefaultValue
   CodeBlock mutableDefaultValue
+
+  @Override
+  String toString() {
+    "CodegenSettingSchema{" +
+      "name='${this.name}', " +
+      "genericType=${this.genericType}, " +
+      "rawType=${this.rawType.canonicalName}, " +
+      "immutableDefaultValue=${this.immutableDefaultValue}, " +
+      "mutableDefaultValue=${this.mutableDefaultValue}" +
+      "}"
+  }
 }
 
-CodegenSettingSchema buildSchemaFor(Method method) {
+private static CodegenSettingSchema buildSchemaFor(Method method) {
   CodegenSettingSchema schema = new CodegenSettingSchema(
       name: method.name,
       genericType: TypeName.get(method.genericReturnType).box(),
@@ -51,12 +62,12 @@ CodegenSettingSchema buildSchemaFor(Method method) {
       mutableDefaultValue: getDefaultValueFor(method, MutableDefaultAdvice),
   )
 
-  System.out.printf("[ I ] Created codegen schema for %s: %s%n", method.getName(), schema)
+  System.out.printf("[INFO] Created codegen schema %s%n", method.getName(), schema)
 
   return schema
 }
 
-CodeBlock getDefaultValueFor(Method method, Class<Annotation> annotation) {
+private static CodeBlock getDefaultValueFor(Method method, Class<Annotation> annotation) {
   Annotation annotationInstance = method.getAnnotation(annotation)
   String[] defaultValue
   if (annotationInstance == null) {
@@ -68,7 +79,7 @@ CodeBlock getDefaultValueFor(Method method, Class<Annotation> annotation) {
   }
 }
 
-CodeBlock parseDefaultValue(List<String> exprs, Class<?> targetType) {
+private static CodeBlock parseDefaultValue(List<String> exprs, Class<?> targetType) {
   if (targetType.isArray()) {
     String dimensionName = targetType.componentType.canonicalName
     // XXX: how do I make multiple dimensions work? Do I even care?
@@ -116,7 +127,7 @@ CodeBlock parseDefaultValue(List<String> exprs, Class<?> targetType) {
   return CodeBlock.of('$S', expr)
 }
 
-CodeBlock stringifyDefaultValue(Object value, Class<?> targetType) {
+private static CodeBlock stringifyDefaultValue(Object value, Class<?> targetType) {
   // Important note:
   // When we have a case such as
   //    enum Foo implements Runnable {
@@ -153,14 +164,14 @@ CodeBlock stringifyDefaultValue(Object value, Class<?> targetType) {
   return CodeBlock.of('$L', value)
 }
 
-void dumpFile(JavaFile file) {
+private static void dumpFile(JavaFile file) {
   System.out.printf(
-      "[ I ] Generated file:%s%n", 
-      ("\n" + file).replace("\n", "\n  |   ")
+      "[INFO] Generated file:%s%n",
+      ("\n" + file).replace("\n", "\n  |    ")
   )
 }
 
-JavaFile buildSettingsCollectionClass(
+private static JavaFile buildSettingsCollectionClass(
     String packageName,
     String settingPackageName,
     String settingClassName,
@@ -255,11 +266,11 @@ JavaFile buildSettingsCollectionClass(
   return file
 }
 
-String attributeMethod(String prefix, String name) {
+private static String attributeMethod(String prefix, String name) {
   return prefix + Character.toUpperCase(name.charAt(0)) + name.substring(1)
 }
 
-JavaFile buildSchemaConstants(
+private static JavaFile buildSchemaConstants(
     String packageName,
     TypeSpec dataClass,
     String settingSchemaPackageName,
@@ -328,51 +339,52 @@ JavaFile buildSchemaConstants(
   return file
 }
 
-
-List<CodegenSettingSchema> schemas = Stream
-    .of(Settings.getDeclaredMethods())
-    .map { buildSchemaFor(it) }
-    .collect(Collectors.toList())
-
-String getMavenProperty(String name) {
-  //noinspection GrUnresolvedAccess
-  String property = project.properties[name]
+private static String getMavenProperty(Map<String, String> properties, String name) {
+  String property = properties.get(name)
   String err = "Maven Property " + name + " was not set"
-  System.out.printf("[ I ] Property name='%s' value='%s'%n", name, property);
+  System.out.printf("[INFO] Property name='%s' value='%s'%n", name, property);
   return Objects.requireNonNull(property, err)
 }
 
-System.err.println("[ I ] Generating setting schema definitions from @Settings annotation")
+private static void generateJavaFiles(def properties) {
+  List<CodegenSettingSchema> schemas = Stream
+      .of(Settings.getDeclaredMethods())
+      .map { buildSchemaFor(it) }
+      .collect(Collectors.toList())
 
-String generatedPackageName = getMavenProperty("settings.generatedPackageName")
-String generatedOutputRoot = getMavenProperty("settings.generatedOutputRoot")
-String settingPackageName = getMavenProperty("settings.settingPackageName")
-String settingClassName = getMavenProperty("settings.settingClassName")
-String settingSchemaPackageName = getMavenProperty("settings.settingSchemaPackageName")
-String settingSchemaClassName = getMavenProperty("settings.settingSchemaClassName")
+  System.out.println("[INFO] Generating setting schema definitions from @Settings annotation")
 
-JavaFile dataClass = buildSettingsCollectionClass(
-    generatedPackageName,
-    settingPackageName,
-    settingClassName,
-    schemas
-)
+  String generatedPackageName = getMavenProperty(properties, "settings.generatedPackageName")
+  String generatedOutputRoot = getMavenProperty(properties, "settings.generatedOutputRoot")
+  String settingPackageName = getMavenProperty(properties, "settings.settingPackageName")
+  String settingClassName = getMavenProperty(properties, "settings.settingClassName")
+  String settingSchemaPackageName = getMavenProperty(properties, "settings.settingSchemaPackageName")
+  String settingSchemaClassName = getMavenProperty(properties, "settings.settingSchemaClassName")
 
-JavaFile schemaDefinition = buildSchemaConstants(
-    generatedPackageName,
-    dataClass.typeSpec,
-    settingSchemaPackageName,
-    settingSchemaClassName,
-    schemas
-)
+  JavaFile dataClass = buildSettingsCollectionClass(
+      generatedPackageName,
+      settingPackageName,
+      settingClassName,
+      schemas
+  )
+
+  JavaFile schemaDefinition = buildSchemaConstants(
+      generatedPackageName,
+      dataClass.typeSpec,
+      settingSchemaPackageName,
+      settingSchemaClassName,
+      schemas
+  )
 
 // Can't use Path.of in Java 8 builds
-Path outputPath = Paths.get(generatedOutputRoot).toAbsolutePath()
-System.err.printf("[ I ] Writing out generated code to %s%n", outputPath)
+  Path outputPath = Paths.get(generatedOutputRoot).toAbsolutePath()
+  System.out.printf("[INFO] Writing out generated code to %s%n", outputPath)
 
-dataClass.writeTo(outputPath)
-schemaDefinition.writeTo(outputPath)
+  dataClass.writeTo(outputPath)
+  schemaDefinition.writeTo(outputPath)
 
-System.err.println("[ I ] Done")
+  System.out.println("[INFO] Done")
+}
 
-//file:noinspection GrMethodMayBeStatic
+//noinspection GrUnresolvedAccess
+generateJavaFiles(project.properties)
