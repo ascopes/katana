@@ -1,4 +1,4 @@
 /**
- * Codegen components for generated models.
+ * Builders for generated models.
  */
 package io.ascopes.katana.ap.codegen.builders;
