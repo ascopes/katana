@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.codegen.builders;
+package io.ascopes.katana.ap.codegen;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 

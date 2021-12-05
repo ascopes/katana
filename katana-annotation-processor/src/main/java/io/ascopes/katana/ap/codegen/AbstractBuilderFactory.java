@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.codegen.builders;
+package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -7,7 +7,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import io.ascopes.katana.ap.codegen.TypeSpecMembers;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.BuilderStrategy;
 import io.ascopes.katana.ap.descriptors.Model;

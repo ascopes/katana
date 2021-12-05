@@ -1,7 +1,7 @@
-package io.ascopes.katana.ap.codegen.builders;
+package io.ascopes.katana.ap.codegen;
 
-import io.ascopes.katana.ap.codegen.builders.Stages.DedicatedStage;
-import io.ascopes.katana.ap.codegen.builders.Stages.FinalStage;
+import io.ascopes.katana.ap.codegen.Stages.DedicatedStage;
+import io.ascopes.katana.ap.codegen.Stages.FinalStage;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.BuilderStrategy;
 import io.ascopes.katana.ap.descriptors.Model;

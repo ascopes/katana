@@ -2,7 +2,6 @@ package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
-import io.ascopes.katana.ap.codegen.builders.DelegatingBuilderFactory;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.logging.Logger;

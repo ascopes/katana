@@ -1,6 +1,5 @@
-package io.ascopes.katana.ap.codegen.builders;
+package io.ascopes.katana.ap.codegen;
 
-import io.ascopes.katana.ap.codegen.TypeSpecMembers;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.BuilderStrategy;
 import io.ascopes.katana.ap.descriptors.Model;

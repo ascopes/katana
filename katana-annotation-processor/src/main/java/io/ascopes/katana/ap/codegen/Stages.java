@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.codegen.builders;
+package io.ascopes.katana.ap.codegen;
 
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.iterators.KatanaIterator;
