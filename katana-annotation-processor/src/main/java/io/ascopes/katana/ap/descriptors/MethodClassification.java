@@ -18,7 +18,7 @@ import org.checkerframework.checker.optional.qual.MaybePresent;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class MethodClassification {
+final class MethodClassification {
 
   private final SortedMap<String, ExecutableElement> getters;
   private final Set<ExecutableElement> staticMethods;
@@ -33,7 +33,7 @@ public final class MethodClassification {
    *
    * @return the getters map.
    */
-  public SortedMap<String, ExecutableElement> getGetters() {
+  SortedMap<String, ExecutableElement> getGetters() {
     return this.getters;
   }
 
@@ -42,7 +42,7 @@ public final class MethodClassification {
    *
    * @return the set of static methods.
    */
-  public Set<ExecutableElement> getStaticMethods() {
+  Set<ExecutableElement> getStaticMethods() {
     return this.staticMethods;
   }
 
@@ -64,13 +64,13 @@ public final class MethodClassification {
    * @return a new builder.
    */
   @MustCall("build")
-  public static Builder builder() {
+  static Builder builder() {
     return new Builder();
   }
 
   @SuppressWarnings("UnusedReturnValue")
   @MustCall("build")
-  public static final class Builder implements ObjectBuilder<MethodClassification> {
+  static final class Builder implements ObjectBuilder<MethodClassification> {
 
     private final SortedMap<String, ExecutableElement> getters;
     private final Set<ExecutableElement> staticMethods;
@@ -87,7 +87,7 @@ public final class MethodClassification {
      * @return an optional containing the discovered getter, or empty if not known.
      */
     @MaybePresent
-    public Optional<ExecutableElement> getExistingGetter(String attributeName) {
+    Optional<ExecutableElement> getExistingGetter(String attributeName) {
       return Optional.ofNullable(this.getters.get(attributeName));
     }
 
@@ -98,7 +98,7 @@ public final class MethodClassification {
      * @param method        the getter method.
      * @return this builder.
      */
-    public Builder getter(String attributeName, ExecutableElement method) {
+    Builder getter(String attributeName, ExecutableElement method) {
       Objects.requireNonNull(attributeName);
       Objects.requireNonNull(method);
       this.getters.put(attributeName, method);
@@ -111,7 +111,7 @@ public final class MethodClassification {
      * @param method the static method.
      * @return this builder.
      */
-    public Builder staticMethod(ExecutableElement method) {
+    Builder staticMethod(ExecutableElement method) {
       Objects.requireNonNull(method);
       this.staticMethods.add(method);
       return this;
@@ -122,6 +122,7 @@ public final class MethodClassification {
      *
      * @return the generated method classification.
      */
+    @Override
     public MethodClassification build() {
       return new MethodClassification(this);
     }

@@ -10,7 +10,7 @@ import java.util.Optional;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class BuilderStrategyFactory {
+final class BuilderStrategyFactory {
 
   /**
    * Create a builder strategy from the given settings.
@@ -18,7 +18,7 @@ public final class BuilderStrategyFactory {
    * @param settings the settings to use.
    * @return the strategy, or an empty optional if ignored.
    */
-  public Optional<BuilderStrategy> create(SettingsCollection settings) {
+  Optional<BuilderStrategy> create(SettingsCollection settings) {
     // Edge case I probably won't account for.
     //
     // I wake up one day and decide "hey, lets make a model that has a builder, but also make it

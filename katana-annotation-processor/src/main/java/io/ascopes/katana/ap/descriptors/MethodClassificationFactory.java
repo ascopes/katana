@@ -26,7 +26,7 @@ import javax.tools.Diagnostic.Kind;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class MethodClassificationFactory {
+final class MethodClassificationFactory {
 
   private final Diagnostics diagnostics;
   private final Types typeUtils;
@@ -38,7 +38,7 @@ public final class MethodClassificationFactory {
    * @param diagnostics diagnostics to use for reporting compilation errors.
    * @param typeUtils   the type utilities to use for introspection.
    */
-  public MethodClassificationFactory(
+  MethodClassificationFactory(
       Diagnostics diagnostics,
       Types typeUtils
   ) {
@@ -55,7 +55,7 @@ public final class MethodClassificationFactory {
    * @param settings      the settings to consider.
    * @return the method classification in an OK result, or a failed result if an error occurred.
    */
-  public Result<MethodClassification> create(
+  Result<MethodClassification> create(
       TypeElement interfaceType,
       SettingsCollection settings
   ) {

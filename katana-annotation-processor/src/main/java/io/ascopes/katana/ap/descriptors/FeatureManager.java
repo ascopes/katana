@@ -35,7 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public class FeatureManager {
+final class FeatureManager {
 
   private final Logger logger;
   private final Diagnostics diagnostics;
@@ -49,7 +49,7 @@ public class FeatureManager {
    * @param elementUtils element utilities to use for introspection.
    * @param typeUtils    type utilities to use for introspection.
    */
-  public FeatureManager(
+  FeatureManager(
       Diagnostics diagnostics,
       Elements elementUtils,
       Types typeUtils
@@ -70,7 +70,7 @@ public class FeatureManager {
    * @param <T>           the type of the feature.
    * @return the inclusion result, or a failure if something was unable to be extracted.
    */
-  public <T extends AttributeFeature> Result<Boolean> checkInclusion(
+  <T extends AttributeFeature> Result<Boolean> checkInclusion(
       String attributeName,
       Setting<T> setting,
       ExecutableElement getter
@@ -157,7 +157,7 @@ public class FeatureManager {
    * @param knownMethods     the known methods to operate on.
    * @return an OK result if found, or a failure if not found or if something was not right.
    */
-  public Result<ExecutableElement> getRequiredCustomMethod(
+  Result<ExecutableElement> getRequiredCustomMethod(
       TypeElement interfaceType,
       Class<? extends CustomizableAttributeFeature> featureType,
       Class<? extends Annotation> methodAnnotation,

@@ -22,7 +22,7 @@ import javax.lang.model.util.Elements;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class AttributeFactory {
+final class AttributeFactory {
 
   private final Logger logger;
   private final Elements elementUtils;
@@ -34,7 +34,7 @@ public final class AttributeFactory {
    * @param featureManager the feature manager to use.
    * @param elementUtils   the element utilities to use for introspection.
    */
-  public AttributeFactory(
+  AttributeFactory(
       FeatureManager featureManager,
       Elements elementUtils
   ) {
@@ -52,7 +52,7 @@ public final class AttributeFactory {
    * @return the stream of attributes. Each wrapped in an OK result if successfully created or an
    *     empty failed result if something went wrong.
    */
-  public Stream<Result<Attribute>> create(
+  Stream<Result<Attribute>> create(
       MethodClassification methodClassification,
       SettingsCollection settings,
       boolean mutable
