@@ -155,7 +155,7 @@ public final class Model {
    * @return the deprecated annotation, or an empty optional if not provided.
    */
   @MaybePresent
-  public Optional<AnnotationMirror> getDeprecatedAnnotation() {
+  public Optional<? extends AnnotationMirror> getDeprecatedAnnotation() {
     return Optional.ofNullable(this.deprecatedAnnotation);
   }
 

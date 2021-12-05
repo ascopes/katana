@@ -1,5 +1,6 @@
 package io.ascopes.katana.ap.codegen.builders;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.MethodSpec.Builder;
@@ -14,6 +15,7 @@ import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.BuilderStrategy;
 import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.utils.CodeGenUtils;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
@@ -109,14 +111,18 @@ final class CompileCheckedBuilderFactory extends AbstractBuilderFactory<Stages> 
     ClassName thisStageTypeName = model.getQualifiedName().nestedClass(dedicatedStage.getName());
     TypeName nextStageTypeName = model.getQualifiedName().nestedClass(nextStage.getName());
 
-    MethodSpec stageMethod = this
-        .stageMethodStubFor(attribute, strategy, nextStageTypeName)
-        .build();
+    MethodSpec.Builder stageMethod = this
+        .stageMethodStubFor(attribute, strategy, nextStageTypeName);
 
-    return TypeSpec
+    TypeSpec.Builder type = TypeSpec
         .interfaceBuilder(thisStageTypeName)
-        .addModifiers(Modifier.PUBLIC)
-        .addMethod(stageMethod);
+        .addModifiers(Modifier.PUBLIC);
+
+    this.deprecatedAnnotationForEither(model, attribute)
+        .ifPresent(type::addAnnotation);
+
+    return type
+        .addMethod(stageMethod.build());
   }
 
   TypeSpec.Builder createFinalStageFor(
@@ -154,10 +160,27 @@ final class CompileCheckedBuilderFactory extends AbstractBuilderFactory<Stages> 
   ) {
     ParameterSpec parameterSpec = this.builderSetterParamFor(attribute).build();
 
-    return MethodSpec
+    MethodSpec.Builder method = MethodSpec
         .methodBuilder(this.builderSetterNameFor(attribute, strategy))
         .addParameter(parameterSpec)
         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
         .returns(returnType);
+
+    attribute
+        .getDeprecatedAnnotation()
+        .map(CodeGenUtils::copyDeprecatedFrom)
+        .ifPresent(method::addAnnotation);
+
+    return method;
+  }
+
+  Optional<AnnotationSpec> deprecatedAnnotationForEither(Model model, Attribute attribute) {
+    if (model.getDeprecatedAnnotation().isPresent()) {
+      return model.getDeprecatedAnnotation()
+          .map(CodeGenUtils::copyDeprecatedFrom);
+    }
+
+    return attribute.getDeprecatedAnnotation()
+        .map(CodeGenUtils::copyDeprecatedFrom);
   }
 }

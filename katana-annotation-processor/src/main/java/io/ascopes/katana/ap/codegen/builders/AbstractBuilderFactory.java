@@ -13,6 +13,7 @@ import io.ascopes.katana.ap.descriptors.BuilderStrategy;
 import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
+import io.ascopes.katana.ap.utils.CodeGenUtils;
 import javax.lang.model.element.Modifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -137,13 +138,18 @@ abstract class AbstractBuilderFactory<@Nullable T> implements BuilderFactory<T> 
         .addMethod(this.builderConstructor(context).build())
         .addMethod(this.builderBuildFor(model, strategy, context).build());
 
+    model
+        .getDeprecatedAnnotation()
+        .map(CodeGenUtils::copyDeprecatedFrom)
+        .ifPresent(typeSpecBuilder::addAnnotation);
+
     model.getAttributes()
-        .forEach(attr -> this.applyAttributeTo(model, strategy, attr, typeSpecBuilder, context));
+        .forEach(attr -> this.applyFieldAndMethod(model, strategy, attr, typeSpecBuilder, context));
 
     return typeSpecBuilder;
   }
 
-  void applyAttributeTo(
+  void applyFieldAndMethod(
       Model model,
       BuilderStrategy strategy,
       Attribute attribute,
@@ -174,12 +180,19 @@ abstract class AbstractBuilderFactory<@Nullable T> implements BuilderFactory<T> 
     ParameterSpec parameter = this.builderSetterParamFor(attribute).build();
     CodeBlock body = this.builderSetterBodyFor(attribute, paramName, fieldName, context).build();
 
-    return MethodSpec
+    MethodSpec.Builder method = MethodSpec
         .methodBuilder(setterName)
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
         .returns(builderTypeName)
         .addParameter(parameter)
         .addCode(body);
+
+    attribute
+        .getDeprecatedAnnotation()
+        .map(CodeGenUtils::copyDeprecatedFrom)
+        .ifPresent(method::addAnnotation);
+
+    return method;
   }
 
   CodeBlock.Builder builderSetterBodyFor(
@@ -195,11 +208,18 @@ abstract class AbstractBuilderFactory<@Nullable T> implements BuilderFactory<T> 
   }
 
   MethodSpec.Builder builderBuildFor(Model model, BuilderStrategy strategy, T context) {
-    return MethodSpec
+    MethodSpec.Builder method = MethodSpec
         .methodBuilder(strategy.getBuildMethodName())
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
         .returns(model.getQualifiedName())
         .addCode(this.builderBuildBodyFor(model, context).build());
+
+    model
+        .getDeprecatedAnnotation()
+        .map(CodeGenUtils::copyDeprecatedFrom)
+        .ifPresent(method::addAnnotation);
+
+    return method;
   }
 
   CodeBlock.Builder builderBuildBodyFor(Model model, T context) {
