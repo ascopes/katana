@@ -61,7 +61,7 @@ public final class DelegatingBuilderFactory implements BuilderFactory<@Nullable 
       case RUNTIME: {
         this.logger.trace("Creating runtime initialization-checked builder");
         SortedSet<Attribute> requiredAttributes = this.requiredAttributes(model);
-        InitTracker initTracker = this.initTrackerFactory.createTracker(requiredAttributes);
+        InitTracker initTracker = this.initTrackerFactory.create(requiredAttributes);
         return this.runtimeCheckedBuilderFactory.create(model, strategy, initTracker);
       }
 
