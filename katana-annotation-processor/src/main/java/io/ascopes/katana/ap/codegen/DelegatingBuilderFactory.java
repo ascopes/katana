@@ -38,7 +38,7 @@ public final class DelegatingBuilderFactory implements BuilderFactory<@Nullable 
   }
 
   /**
-   * Alias for {@link #create(Model, BuilderStrategy, Void)}.
+   * Bridge for {@link #create(Model, BuilderStrategy, Void)}.
    */
   public TypeSpecMembers create(Model model, BuilderStrategy strategy) {
     return this.create(model, strategy, null);
@@ -48,12 +48,15 @@ public final class DelegatingBuilderFactory implements BuilderFactory<@Nullable 
    * {@inheritDoc}
    */
   @Override
-  public TypeSpecMembers create(Model model, BuilderStrategy strategy, Void unused) {
+  public TypeSpecMembers create(Model model, BuilderStrategy strategy, @Nullable Void context) {
+    //noinspection ConstantConditions
+    assert context == null : "Unexpected context parameter passed";
+
     switch (strategy.getBuilderInitCheck()) {
 
       case NONE:
         this.logger.trace("Creating simple unchecked builder");
-        return this.simpleBuilderFactory.create(model, strategy, unused);
+        return this.simpleBuilderFactory.create(model, strategy, context);
 
       case RUNTIME: {
         this.logger.trace("Creating runtime initialization-checked builder");
