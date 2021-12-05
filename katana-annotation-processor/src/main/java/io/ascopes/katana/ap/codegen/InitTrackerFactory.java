@@ -24,7 +24,7 @@ final class InitTrackerFactory {
   /**
    * Initialize this factory.
    */
-  public InitTrackerFactory() {
+  InitTrackerFactory() {
     this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
@@ -34,7 +34,7 @@ final class InitTrackerFactory {
    * @param attributes the attributes to track.
    * @return a tracker of the most efficient size to use for the given attributes.
    */
-  public InitTracker create(SortedSet<Attribute> attributes) {
+  InitTracker create(SortedSet<Attribute> attributes) {
     // TODO(ascopes): test these size offsets are correct and don't get messed up by int overflows.
     if (attributes.size() < Integer.SIZE) {
       this.logger.debug("Using an int tracker for tracking initialized attributes");

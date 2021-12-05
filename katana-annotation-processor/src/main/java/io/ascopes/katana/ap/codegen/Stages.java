@@ -2,7 +2,6 @@ package io.ascopes.katana.ap.codegen;
 
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.iterators.KatanaIterator;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.SortedSet;
 
@@ -14,7 +13,7 @@ import java.util.SortedSet;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public interface Stages {
+interface Stages {
 
   /**
    * Get an iterator across each dedicated stage.

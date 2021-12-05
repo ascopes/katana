@@ -36,7 +36,7 @@ abstract class AbstractBuilderFactory<@Nullable T> implements BuilderFactory<T> 
     return this.createMembersFor(model, strategy, context).build();
   }
 
-  protected TypeSpecMembers.Builder createMembersFor(
+  TypeSpecMembers.Builder createMembersFor(
       Model model,
       BuilderStrategy strategy,
       T context

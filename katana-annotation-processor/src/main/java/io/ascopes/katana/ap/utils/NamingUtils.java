@@ -43,6 +43,7 @@ public final class NamingUtils {
 
   /**
    * Convert the given name into pascal-case from camel-case or snake-case.
+   *
    * @param name the input name.
    * @return the resultant name.
    */

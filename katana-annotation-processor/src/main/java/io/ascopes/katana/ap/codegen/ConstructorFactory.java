@@ -16,14 +16,14 @@ import javax.lang.model.element.Modifier;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class ConstructorFactory {
+final class ConstructorFactory {
 
   private final Logger logger;
 
   /**
    * Initialize this factory.
    */
-  public ConstructorFactory() {
+  ConstructorFactory() {
     this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
@@ -35,7 +35,7 @@ public final class ConstructorFactory {
    * @param model the model to use.
    * @return a stream of generated method specs.
    */
-  public Stream<MethodSpec> create(Model model) {
+  Stream<MethodSpec> create(Model model) {
     return model
         .getConstructors()
         .stream()

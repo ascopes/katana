@@ -1,6 +1,5 @@
 package io.ascopes.katana.ap.codegen;
 
-import io.ascopes.katana.ap.codegen.TypeSpecMembers;
 import io.ascopes.katana.ap.descriptors.BuilderStrategy;
 import io.ascopes.katana.ap.descriptors.Model;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -12,7 +11,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public interface BuilderFactory<@Nullable T> {
+interface BuilderFactory<@Nullable T> {
 
   /**
    * Create the builder components to add to the generated model.

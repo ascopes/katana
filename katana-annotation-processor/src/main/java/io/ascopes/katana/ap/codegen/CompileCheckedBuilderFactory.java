@@ -32,7 +32,7 @@ import javax.lang.model.element.Modifier;
 final class CompileCheckedBuilderFactory extends AbstractBuilderFactory<Stages> {
 
   @Override
-  protected TypeSpecMembers.Builder createMembersFor(
+  TypeSpecMembers.Builder createMembersFor(
       Model model,
       BuilderStrategy strategy,
       Stages context

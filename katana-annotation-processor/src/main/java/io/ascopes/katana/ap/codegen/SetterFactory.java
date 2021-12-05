@@ -15,14 +15,14 @@ import javax.lang.model.element.Modifier;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class SetterFactory {
+final class SetterFactory {
 
   private final Logger logger;
 
   /**
    * Initialize this factory.
    */
-  public SetterFactory() {
+  SetterFactory() {
     this.logger = LoggerFactory.loggerFor(this.getClass());
   }
 
@@ -33,7 +33,7 @@ public final class SetterFactory {
    * @param setterPrefix the setter prefix to use.
    * @return the generated method spec.
    */
-  public MethodSpec create(Attribute attribute, String setterPrefix) {
+  MethodSpec create(Attribute attribute, String setterPrefix) {
     String setterName = NamingUtils.addPrefixCamelCase(setterPrefix, attribute.getName());
 
     MethodSpec.Builder builder = MethodSpec

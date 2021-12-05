@@ -17,7 +17,7 @@ import java.util.Objects;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class TypeSpecMembers {
+final class TypeSpecMembers {
 
   private final List<MethodSpec> methods;
   private final List<FieldSpec> fields;
@@ -34,7 +34,7 @@ public final class TypeSpecMembers {
    *
    * @param typeSpecBuilder the builder to apply to.
    */
-  public void applyTo(TypeSpec.Builder typeSpecBuilder) {
+  void applyTo(TypeSpec.Builder typeSpecBuilder) {
     this.methods.forEach(typeSpecBuilder::addMethod);
     this.fields.forEach(typeSpecBuilder::addField);
     this.types.forEach(typeSpecBuilder::addType);
@@ -45,7 +45,7 @@ public final class TypeSpecMembers {
    *
    * @return the builder.
    */
-  public static Builder builder() {
+  static Builder builder() {
     return new Builder();
   }
 
@@ -64,7 +64,7 @@ public final class TypeSpecMembers {
   /**
    * Builder for a group of members.
    */
-  public static final class Builder implements ObjectBuilder<TypeSpecMembers> {
+  static final class Builder implements ObjectBuilder<TypeSpecMembers> {
 
     private final List<MethodSpec> methods;
     private final List<FieldSpec> fields;
@@ -82,7 +82,7 @@ public final class TypeSpecMembers {
      * @param method the method spec to add.
      * @return this builder.
      */
-    public Builder method(MethodSpec method) {
+    Builder method(MethodSpec method) {
       this.methods.add(Objects.requireNonNull(method));
       return this;
     }
@@ -93,7 +93,7 @@ public final class TypeSpecMembers {
      * @param field the field spec to add.
      * @return this builder.
      */
-    public Builder field(FieldSpec field) {
+    Builder field(FieldSpec field) {
       this.fields.add(Objects.requireNonNull(field));
       return this;
     }
@@ -104,7 +104,7 @@ public final class TypeSpecMembers {
      * @param type the type spec to add.
      * @return this builder.
      */
-    public Builder type(TypeSpec type) {
+    Builder type(TypeSpec type) {
       this.types.add(Objects.requireNonNull(type));
       return this;
     }
@@ -114,6 +114,7 @@ public final class TypeSpecMembers {
      *
      * @return the generated entity.
      */
+    @Override
     public TypeSpecMembers build() {
       return new TypeSpecMembers(this);
     }

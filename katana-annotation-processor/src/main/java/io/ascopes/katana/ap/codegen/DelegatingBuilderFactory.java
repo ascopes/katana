@@ -16,7 +16,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class DelegatingBuilderFactory implements BuilderFactory<@Nullable Void> {
+final class DelegatingBuilderFactory implements BuilderFactory<@Nullable Void> {
 
   private final Logger logger;
   private final InitTrackerFactory initTrackerFactory;
@@ -28,7 +28,7 @@ public final class DelegatingBuilderFactory implements BuilderFactory<@Nullable 
   /**
    * Initialize this factory.
    */
-  public DelegatingBuilderFactory() {
+  DelegatingBuilderFactory() {
     this.logger = LoggerFactory.loggerFor(this.getClass());
     this.initTrackerFactory = new InitTrackerFactory();
     this.stageFactory = new StageFactory();
@@ -40,7 +40,7 @@ public final class DelegatingBuilderFactory implements BuilderFactory<@Nullable 
   /**
    * Bridge for {@link #create(Model, BuilderStrategy, Void)}.
    */
-  public TypeSpecMembers create(Model model, BuilderStrategy strategy) {
+  TypeSpecMembers create(Model model, BuilderStrategy strategy) {
     return this.create(model, strategy, null);
   }
 

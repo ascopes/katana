@@ -13,7 +13,7 @@ import javax.lang.model.element.Modifier;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public final class GetterFactory {
+final class GetterFactory {
 
   private final Logger logger;
 
