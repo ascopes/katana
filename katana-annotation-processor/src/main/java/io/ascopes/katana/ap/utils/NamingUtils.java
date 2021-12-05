@@ -1,5 +1,6 @@
 package io.ascopes.katana.ap.utils;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.SourceVersion;
@@ -38,6 +39,42 @@ public final class NamingUtils {
     }
 
     return name;
+  }
+
+  /**
+   * Convert the given name into pascal-case from camel-case or snake-case.
+   * @param name the input name.
+   * @return the resultant name.
+   */
+  public static String toPascalCase(String name) {
+    // TODO(ascopes): unit tests
+
+    StringBuilder constructedName = new StringBuilder();
+    for (String chunk : name.split("_+")) {
+      constructedName.append(capitalize(chunk));
+    }
+
+    if (constructedName.length() == 0) {
+      throw new IllegalStateException("Empty name produced!");
+    }
+
+    return constructedName.toString();
+  }
+
+  /**
+   * Make the first character of a string uppercase.
+   *
+   * @param text the text to process.
+   * @return the input with the first character changed to uppercase.
+   */
+  public static String capitalize(String text) {
+    // TODO(ascopes): unit tests
+
+    if (text.length() <= 1) {
+      return text.toUpperCase(Locale.ROOT);
+    }
+
+    return Character.toUpperCase(text.charAt(0)) + text.substring(1);
   }
 
   /**

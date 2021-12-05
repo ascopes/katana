@@ -55,6 +55,33 @@ public abstract class KatanaIterator<E> implements Iterator<E> {
     return StreamSupport.stream(this.spliterator(), false);
   }
 
+  /**
+   * Decorate a regular iterator to turn it into a Katana iterator.
+   *
+   * @param iterator the iterator to decorate.
+   * @param <E>      the element type.
+   * @return the decorated iterator.
+   */
+  public static <E> KatanaIterator<E> decorate(Iterator<E> iterator) {
+    // TODO(ascopes): unit test.
+    return new KatanaIterator<E>() {
+      @Override
+      public boolean hasNext() {
+        return iterator.hasNext();
+      }
+
+      @Override
+      public E next() throws NoSuchElementException {
+        return iterator.next();
+      }
+
+      @Override
+      public int characteristics() {
+        return Spliterator.ORDERED;
+      }
+    };
+  }
+
   protected static NoSuchElementException noMoreElementsException(String name) {
     return new NoSuchElementException("There are no more " + name + " to iterate over");
   }

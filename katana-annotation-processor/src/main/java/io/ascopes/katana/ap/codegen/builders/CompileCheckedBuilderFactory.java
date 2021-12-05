@@ -1,24 +1,163 @@
 package io.ascopes.katana.ap.codegen.builders;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.MethodSpec.Builder;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import io.ascopes.katana.ap.codegen.TypeSpecMembers;
+import io.ascopes.katana.ap.codegen.builders.Stages.DedicatedStage;
+import io.ascopes.katana.ap.codegen.builders.Stages.FinalStage;
+import io.ascopes.katana.ap.codegen.builders.Stages.Stage;
+import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.BuilderStrategy;
 import io.ascopes.katana.ap.descriptors.Model;
+import io.ascopes.katana.ap.utils.CodeGenUtils;
+import java.util.stream.Collectors;
+import javax.lang.model.element.Modifier;
 
 /**
- * Simple builder factory implementation that provides initialization checking at compile time
- * through the use of a staged builder.
+ * Builder factory implementation that provides initialization checking at compile time through the
+ * use of a staged builder.
+ *
+ * <p>This will define a custom interface for every mandatory attribute, forcing the builder type
+ * to implement these interfaces as to force the user to call specific methods to be able to reach
+ * the {@code .build} method at the end successfully.
  *
  * @author Ashley Scopes
  * @since 0.0.1
  */
-final class CompileCheckedBuilderFactory implements BuilderFactory {
+final class CompileCheckedBuilderFactory extends AbstractBuilderFactory<Stages> {
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
-  public TypeSpecMembers create(Model model, BuilderStrategy strategy) {
-    // TODO(ascopes): implement this.
-    throw new UnsupportedOperationException("Not yet supported!");
+  protected TypeSpecMembers.Builder createMembersFor(
+      Model model,
+      BuilderStrategy strategy,
+      Stages context
+  ) {
+    TypeSpecMembers.Builder builder = super.createMembersFor(model, strategy, context);
+
+    builder.type(this.createFinalStageFor(model, strategy, context.getFinalStage()).build());
+
+    context
+        .dedicatedStageIterator()
+        .stream()
+        .map(stage -> this.dedicatedStageFor(model, strategy, stage))
+        .map(TypeSpec.Builder::build)
+        .forEach(builder::type);
+
+    return builder;
+  }
+
+  @Override
+  Builder builderMethodFor(Model model, BuilderStrategy strategy, Stages context) {
+
+    Stage firstStage = context
+        .dedicatedStageIterator()
+        .stream()
+        .findFirst()
+        .map(Stage.class::cast)
+        .orElseGet(context::getFinalStage);
+
+    ClassName firstStageTypeName = model.getQualifiedName().nestedClass(firstStage.getName());
+
+    return super
+        .builderMethodFor(model, strategy, context)
+        .returns(firstStageTypeName);
+  }
+
+  @Override
+  TypeSpec.Builder builderTypeFor(Model model, BuilderStrategy strategy, Stages context) {
+    return super
+        .builderTypeFor(model, strategy, context)
+        .addSuperinterfaces(context
+            .dedicatedStageIterator()
+            .stream()
+            .map(DedicatedStage::getName)
+            .map(model.getQualifiedName()::nestedClass)
+            .collect(Collectors.toList()))
+        .addSuperinterface(model.getQualifiedName().nestedClass(context.getFinalStage().getName()));
+  }
+
+  @Override
+  MethodSpec.Builder builderSetterFor(
+      Model model,
+      Attribute attribute,
+      BuilderStrategy strategy,
+      Stages context
+  ) {
+    return super
+        .builderSetterFor(model, attribute, strategy, context)
+        .addAnnotation(CodeGenUtils.override());
+  }
+
+  @Override
+  Builder builderBuildFor(Model model, BuilderStrategy strategy, Stages context) {
+    return super.builderBuildFor(model, strategy, context)
+        .addAnnotation(CodeGenUtils.override());
+  }
+
+  TypeSpec.Builder dedicatedStageFor(
+      Model model,
+      BuilderStrategy strategy,
+      DedicatedStage dedicatedStage
+  ) {
+    Attribute attribute = dedicatedStage.getAttribute();
+    Stage nextStage = dedicatedStage.getNextStage();
+
+    ClassName thisStageTypeName = model.getQualifiedName().nestedClass(dedicatedStage.getName());
+    TypeName nextStageTypeName = model.getQualifiedName().nestedClass(nextStage.getName());
+
+    MethodSpec stageMethod = this
+        .stageMethodStubFor(attribute, strategy, nextStageTypeName)
+        .build();
+
+    return TypeSpec
+        .interfaceBuilder(thisStageTypeName)
+        .addModifiers(Modifier.PUBLIC)
+        .addMethod(stageMethod);
+  }
+
+  TypeSpec.Builder createFinalStageFor(
+      Model model,
+      BuilderStrategy strategy,
+      FinalStage finalStage
+  ) {
+    ClassName finalStageTypeName = model.getQualifiedName().nestedClass(finalStage.getName());
+
+    MethodSpec buildMethod = MethodSpec
+        .methodBuilder(strategy.getBuildMethodName())
+        .returns(model.getQualifiedName())
+        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+        .build();
+
+    TypeSpec.Builder finalType = TypeSpec
+        .interfaceBuilder(finalStageTypeName)
+        .addModifiers(Modifier.PUBLIC);
+
+    finalStage
+        .getAttributes()
+        .stream()
+        .map(attr -> this.stageMethodStubFor(attr, strategy, model.getQualifiedName()))
+        .map(MethodSpec.Builder::build)
+        .forEach(finalType::addMethod);
+
+    return finalType
+        .addMethod(buildMethod);
+  }
+
+  MethodSpec.Builder stageMethodStubFor(
+      Attribute attribute,
+      BuilderStrategy strategy,
+      TypeName returnType
+  ) {
+    ParameterSpec parameterSpec = this.builderSetterParamFor(attribute).build();
+
+    return MethodSpec
+        .methodBuilder(this.builderSetterNameFor(attribute, strategy))
+        .addParameter(parameterSpec)
+        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+        .returns(returnType);
   }
 }

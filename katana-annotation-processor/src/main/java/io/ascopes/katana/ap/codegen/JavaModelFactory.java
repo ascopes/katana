@@ -2,7 +2,7 @@ package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
-import io.ascopes.katana.ap.codegen.builders.BuilderFactoryFactory;
+import io.ascopes.katana.ap.codegen.builders.DelegatingBuilderFactory;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.logging.Logger;
@@ -23,7 +23,7 @@ public final class JavaModelFactory {
   private final GetterFactory getterFactory;
   private final SetterFactory setterFactory;
   private final ConstructorFactory constructorFactory;
-  private final BuilderFactoryFactory builderFactoryFactory;
+  private final DelegatingBuilderFactory delegatingBuilderFactory;
 
   /**
    * Initialize this factory.
@@ -34,7 +34,7 @@ public final class JavaModelFactory {
     this.getterFactory = new GetterFactory();
     this.setterFactory = new SetterFactory();
     this.constructorFactory = new ConstructorFactory();
-    this.builderFactoryFactory = new BuilderFactoryFactory();
+    this.delegatingBuilderFactory = new DelegatingBuilderFactory();
   }
 
   /**
@@ -98,10 +98,8 @@ public final class JavaModelFactory {
 
   private void applyBuilders(TypeSpec.Builder typeSpecBuilder, Model model) {
     model.getBuilderStrategy()
-        .ifPresent(strategy -> this.builderFactoryFactory
-            .create(strategy)
-            .create(model, strategy)
-            .applyTo(typeSpecBuilder));
+        .map(strategy -> this.delegatingBuilderFactory.create(model, strategy))
+        .ifPresent(members -> members.applyTo(typeSpecBuilder));
   }
 }
 

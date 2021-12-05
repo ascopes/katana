@@ -1,12 +1,18 @@
 package io.ascopes.katana.ap.utils;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import org.checkerframework.common.util.report.qual.ReportCreation;
 import org.checkerframework.common.util.report.qual.ReportInherit;
 
@@ -19,11 +25,38 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
 @ReportCreation
 @ReportInherit
 public final class CollectionUtils {
-  // TODO(ascopes): unit tests!
 
   private CollectionUtils() {
     throw new UnsupportedOperationException("static-only class");
   }
+
+  /**
+   * Collector that produces a sorted set.
+   *
+   * @param comparator the comparator to use in the set.
+   * @param <T>        the element type.
+   * @return the collector.
+   */
+  public static <T> Collector<T, ?, SortedSet<T>> toSortedSet(Comparator<T> comparator) {
+    // TODO(ascopes): unit test this
+    return Collectors.toCollection(() -> new TreeSet<>(comparator));
+  }
+
+  /**
+   * Collector that produces a sorted set.
+   *
+   * @param comparableKey a function that returns a key to compare the elements against.
+   * @param <T>           the element type.
+   * @param <U>           the comparable key for the elements.
+   * @return the collector.
+   */
+  public static <T, U extends Comparable<U>> Collector<T, ?, SortedSet<T>> toSortedSet(
+      Function<T, U> comparableKey
+  ) {
+    // TODO(ascopes): unit test this
+    return toSortedSet(Comparator.comparing(comparableKey));
+  }
+
 
   /**
    * Shallow-freeze a list.
@@ -56,6 +89,19 @@ public final class CollectionUtils {
    */
   public static <T> SortedSet<T> freezeSortedSet(SortedSet<T> set) {
     return Collections.unmodifiableSortedSet(Objects.requireNonNull(set));
+  }
+
+
+  /**
+   * Shallow-freeze a map.
+   *
+   * @param map the map to freeze.
+   * @param <K> the map's key type.
+   * @param <V> the map's value type.
+   * @return the map, wrapped in a delegating type that makes it unmodifiable.
+   */
+  public static <K, V> Map<K, V> freezeMap(Map<K, V> map) {
+    return Collections.unmodifiableMap(Objects.requireNonNull(map));
   }
 
   /**

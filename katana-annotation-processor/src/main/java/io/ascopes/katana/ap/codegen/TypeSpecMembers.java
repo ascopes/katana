@@ -4,6 +4,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import io.ascopes.katana.ap.utils.CollectionUtils;
+import io.ascopes.katana.ap.utils.ObjectBuilder;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,7 +64,7 @@ public final class TypeSpecMembers {
   /**
    * Builder for a group of members.
    */
-  public static final class Builder {
+  public static final class Builder implements ObjectBuilder<TypeSpecMembers> {
 
     private final List<MethodSpec> methods;
     private final List<FieldSpec> fields;

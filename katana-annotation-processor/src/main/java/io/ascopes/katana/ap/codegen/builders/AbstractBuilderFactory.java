@@ -1,8 +1,10 @@
 package io.ascopes.katana.ap.codegen.builders;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.ascopes.katana.ap.codegen.TypeSpecMembers;
@@ -11,16 +13,17 @@ import io.ascopes.katana.ap.descriptors.BuilderStrategy;
 import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
-import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Base logic that most builders will want to implement or override.
  *
+ * @param <T> contextual argument to pass around.
  * @author Ashley Scopes
  * @since 0.0.1
  */
-abstract class AbstractBuilderFactory implements BuilderFactory {
+abstract class AbstractBuilderFactory<@Nullable T> implements BuilderFactory<T> {
 
   private final Logger logger;
 
@@ -29,15 +32,15 @@ abstract class AbstractBuilderFactory implements BuilderFactory {
   }
 
   @Override
-  public final TypeSpecMembers create(Model model, BuilderStrategy strategy) {
-    return this.createMembersFor(model, strategy).build();
+  public final TypeSpecMembers create(Model model, BuilderStrategy strategy, T context) {
+    return this.createMembersFor(model, strategy, context).build();
   }
 
-  TypeSpecMembers.Builder createMembersFor(Model model, BuilderStrategy strategy) {
-    TypeSpec builderType = this.builderTypeFor(model, strategy).build();
+  protected TypeSpecMembers.Builder createMembersFor(Model model, BuilderStrategy strategy, T context) {
+    TypeSpec builderType = this.builderTypeFor(model, strategy, context).build();
     this.logger.trace("Generated builder type:\n{}", builderType);
 
-    MethodSpec builderMethod = this.builderMethodFor(model, strategy).build();
+    MethodSpec builderMethod = this.builderMethodFor(model, strategy, context).build();
     this.logger.trace("Generated builder method:\n{}", builderMethod);
 
     MethodSpec modelConstructor = this.modelConstructorFor(model, strategy).build();
@@ -50,7 +53,7 @@ abstract class AbstractBuilderFactory implements BuilderFactory {
         .method(modelConstructor);
 
     if (strategy.isToBuilderMethodEnabled()) {
-      MethodSpec toBuilderMethod = this.toBuilderMethodFor(model, strategy).build();
+      MethodSpec toBuilderMethod = this.toBuilderMethodFor(model, strategy, context).build();
 
       this.logger.trace("Generated toBuilder method:\n{}", toBuilderMethod);
 
@@ -63,11 +66,12 @@ abstract class AbstractBuilderFactory implements BuilderFactory {
 
   MethodSpec.Builder modelConstructorFor(Model model, BuilderStrategy strategy) {
     String builderParamName = "builder";
+    TypeName builderTypeName = this.builderTypeNameFor(model, strategy);
 
     return MethodSpec
         .constructorBuilder()
         .addModifiers(Modifier.PRIVATE)
-        .addParameter(this.builderTypeNameFor(model, strategy), builderParamName, Modifier.FINAL)
+        .addParameter(builderTypeName, builderParamName, Modifier.FINAL)
         .addCode(this.modelConstructorBodyFor(model, builderParamName).build());
   }
 
@@ -85,29 +89,30 @@ abstract class AbstractBuilderFactory implements BuilderFactory {
     return bodyBuilder;
   }
 
-  MethodSpec.Builder builderMethodFor(Model model, BuilderStrategy strategy) {
+  MethodSpec.Builder builderMethodFor(Model model, BuilderStrategy strategy, T context) {
     TypeName builderType = this.builderTypeNameFor(model, strategy);
+    CodeBlock body = this.builderMethodBodyFor(builderType, context).build();
 
     return MethodSpec
         .methodBuilder(strategy.getBuilderMethodName())
         .returns(builderType)
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-        .addCode(this.builderMethodBodyFor(builderType).build());
+        .addCode(body);
   }
 
-  CodeBlock.Builder builderMethodBodyFor(TypeName builderType) {
+  CodeBlock.Builder builderMethodBodyFor(TypeName builderType, T context) {
     return CodeBlock
         .builder()
         .addStatement("return new $T()", builderType);
   }
 
-  MethodSpec.Builder toBuilderMethodFor(Model model, BuilderStrategy strategy) {
+  MethodSpec.Builder toBuilderMethodFor(Model model, BuilderStrategy strategy, T context) {
     TypeName builderType = this.builderTypeNameFor(model, strategy);
 
     CodeBlock body = model
         .getAttributes()
         .stream()
-        .map(this::setAttributeOnBuilderFor)
+        .map(attr -> this.setAttributeOnBuilderFor(attr, strategy))
         .reduce(CodeBlock.builder().add("return new $T()", builderType), (a, b) -> a.add(b.build()))
         .build();
 
@@ -117,58 +122,71 @@ abstract class AbstractBuilderFactory implements BuilderFactory {
         .addStatement(body);
   }
 
-  CodeBlock.Builder setAttributeOnBuilderFor(Attribute attribute) {
-    String setterName = this.builderSetterNameFor(attribute);
+  CodeBlock.Builder setAttributeOnBuilderFor(
+      Attribute attribute,
+      BuilderStrategy strategy
+  ) {
+    String setterName = this.builderSetterNameFor(attribute, strategy);
     return CodeBlock.builder().add(".$N(this.$N)", setterName, attribute.getIdentifier());
   }
 
-  TypeSpec.Builder builderTypeFor(Model model, BuilderStrategy strategy) {
-    return TypeSpec
+  TypeSpec.Builder builderTypeFor(Model model, BuilderStrategy strategy, T context) {
+    TypeSpec.Builder typeSpecBuilder = TypeSpec
         .classBuilder(strategy.getBuilderClassName())
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-        .addFields(this.builderFieldsFor(model))
-        .addMethod(this.builderConstructor().build())
-        .addMethods(this.builderSettersFor(model, strategy))
-        .addMethod(this.builderBuildFor(model, strategy).build());
+        .addMethod(this.builderConstructor(context).build())
+        .addMethod(this.builderBuildFor(model, strategy, context).build());
+
+    model.getAttributes()
+        .forEach(attr -> this.applyAttributeTo(model, strategy, attr, typeSpecBuilder, context));
+
+    return typeSpecBuilder;
   }
 
-  Iterable<FieldSpec> builderFieldsFor(Model model) {
-    return model
-        .getAttributes()
-        .stream()
-        .map(attr -> FieldSpec
-            .builder(attr.getType(), attr.getIdentifier())
-            .addModifiers(Modifier.PRIVATE)
-            .build())
-        .collect(Collectors.toList());
+  void applyAttributeTo(
+      Model model,
+      BuilderStrategy strategy,
+      Attribute attribute,
+      TypeSpec.Builder builderType,
+      T context
+  ) {
+    builderType
+        .addField(this.builderFieldFor(attribute, context).build())
+        .addMethod(this.builderSetterFor(model, attribute, strategy, context).build());
   }
 
-  Iterable<MethodSpec> builderSettersFor(Model model, BuilderStrategy strategy) {
-    return model
-        .getAttributes()
-        .stream()
-        .map(attr -> this.builderSetterFor(model, attr, strategy).build())
-        .collect(Collectors.toList());
+  FieldSpec.Builder builderFieldFor(Attribute attribute, T context) {
+    return FieldSpec
+        .builder(attribute.getType(), attribute.getIdentifier())
+        .addModifiers(Modifier.PRIVATE);
   }
 
-  MethodSpec.Builder builderSetterFor(Model model, Attribute attribute, BuilderStrategy strategy) {
+  MethodSpec.Builder builderSetterFor(
+      Model model,
+      Attribute attribute,
+      BuilderStrategy strategy,
+      T context
+  ) {
     TypeName builderTypeName = this.builderTypeNameFor(model, strategy);
-    String setterName = this.builderSetterNameFor(attribute);
+    String setterName = this.builderSetterNameFor(attribute, strategy);
     String paramName = this.builderParamNameFor(attribute);
     String fieldName = this.builderFieldNameFor(attribute);
+    ParameterSpec parameter = this.builderSetterParamFor(attribute).build();
+    CodeBlock body = this.builderSetterBodyFor(attribute, paramName, fieldName, context).build();
 
     return MethodSpec
         .methodBuilder(setterName)
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
         .returns(builderTypeName)
-        .addParameter(attribute.getType(), paramName, Modifier.FINAL)
-        .addCode(this.builderSetterBodyFor(attribute, paramName, fieldName).build());
+        .addParameter(parameter)
+        .addCode(body);
   }
 
   CodeBlock.Builder builderSetterBodyFor(
       Attribute attribute,
       String paramName,
-      String fieldName
+      String fieldName,
+      T context
   ) {
     return CodeBlock
         .builder()
@@ -176,27 +194,33 @@ abstract class AbstractBuilderFactory implements BuilderFactory {
         .addStatement("return this");
   }
 
-  MethodSpec.Builder builderBuildFor(Model model, BuilderStrategy strategy) {
+  MethodSpec.Builder builderBuildFor(Model model, BuilderStrategy strategy, T context) {
     return MethodSpec
         .methodBuilder(strategy.getBuildMethodName())
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
         .returns(model.getQualifiedName())
-        .addCode(this.builderBuildBodyFor(model).build());
+        .addCode(this.builderBuildBodyFor(model, context).build());
   }
 
-  CodeBlock.Builder builderBuildBodyFor(Model model) {
+  CodeBlock.Builder builderBuildBodyFor(Model model, T context) {
     return CodeBlock
         .builder()
         .addStatement("return new $T(this)", model.getQualifiedName());
   }
 
-  MethodSpec.Builder builderConstructor() {
+  MethodSpec.Builder builderConstructor(T context) {
     return MethodSpec
         .constructorBuilder()
         .addModifiers(Modifier.PRIVATE);
   }
 
-  TypeName builderTypeNameFor(Model model, BuilderStrategy strategy) {
+  ParameterSpec.Builder builderSetterParamFor(Attribute attribute) {
+    String paramName = this.builderParamNameFor(attribute);
+    return ParameterSpec
+        .builder(attribute.getType(), paramName, Modifier.FINAL);
+  }
+
+  ClassName builderTypeNameFor(Model model, BuilderStrategy strategy) {
     return model.getQualifiedName().nestedClass(strategy.getBuilderClassName());
   }
 
@@ -208,7 +232,7 @@ abstract class AbstractBuilderFactory implements BuilderFactory {
     return attribute.getIdentifier();
   }
 
-  String builderSetterNameFor(Attribute attribute) {
+  String builderSetterNameFor(Attribute attribute, BuilderStrategy strategy) {
     // TODO(ascopes): adjust names to avoid collisions.
     return attribute.getIdentifier();
   }

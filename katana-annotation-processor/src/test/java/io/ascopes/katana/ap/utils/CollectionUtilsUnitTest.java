@@ -71,6 +71,22 @@ class CollectionUtilsUnitTest {
   }
 
   @Test
+  void freezeMap_fails_if_null() {
+    BDDAssertions
+        .thenCode(() -> CollectionUtils.freezeMap(null))
+        .isInstanceOf(NullPointerException.class);
+  }
+
+  @ParameterizedTest
+  @MethodSource("mutableOperationsMap")
+  void freezeMap_produces_frozen_map(Consumer<Map<Object, Object>> operation) {
+    Map<Object, Object> map = CollectionUtils.freezeMap(new HashMap<>());
+    BDDAssertions
+        .thenCode(() -> operation.accept(map))
+        .isInstanceOf(UnsupportedOperationException.class);
+  }
+
+  @Test
   void freezeSortedMap_fails_if_null() {
     BDDAssertions
         .thenCode(() -> CollectionUtils.freezeSortedMap(null))

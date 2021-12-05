@@ -44,7 +44,7 @@ class BareModelIntegrationTest {
                 "",
                 "@MutableModel",
                 "@ImmutableModel",
-                "@Settings(builder = true, builderInitCheck = BuilderInitCheck.RUNTIME)",
+                "@Settings(builder = true, builderInitCheck = BuilderInitCheck.TYPESAFE)",
                 "public interface BareModel {",
                 "  String getFoo();",
                 "  int getBar();",
