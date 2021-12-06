@@ -4,7 +4,7 @@ A project that aims to provide an annotation processor for Java 8 and newer whic
 boilerplate data classes.
 
 This takes a lot of inspiration from [Project Lombok](https://projectlombok.org/)
-and [Immutables](https://immutables.github.io/), while addressing several fundemental downsides that
+and [Immutables](https://immutables.github.io/), while addressing several fundamental downsides that
 I have found from using both of these tools.
 
 The library itself is not designed to act as a replacement for
