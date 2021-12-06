@@ -1,8 +1,8 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.advices.CustomMethodAdvice;
-import io.ascopes.katana.annotations.advices.CustomMethodAdvice.This;
-import io.ascopes.katana.annotations.advices.CustomMethodAdvices;
+import io.ascopes.katana.annotations.internal.CustomMethodAdvice;
+import io.ascopes.katana.annotations.internal.CustomMethodAdvice.This;
+import io.ascopes.katana.annotations.internal.CustomMethodAdvices;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;

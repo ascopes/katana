@@ -1,4 +1,4 @@
-package io.ascopes.katana.annotations.advices;
+package io.ascopes.katana.annotations.internal;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

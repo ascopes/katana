@@ -29,7 +29,7 @@ final class BuilderStrategyFactory {
     // they can open an issue and explain it to me, and then I will probably go and scratch my
     // head over how to best deal with this for a few days, then alter the code in this method
     // to do something.... probably.
-    if (!settings.getBuilder().getValue()) {
+    if (!settings.getBuilder().getValue().isDisabled()) {
       return Optional.empty();
     }
 
@@ -40,7 +40,7 @@ final class BuilderStrategyFactory {
         .toBuilderMethodName(settings.getToBuilderMethodName().getValue())
         .builderMethodName(settings.getInitBuilderMethodName().getValue())
         .buildMethodName(settings.getBuilderBuildMethodName().getValue())
-        .builderInitCheck(settings.getBuilderInitCheck().getValue())
+        .builderType(settings.getBuilder().getValue())
         .build();
 
     return Optional.of(builderStrategy);

@@ -1,10 +1,10 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.advices.CustomMethodAdvice;
-import io.ascopes.katana.annotations.advices.CustomMethodAdvice.This;
-import io.ascopes.katana.annotations.advices.ExclusionAdvice;
-import io.ascopes.katana.annotations.advices.InclusionAdvice;
-import io.ascopes.katana.annotations.features.CustomizableAttributeFeature;
+import io.ascopes.katana.annotations.internal.CustomMethodAdvice;
+import io.ascopes.katana.annotations.internal.CustomMethodAdvice.This;
+import io.ascopes.katana.annotations.internal.CustomizableAttributeFeature;
+import io.ascopes.katana.annotations.internal.ExclusionAdvice;
+import io.ascopes.katana.annotations.internal.InclusionAdvice;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

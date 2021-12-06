@@ -1,4 +1,4 @@
-package io.ascopes.katana.annotations.features;
+package io.ascopes.katana.annotations.internal;
 
 /**
  * Extension of {@link AttributeFeature} which also supports providing custom implementations by the

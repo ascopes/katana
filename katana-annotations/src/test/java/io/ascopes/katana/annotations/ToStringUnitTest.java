@@ -1,6 +1,6 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.advices.CustomMethodAdvice.This;
+import io.ascopes.katana.annotations.internal.CustomMethodAdvice.This;
 import org.junit.jupiter.api.Nested;
 
 class ToStringUnitTest {

@@ -3,7 +3,7 @@ package io.ascopes.katana.ap.descriptors;
 import com.squareup.javapoet.TypeName;
 import io.ascopes.katana.annotations.FieldVisibility;
 import io.ascopes.katana.annotations.Visibility;
-import io.ascopes.katana.ap.descriptors.Attribute.Builder;
+import io.ascopes.katana.ap.descriptors.Attribute.AttributeBuilder;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
@@ -92,15 +92,15 @@ final class AttributeFactory {
         .ifOkFlatMap(builder -> this.processToString(builder, settings))
         .ifOkFlatMap(builder -> this.processEqualsAndHashCode(builder, settings))
         .ifOk(this::processAttributeLevelDeprecation)
-        .ifOkMap(Builder::build);
+        .ifOkMap(AttributeBuilder::build);
 
     this.logger.debug("Attribute creation for {} had result {}", attributeName, result);
 
     return result;
   }
 
-  private Result<Attribute.Builder> processFinal(
-      Attribute.Builder builder,
+  private Result<AttributeBuilder> processFinal(
+      AttributeBuilder builder,
       boolean mutable,
       @SuppressWarnings("unused") SettingsCollection settings
   ) {
@@ -108,8 +108,8 @@ final class AttributeFactory {
         .ok(builder.finalField(!mutable));
   }
 
-  private Result<Attribute.Builder> processTransience(
-      Attribute.Builder builder,
+  private Result<AttributeBuilder> processTransience(
+      AttributeBuilder builder,
       SettingsCollection settings
   ) {
     return this.featureManager
@@ -117,8 +117,8 @@ final class AttributeFactory {
         .ifOkMap(builder::transientField);
   }
 
-  private Result<Attribute.Builder> processFieldVisibility(
-      Attribute.Builder builder,
+  private Result<AttributeBuilder> processFieldVisibility(
+      AttributeBuilder builder,
       SettingsCollection settings
   ) {
     FieldVisibility fieldVisibility = builder.getGetter().getAnnotation(FieldVisibility.class);
@@ -134,8 +134,8 @@ final class AttributeFactory {
         .ok(builder.fieldVisibility(visibility));
   }
 
-  private Result<Attribute.Builder> processSetter(
-      Attribute.Builder builder,
+  private Result<AttributeBuilder> processSetter(
+      AttributeBuilder builder,
       SettingsCollection settings
   ) {
     return this.featureManager
@@ -145,8 +145,8 @@ final class AttributeFactory {
         .ifOkReplace(() -> Result.ok(builder));
   }
 
-  private Result<Attribute.Builder> processToString(
-      Attribute.Builder builder,
+  private Result<AttributeBuilder> processToString(
+      AttributeBuilder builder,
       SettingsCollection settings
   ) {
     return this.featureManager
@@ -154,8 +154,8 @@ final class AttributeFactory {
         .ifOkMap(builder::includeInToString);
   }
 
-  private Result<Attribute.Builder> processEqualsAndHashCode(
-      Attribute.Builder builder,
+  private Result<AttributeBuilder> processEqualsAndHashCode(
+      AttributeBuilder builder,
       SettingsCollection settings
   ) {
     return this.featureManager
@@ -163,7 +163,7 @@ final class AttributeFactory {
         .ifOkMap(builder::includeInEqualsAndHashCode);
   }
 
-  private void processAttributeLevelDeprecation(Attribute.Builder builder) {
+  private void processAttributeLevelDeprecation(AttributeBuilder builder) {
     TypeElement deprecatedAnnotation = this.elementUtils
         .getTypeElement(Deprecated.class.getCanonicalName());
 
@@ -174,12 +174,12 @@ final class AttributeFactory {
 
   private static final class AttributeCandidate {
 
-    private final Attribute.Builder builder;
+    private final AttributeBuilder builder;
     private final SettingsCollection settings;
     private final boolean mutableModel;
 
     private AttributeCandidate(
-        Attribute.Builder builder,
+        AttributeBuilder builder,
         SettingsCollection settings,
         boolean mutableModel
     ) {
@@ -188,7 +188,7 @@ final class AttributeFactory {
       this.mutableModel = mutableModel;
     }
 
-    public Builder getBuilder() {
+    public AttributeBuilder getBuilder() {
       return this.builder;
     }
 

@@ -1,7 +1,7 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.advices.ExclusionAdvice;
-import io.ascopes.katana.annotations.advices.InclusionAdvice;
+import io.ascopes.katana.annotations.internal.ExclusionAdvice;
+import io.ascopes.katana.annotations.internal.InclusionAdvice;
 import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;

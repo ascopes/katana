@@ -11,8 +11,8 @@ import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.WildcardTypeName
 import io.ascopes.katana.annotations.Settings
-import io.ascopes.katana.annotations.advices.ImmutableDefaultAdvice
-import io.ascopes.katana.annotations.advices.MutableDefaultAdvice
+import io.ascopes.katana.annotations.internal.ImmutableDefaultAdvice
+import io.ascopes.katana.annotations.internal.MutableDefaultAdvice
 import java.lang.annotation.Annotation
 import java.lang.reflect.Method
 import java.nio.file.Path

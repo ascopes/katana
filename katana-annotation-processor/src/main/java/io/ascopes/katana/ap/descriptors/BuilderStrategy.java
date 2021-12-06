@@ -1,6 +1,6 @@
 package io.ascopes.katana.ap.descriptors;
 
-import io.ascopes.katana.annotations.BuilderInitCheck;
+import io.ascopes.katana.annotations.Builder;
 import io.ascopes.katana.ap.utils.ObjectBuilder;
 import io.ascopes.katana.ap.utils.StringUtils;
 import java.util.Objects;
@@ -20,15 +20,15 @@ public final class BuilderStrategy {
   private final String toBuilderMethodName;
   private final String builderMethodName;
   private final String buildMethodName;
-  private final BuilderInitCheck builderInitCheck;
+  private final Builder builderType;
 
-  private BuilderStrategy(Builder builder) {
+  private BuilderStrategy(BuilderStrategyBuilder builder) {
     this.builderClassName = Objects.requireNonNull(builder.builderClassName);
     this.toBuilderMethodEnabled = Objects.requireNonNull(builder.toBuilderMethodEnabled);
     this.toBuilderMethodName = Objects.requireNonNull(builder.toBuilderMethodName);
     this.builderMethodName = Objects.requireNonNull(builder.builderMethodName);
     this.buildMethodName = Objects.requireNonNull(builder.buildMethodName);
-    this.builderInitCheck = Objects.requireNonNull(builder.builderInitCheck);
+    this.builderType = Objects.requireNonNull(builder.builderType);
   }
 
   /**
@@ -77,12 +77,12 @@ public final class BuilderStrategy {
   }
 
   /**
-   * Get the initialization checking strategy to use.
+   * Get the type of builder to use.
    *
-   * @return the initialization checking strategy;
+   * @return the type of builder to use.
    */
-  public BuilderInitCheck getBuilderInitCheck() {
-    return this.builderInitCheck;
+  public Builder getBuilderType() {
+    return this.builderType;
   }
 
   /**
@@ -96,7 +96,7 @@ public final class BuilderStrategy {
         + "toBuilderMethodName=" + StringUtils.quoted(this.toBuilderMethodName) + ", "
         + "builderMethodName=" + StringUtils.quoted(this.builderMethodName) + ", "
         + "buildMethodName=" + StringUtils.quoted(this.buildMethodName) + ", "
-        + "builderInitCheck=" + this.builderInitCheck
+        + "builderInitCheck=" + this.builderType
         + '}';
   }
 
@@ -105,24 +105,24 @@ public final class BuilderStrategy {
    *
    * @return the new builder.
    */
-  public static Builder builder() {
-    return new Builder();
+  public static BuilderStrategyBuilder builder() {
+    return new BuilderStrategyBuilder();
   }
 
   /**
    * A builder for {@link BuilderStrategy} descriptors..
    */
   @MustCall("build")
-  public static final class Builder implements ObjectBuilder<BuilderStrategy> {
+  public static final class BuilderStrategyBuilder implements ObjectBuilder<BuilderStrategy> {
 
     private @MonotonicNonNull String builderClassName;
     private @MonotonicNonNull Boolean toBuilderMethodEnabled;
     private @MonotonicNonNull String toBuilderMethodName;
     private @MonotonicNonNull String buildMethodName;
     private @MonotonicNonNull String builderMethodName;
-    private @MonotonicNonNull BuilderInitCheck builderInitCheck;
+    private @MonotonicNonNull Builder builderType;
 
-    private Builder() {
+    private BuilderStrategyBuilder() {
     }
 
     /**
@@ -131,7 +131,7 @@ public final class BuilderStrategy {
      * @param builderClassName the name of the builder type.
      * @return this builder.
      */
-    public Builder builderClassName(String builderClassName) {
+    public BuilderStrategyBuilder builderClassName(String builderClassName) {
       this.builderClassName = Objects.requireNonNull(builderClassName);
       return this;
     }
@@ -142,7 +142,7 @@ public final class BuilderStrategy {
      * @param toBuilderMethodEnabled true if the toBuilder method is enabled, false otherwise.
      * @return this builder.
      */
-    public Builder toBuilderMethodEnabled(Boolean toBuilderMethodEnabled) {
+    public BuilderStrategyBuilder toBuilderMethodEnabled(Boolean toBuilderMethodEnabled) {
       this.toBuilderMethodEnabled = Objects.requireNonNull(toBuilderMethodEnabled);
       return this;
     }
@@ -153,7 +153,7 @@ public final class BuilderStrategy {
      * @param toBuilderMethodName the name of the toBuilder method.
      * @return this builder.
      */
-    public Builder toBuilderMethodName(String toBuilderMethodName) {
+    public BuilderStrategyBuilder toBuilderMethodName(String toBuilderMethodName) {
       this.toBuilderMethodName = Objects.requireNonNull(toBuilderMethodName);
       return this;
     }
@@ -164,7 +164,7 @@ public final class BuilderStrategy {
      * @param builderMethodName the name of the builder method.
      * @return this builder.
      */
-    public Builder builderMethodName(String builderMethodName) {
+    public BuilderStrategyBuilder builderMethodName(String builderMethodName) {
       this.builderMethodName = Objects.requireNonNull(builderMethodName);
       return this;
     }
@@ -175,19 +175,19 @@ public final class BuilderStrategy {
      * @param buildMethodName the name of the build method.
      * @return this builder.
      */
-    public Builder buildMethodName(String buildMethodName) {
+    public BuilderStrategyBuilder buildMethodName(String buildMethodName) {
       this.buildMethodName = Objects.requireNonNull(buildMethodName);
       return this;
     }
 
     /**
-     * Set the initialization checking strategy for the builder.
+     * Set the type of builder to use.
      *
-     * @param builderInitCheck the strategy to use.
+     * @param builderType the type of builder to use.
      * @return this builder.
      */
-    public Builder builderInitCheck(BuilderInitCheck builderInitCheck) {
-      this.builderInitCheck = Objects.requireNonNull(builderInitCheck);
+    public BuilderStrategyBuilder builderType(Builder builderType) {
+      this.builderType = Objects.requireNonNull(builderType);
       return this;
     }
 

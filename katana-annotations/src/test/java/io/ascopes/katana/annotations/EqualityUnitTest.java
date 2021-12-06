@@ -1,13 +1,7 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.advices.CustomMethodAdvice;
-import io.ascopes.katana.annotations.advices.CustomMethodAdvice.This;
-import io.ascopes.katana.annotations.advices.CustomMethodAdvices;
-import org.assertj.core.api.BDDAssertions;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
+import io.ascopes.katana.annotations.internal.CustomMethodAdvice.This;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 
 class EqualityUnitTest {
 

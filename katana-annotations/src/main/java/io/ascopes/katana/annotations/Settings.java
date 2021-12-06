@@ -1,7 +1,7 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.advices.ImmutableDefaultAdvice;
-import io.ascopes.katana.annotations.advices.MutableDefaultAdvice;
+import io.ascopes.katana.annotations.internal.ImmutableDefaultAdvice;
+import io.ascopes.katana.annotations.internal.MutableDefaultAdvice;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -127,11 +127,11 @@ public @interface Settings {
   /////////////////////////////////////
 
   /**
-   * True if a builder should be added.
+   * The builder implementation to use.
    *
-   * @return true or false.
+   * @return the builder implementation to use.
    */
-  boolean builder() default false;
+  Builder builder() default Builder.DISABLED;
 
   /**
    * The name to give the builder, if enabled. Ignored if {@link #builder()} is false.
@@ -148,16 +148,8 @@ public @interface Settings {
   String builderBuildMethodName() default "build";
 
   /**
-   * How to check for uninitialized required attributes. This is ignored if {@link #builder()} is
-   * false.
-   *
-   * @return the initialization checking strategy to use.
-   */
-  BuilderInitCheck builderInitCheck() default BuilderInitCheck.NONE;
-
-  /**
-   * Name of the builder initialization method that is defined on the generated model type. This
-   * is ignored if {@link #builder()} is false.
+   * Name of the builder initialization method that is defined on the generated model type. This is
+   * ignored if {@link #builder()} is false.
    *
    * @return the builder initialization method name.
    */

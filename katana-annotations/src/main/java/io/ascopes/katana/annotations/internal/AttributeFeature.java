@@ -1,4 +1,4 @@
-package io.ascopes.katana.annotations.features;
+package io.ascopes.katana.annotations.internal;
 
 /**
  * Interface for a descriptor describing a feature on an attribute.
@@ -6,7 +6,7 @@ package io.ascopes.katana.annotations.features;
  * @author Ashley Scopes
  * @since 0.0.1
  */
-public interface AttributeFeature {
+public interface AttributeFeature extends Feature {
 
   /**
    * Determine whether the attribute feature would include all attributes implicitly
@@ -25,15 +25,6 @@ public interface AttributeFeature {
    * @return true if the value represents "exclude all".
    */
   default boolean isExcludeAll() {
-    return false;
-  }
-
-  /**
-   * Determine whether the attribute feature would be explicitly skipped.
-   *
-   * @return true if the value represents "disabled".
-   */
-  default boolean isDisabled() {
     return false;
   }
 }

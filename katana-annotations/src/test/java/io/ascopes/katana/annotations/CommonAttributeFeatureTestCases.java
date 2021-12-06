@@ -1,7 +1,7 @@
 package io.ascopes.katana.annotations;
 
-import io.ascopes.katana.annotations.features.AttributeFeature;
-import io.ascopes.katana.annotations.features.CustomizableAttributeFeature;
+import io.ascopes.katana.annotations.internal.AttributeFeature;
+import io.ascopes.katana.annotations.internal.CustomizableAttributeFeature;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;

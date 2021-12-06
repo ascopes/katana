@@ -19,7 +19,7 @@ An example of what to expect from this library:
 ```java
 @ImmutableModel
 @Settings(
-        builder = true,
+        builder = Builder.SIMPLE,
         equalityMode = Equality.EXCLUDE_ALL    // default is to consider all fields for equality.
 )
 public interface JsonWebToken {

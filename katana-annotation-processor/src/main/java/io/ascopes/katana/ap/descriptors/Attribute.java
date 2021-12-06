@@ -34,7 +34,7 @@ public final class Attribute {
   // Nullable fields
   private final @Nullable AnnotationMirror deprecatedAnnotation;
 
-  private Attribute(Builder builder) {
+  private Attribute(AttributeBuilder builder) {
     this.name = Objects.requireNonNull(builder.name);
     this.identifier = Objects.requireNonNull(builder.identifier);
     this.type = Objects.requireNonNull(builder.type);
@@ -141,8 +141,8 @@ public final class Attribute {
    * @return the builder.
    */
   @MustCall("build")
-  public static Builder builder() {
-    return new Builder();
+  public static AttributeBuilder builder() {
+    return new AttributeBuilder();
   }
 
   /**
@@ -150,7 +150,7 @@ public final class Attribute {
    */
   @SuppressWarnings("UnusedReturnValue")
   @MustCall("build")
-  public static final class Builder implements ObjectBuilder<Attribute> {
+  public static final class AttributeBuilder implements ObjectBuilder<Attribute> {
 
     private @MonotonicNonNull String name;
     private @MonotonicNonNull String identifier;
@@ -166,7 +166,7 @@ public final class Attribute {
     // Nullable fields
     private @Nullable AnnotationMirror deprecatedAnnotation;
 
-    private Builder() {
+    private AttributeBuilder() {
     }
 
     /**
@@ -184,7 +184,7 @@ public final class Attribute {
      * @param getter the getter to override.
      * @return this builder.
      */
-    public Builder getter(ExecutableElement getter) {
+    public AttributeBuilder getter(ExecutableElement getter) {
       this.getter = Objects.requireNonNull(getter);
       return this;
     }
@@ -204,7 +204,7 @@ public final class Attribute {
      * @param name the name of the attribute.
      * @return this builder.
      */
-    public Builder name(String name) {
+    public AttributeBuilder name(String name) {
       this.name = Objects.requireNonNull(name);
       return this;
     }
@@ -215,7 +215,7 @@ public final class Attribute {
      * @param identifier the identifier for the attribute field.
      * @return this builder.
      */
-    public Builder identifier(String identifier) {
+    public AttributeBuilder identifier(String identifier) {
       this.identifier = Objects.requireNonNull(identifier);
       return this;
     }
@@ -226,7 +226,7 @@ public final class Attribute {
      * @param type the type name for the attribute.
      * @return this builder.
      */
-    public Builder type(TypeName type) {
+    public AttributeBuilder type(TypeName type) {
       this.type = Objects.requireNonNull(type);
       return this;
     }
@@ -237,7 +237,7 @@ public final class Attribute {
      * @param fieldVisibility the visibility for the field.
      * @return this builder.
      */
-    public Builder fieldVisibility(Visibility fieldVisibility) {
+    public AttributeBuilder fieldVisibility(Visibility fieldVisibility) {
       this.fieldVisibility = Objects.requireNonNull(fieldVisibility);
       return this;
     }
@@ -248,7 +248,7 @@ public final class Attribute {
      * @param finalField whether the field is final or not.
      * @return this builder.
      */
-    public Builder finalField(Boolean finalField) {
+    public AttributeBuilder finalField(Boolean finalField) {
       this.finalField = Objects.requireNonNull(finalField);
       return this;
     }
@@ -259,7 +259,7 @@ public final class Attribute {
      * @param transientField whether the field is transient or not.
      * @return this builder.
      */
-    public Builder transientField(Boolean transientField) {
+    public AttributeBuilder transientField(Boolean transientField) {
       this.transientField = Objects.requireNonNull(transientField);
       return this;
     }
@@ -270,7 +270,7 @@ public final class Attribute {
      * @param setterEnabled whether the field has a setter or not.
      * @return this builder.
      */
-    public Builder setterEnabled(Boolean setterEnabled) {
+    public AttributeBuilder setterEnabled(Boolean setterEnabled) {
       this.setterEnabled = Objects.requireNonNull(setterEnabled);
       return this;
     }
@@ -281,7 +281,7 @@ public final class Attribute {
      * @param includeInToString whether this attribute is included in a toString or not.
      * @return this builder.
      */
-    public Builder includeInToString(Boolean includeInToString) {
+    public AttributeBuilder includeInToString(Boolean includeInToString) {
       this.includeInToString = Objects.requireNonNull(includeInToString);
       return this;
     }
@@ -293,7 +293,7 @@ public final class Attribute {
      *                                   hashCode or not.
      * @return this builder.
      */
-    public Builder includeInEqualsAndHashCode(Boolean includeInEqualsAndHashCode) {
+    public AttributeBuilder includeInEqualsAndHashCode(Boolean includeInEqualsAndHashCode) {
       this.includeInEqualsAndHashCode = Objects.requireNonNull(includeInEqualsAndHashCode);
       return this;
     }
@@ -304,7 +304,7 @@ public final class Attribute {
      * @param deprecatedAnnotation the nullable deprecated annotation.
      * @return this builder.
      */
-    public Builder deprecatedAnnotation(@Nullable AnnotationMirror deprecatedAnnotation) {
+    public AttributeBuilder deprecatedAnnotation(@Nullable AnnotationMirror deprecatedAnnotation) {
       this.deprecatedAnnotation = deprecatedAnnotation;
       return this;
     }

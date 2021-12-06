@@ -52,13 +52,13 @@ final class DelegatingBuilderFactory implements BuilderFactory<@Nullable Void> {
     //noinspection ConstantConditions
     assert context == null : "Unexpected context parameter passed";
 
-    switch (strategy.getBuilderInitCheck()) {
+    switch (strategy.getBuilderType()) {
 
-      case NONE:
+      case SIMPLE:
         this.logger.trace("Creating simple unchecked builder");
         return this.simpleBuilderFactory.create(model, strategy, context);
 
-      case RUNTIME: {
+      case RUNTIME_CHECKED: {
         this.logger.trace("Creating runtime initialization-checked builder");
         SortedSet<Attribute> requiredAttributes = this.requiredAttributes(model);
         InitTracker initTracker = this.initTrackerFactory.create(requiredAttributes);
