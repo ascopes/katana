@@ -137,7 +137,7 @@ public final class Result<T> {
     if (this.isOk()) {
       Result<?> next = then.apply(this.unwrap());
       if (!next.isOk()) {
-        return castFailedOrIgnored(next);
+        return castFailed(next);
       }
     }
 
@@ -157,7 +157,7 @@ public final class Result<T> {
     this.assertNotCleared();
     return this.isOk()
         ? then.andThen(Result::ok).apply(this.unwrap())
-        : castFailedOrIgnored(this);
+        : castFailed(this);
   }
 
   /**
@@ -172,7 +172,7 @@ public final class Result<T> {
     this.assertNotCleared();
     return this.isOk()
         ? Objects.requireNonNull(then.apply(this.unwrap()))
-        : castFailedOrIgnored(this);
+        : castFailed(this);
   }
 
   /**
@@ -187,7 +187,22 @@ public final class Result<T> {
     Objects.requireNonNull(then);
     return this.isOk()
         ? Objects.requireNonNull(then.get())
-        : castFailedOrIgnored(this);
+        : castFailed(this);
+  }
+
+
+  /**
+   * If the result is OK, then drop the value.
+   *
+   * <p>Acts as a cast to {@code Result<Void>} from any other generic result type.
+   *
+   * @return the result, emptied if OK. If failed, the result is just cast.
+   */
+  public Result<Void> ifOkDiscard() {
+    // TODO(ascopes): unit test
+    return this.isOk()
+        ? ok()
+        : castFailed(this);
   }
 
 
@@ -281,7 +296,7 @@ public final class Result<T> {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T> Result<T> castFailedOrIgnored(Result<?> result) {
+  private static <T> Result<T> castFailed(Result<?> result) {
     assert result.isNotOk();
     // Type erasure is a beautiful thing sometimes.
     return (Result<T>) result;

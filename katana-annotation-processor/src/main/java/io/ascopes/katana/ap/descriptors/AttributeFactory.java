@@ -59,133 +59,153 @@ final class AttributeFactory {
   ) {
     return methodClassification
         .getGetters()
-        .keySet()
+        .entrySet()
         .stream()
-        .map(attr -> this.buildFor(attr, methodClassification, mutable, settings));
+        .map(pair -> this.createSingle(new AttributeCandidate(
+            pair.getKey(),
+            Attribute.builder(),
+            pair.getValue(),
+            settings,
+            mutable
+        )));
   }
 
-  private Result<Attribute> buildFor(
-      String attributeName,
-      MethodClassification methodClassification,
-      boolean mutable,
-      SettingsCollection settings
-  ) {
-    // Expect this to always be present.
-    ExecutableElement getter = Objects
-        .requireNonNull(methodClassification.getGetters().get(attributeName));
+  private Result<Attribute> createSingle(AttributeCandidate candidate) {
+
+    ExecutableElement getter = candidate.getGetter();
     TypeName typeName = TypeName.get(getter.getReturnType());
 
     // Ensure we have a valid identifier.
-    String identifierName = NamingUtils.transmogrifyIdentifier(attributeName);
+    String name = candidate.getName();
+    String identifierName = NamingUtils.transmogrifyIdentifier(name);
 
-    Result<Attribute> result = Result
-        .ok(Attribute
-            .builder()
-            .name(attributeName)
-            .identifier(identifierName)
-            .type(typeName)
-            .getter(getter))
-        .ifOkFlatMap(builder -> this.processFinal(builder, mutable, settings))
-        .ifOkFlatMap(builder -> this.processTransience(builder, settings))
-        .ifOkFlatMap(builder -> this.processFieldVisibility(builder, settings))
-        .ifOkFlatMap(builder -> this.processSetter(builder, settings))
-        .ifOkFlatMap(builder -> this.processToString(builder, settings))
-        .ifOkFlatMap(builder -> this.processEqualsAndHashCode(builder, settings))
-        .ifOk(this::processAttributeLevelDeprecation)
-        .ifOkMap(AttributeBuilder::build);
+    candidate
+        .getBuilder()
+        .name(name)
+        .identifier(identifierName)
+        .type(typeName)
+        .getter(getter);
 
-    this.logger.debug("Attribute creation for {} had result {}", attributeName, result);
-
-    return result;
-  }
-
-  private Result<AttributeBuilder> processFinal(
-      AttributeBuilder builder,
-      boolean mutable,
-      @SuppressWarnings("unused") SettingsCollection settings
-  ) {
     return Result
-        .ok(builder.finalField(!mutable));
+        .ok(candidate)
+        .ifOkCheck(this::processFinal)
+        .ifOkCheck(this::processTransience)
+        .ifOkCheck(this::processFieldVisibility)
+        .ifOkCheck(this::processSetter)
+        .ifOkCheck(this::processEqualsAndHashCode)
+        .ifOkCheck(this::processToStringInclusion)
+        .ifOkCheck(this::processAttributeLevelDeprecation)
+        .ifOkMap(AttributeCandidate::getBuilder)
+        .ifOkMap(AttributeBuilder::build)
+        .ifOk(attr -> this.logger.debug("Attribute creation for {} had result {}", name, attr));
   }
 
-  private Result<AttributeBuilder> processTransience(
-      AttributeBuilder builder,
-      SettingsCollection settings
-  ) {
+  private Result<Void> processFinal(AttributeCandidate candidate) {
+    candidate.getBuilder().finalField(candidate.isMutableModel());
+    return Result.ok();
+  }
+
+  private Result<Void> processTransience(AttributeCandidate candidate) {
     return this.featureManager
-        .checkInclusion(builder.getName(), settings.getFieldTransience(), builder.getGetter())
-        .ifOkMap(builder::transientField);
+        .checkInclusion(
+            candidate.getName(),
+            candidate.getSettings().getFieldTransience(),
+            candidate.getGetter()
+        )
+        .ifOk(candidate.getBuilder()::transientField)
+        .ifOkDiscard();
   }
 
-  private Result<AttributeBuilder> processFieldVisibility(
-      AttributeBuilder builder,
-      SettingsCollection settings
-  ) {
-    FieldVisibility fieldVisibility = builder.getGetter().getAnnotation(FieldVisibility.class);
+  private Result<Void> processFieldVisibility(AttributeCandidate candidate) {
+    FieldVisibility fieldVisibility = candidate.getGetter().getAnnotation(FieldVisibility.class);
     Visibility visibility;
 
     if (fieldVisibility == null) {
-      visibility = settings.getFieldVisibility().getValue();
+      visibility = candidate.getSettings().getFieldVisibility().getValue();
     } else {
       visibility = fieldVisibility.value();
     }
 
-    return Result
-        .ok(builder.fieldVisibility(visibility));
+    candidate.getBuilder().fieldVisibility(visibility);
+
+    return Result.ok();
   }
 
-  private Result<AttributeBuilder> processSetter(
-      AttributeBuilder builder,
-      SettingsCollection settings
-  ) {
+  private Result<Void> processSetter(AttributeCandidate candidate) {
     return this.featureManager
-        .checkInclusion(builder.getName(), settings.getSetters(), builder.getGetter())
-        .ifOk(builder::setterEnabled)
+        .checkInclusion(
+            candidate.getName(),
+            candidate.getSettings().getSetters(),
+            candidate.getGetter()
+        )
+        .ifOk(candidate.getBuilder()::setterEnabled)
         // TODO(ascopes): allow overriding explicitly defined setters in the future
-        .ifOkReplace(() -> Result.ok(builder));
+        .ifOkDiscard();
   }
 
-  private Result<AttributeBuilder> processToString(
-      AttributeBuilder builder,
-      SettingsCollection settings
-  ) {
+  private Result<Void> processEqualsAndHashCode(AttributeCandidate candidate) {
+    // This doesn't make any difference if we have a custom equality pair provided.
     return this.featureManager
-        .checkInclusion(builder.getName(), settings.getToStringMode(), builder.getGetter())
-        .ifOkMap(builder::includeInToString);
+        .checkInclusion(
+            candidate.getName(),
+            candidate.getSettings().getEqualityMode(),
+            candidate.getGetter()
+        )
+        .ifOk(candidate.getBuilder()::includeInEqualsAndHashCode)
+        .ifOkDiscard();
   }
 
-  private Result<AttributeBuilder> processEqualsAndHashCode(
-      AttributeBuilder builder,
-      SettingsCollection settings
-  ) {
+  private Result<Void> processToStringInclusion(AttributeCandidate candidate) {
+    // This doesn't make any difference if we have a custom toString provided.
     return this.featureManager
-        .checkInclusion(builder.getName(), settings.getEqualityMode(), builder.getGetter())
-        .ifOkMap(builder::includeInEqualsAndHashCode);
+        .checkInclusion(
+            candidate.getName(),
+            candidate.getSettings().getToStringMode(),
+            candidate.getGetter()
+        )
+        .ifOk(candidate.getBuilder()::includeInToString)
+        .ifOkDiscard();
   }
 
-  private void processAttributeLevelDeprecation(AttributeBuilder builder) {
+  private Result<Void> processAttributeLevelDeprecation(AttributeCandidate candidate) {
     TypeElement deprecatedAnnotation = this.elementUtils
         .getTypeElement(Deprecated.class.getCanonicalName());
 
     AnnotationUtils
-        .findAnnotationMirror(builder.getGetter(), deprecatedAnnotation)
-        .ifPresent(builder::deprecatedAnnotation);
+        .findAnnotationMirror(candidate.getGetter(), deprecatedAnnotation)
+        .ifPresent(candidate.getBuilder()::deprecatedAnnotation);
+
+    return Result.ok();
   }
 
   private static final class AttributeCandidate {
 
+    private final String name;
     private final AttributeBuilder builder;
+    private final ExecutableElement getter;
     private final SettingsCollection settings;
     private final boolean mutableModel;
 
     private AttributeCandidate(
+        String name,
         AttributeBuilder builder,
+        ExecutableElement getter,
         SettingsCollection settings,
         boolean mutableModel
     ) {
-      this.builder = builder;
-      this.settings = settings;
+      this.name = Objects.requireNonNull(name);
+      this.builder = Objects.requireNonNull(builder);
+      this.getter = Objects.requireNonNull(getter);
+      this.settings = Objects.requireNonNull(settings);
       this.mutableModel = mutableModel;
+    }
+
+    public String getName() {
+      return this.name;
+    }
+
+    public ExecutableElement getGetter() {
+      return this.getter;
     }
 
     public AttributeBuilder getBuilder() {

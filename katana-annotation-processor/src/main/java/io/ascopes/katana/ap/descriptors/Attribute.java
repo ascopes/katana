@@ -114,6 +114,29 @@ public final class Attribute {
   }
 
   /**
+   * Determine whether this attribute should be included in the generated equals and hashcode
+   * methods.
+   *
+   * <p>This is meaningless if generation is disabled or set to use a custom method.
+   *
+   * @return true if included, false if excluded.
+   */
+  public boolean getIncludeInEqualsAndHashCode() {
+    return this.includeInEqualsAndHashCode;
+  }
+
+  /**
+   * Determine whether this attribute should be included in the generated toString method.
+   *
+   * <p>This is meaningless if generation is disabled or set to use a custom method.
+   *
+   * @return true if included, false if excluded.
+   */
+  public boolean getIncludeInToStrnig() {
+    return this.includeInToString;
+  }
+
+  /**
    * Get the deprecated annotation from the overridden getter, if it is present.
    *
    * @return the deprecated annotation, or an empty optional if not present.
@@ -170,15 +193,6 @@ public final class Attribute {
     }
 
     /**
-     * Get the getter in the builder.
-     *
-     * @return the getter in the builder.
-     */
-    ExecutableElement getGetter() {
-      return Objects.requireNonNull(this.getter);
-    }
-
-    /**
      * Set the getter to override.
      *
      * @param getter the getter to override.
@@ -187,15 +201,6 @@ public final class Attribute {
     public AttributeBuilder getter(ExecutableElement getter) {
       this.getter = Objects.requireNonNull(getter);
       return this;
-    }
-
-    /**
-     * Get the name in the builder.
-     *
-     * @return the name in the builder.
-     */
-    String getName() {
-      return Objects.requireNonNull(this.name);
     }
 
     /**
