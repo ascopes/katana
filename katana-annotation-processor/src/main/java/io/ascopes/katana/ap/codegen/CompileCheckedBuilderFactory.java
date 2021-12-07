@@ -10,6 +10,7 @@ import com.squareup.javapoet.TypeSpec;
 import io.ascopes.katana.ap.codegen.Stages.DedicatedStage;
 import io.ascopes.katana.ap.codegen.Stages.FinalStage;
 import io.ascopes.katana.ap.codegen.Stages.Stage;
+import io.ascopes.katana.ap.codegen.TypeSpecMembers.TypeSpecMembersBuilder;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.BuilderStrategy;
 import io.ascopes.katana.ap.descriptors.Model;
@@ -32,23 +33,23 @@ import javax.lang.model.element.Modifier;
 final class CompileCheckedBuilderFactory extends AbstractBuilderFactory<Stages> {
 
   @Override
-  TypeSpecMembers.Builder createMembersFor(
+  TypeSpecMembersBuilder createMembersFor(
       Model model,
       BuilderStrategy strategy,
       Stages context
   ) {
-    TypeSpecMembers.Builder builder = super.createMembersFor(model, strategy, context);
-
-    builder.type(this.createFinalStageFor(model, strategy, context.getFinalStage()).build());
+    TypeSpecMembersBuilder membersBuilder = super.createMembersFor(model, strategy, context);
+    TypeSpec type = this.createFinalStageFor(model, strategy, context.getFinalStage()).build();
+    membersBuilder.type(type);
 
     context
         .dedicatedStageIterator()
         .stream()
         .map(stage -> this.dedicatedStageFor(model, strategy, stage))
         .map(TypeSpec.Builder::build)
-        .forEach(builder::type);
+        .forEach(membersBuilder::type);
 
-    return builder;
+    return membersBuilder;
   }
 
   @Override

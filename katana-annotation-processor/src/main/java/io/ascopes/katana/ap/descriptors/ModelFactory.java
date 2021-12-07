@@ -8,7 +8,7 @@ import io.ascopes.katana.annotations.ToString;
 import io.ascopes.katana.annotations.ToString.CustomToString;
 import io.ascopes.katana.ap.descriptors.EqualityStrategy.CustomEqualityStrategy;
 import io.ascopes.katana.ap.descriptors.EqualityStrategy.GeneratedEqualityStrategy;
-import io.ascopes.katana.ap.descriptors.Model.Builder;
+import io.ascopes.katana.ap.descriptors.Model.ModelBuilder;
 import io.ascopes.katana.ap.descriptors.ToStringStrategy.CustomToStringStrategy;
 import io.ascopes.katana.ap.descriptors.ToStringStrategy.GeneratedToStringStrategy;
 import io.ascopes.katana.ap.logging.Diagnostics;
@@ -125,7 +125,7 @@ public final class ModelFactory {
         .ifOkCheck(this::setToStringStrategy)
         .ifOkCheck(this::setIndent)
         .ifOkMap(ModelCandidate::getBuilder)
-        .ifOkMap(Builder::build);
+        .ifOkMap(ModelBuilder::build);
 
     this.logger.debug("Model creation had result {}", result);
 
@@ -250,14 +250,14 @@ public final class ModelFactory {
     this.logger.trace("Setting constructors for candidate");
 
     SettingsCollection settings = candidate.getSettings();
-    Builder builder = candidate.getBuilder();
+    ModelBuilder modelBuilder = candidate.getBuilder();
 
     if (settings.getCopyConstructor().getValue()) {
-      this.addConstructor(builder, Constructor.COPY);
+      this.addConstructor(modelBuilder, Constructor.COPY);
     }
 
     if (settings.getAllArgsConstructor().getValue()) {
-      this.addConstructor(builder, Constructor.ALL_ARGS);
+      this.addConstructor(modelBuilder, Constructor.ALL_ARGS);
     }
 
     if (settings.getDefaultArgsConstructor().getValue()) {
@@ -266,15 +266,15 @@ public final class ModelFactory {
           ? Constructor.NO_ARGS
           : Constructor.ALL_ARGS;
 
-      this.addConstructor(builder, constructor);
+      this.addConstructor(modelBuilder, constructor);
     }
 
     return Result.ok();
   }
 
-  private void addConstructor(Model.Builder builder, Constructor constructor) {
+  private void addConstructor(ModelBuilder modelBuilder, Constructor constructor) {
     this.logger.trace("Will implement {} constructor", constructor);
-    builder.constructor(constructor);
+    modelBuilder.constructor(constructor);
   }
 
   private Result<Void> setBuilderStrategy(ModelCandidate candidate) {
@@ -456,7 +456,7 @@ public final class ModelFactory {
    */
   private static final class ModelCandidate {
 
-    private final Builder builder;
+    private final ModelBuilder modelBuilder;
     private final TypeElement interfaceType;
     private final SettingsCollection settings;
     private final AnnotationMirror mirror;
@@ -464,14 +464,14 @@ public final class ModelFactory {
     private final MethodClassification methodClassification;
 
     public ModelCandidate(
-        Builder builder,
+        ModelBuilder modelBuilder,
         TypeElement interfaceType,
         SettingsCollection settings,
         AnnotationMirror mirror,
         boolean mutable,
         MethodClassification methodClassification
     ) {
-      this.builder = Objects.requireNonNull(builder);
+      this.modelBuilder = Objects.requireNonNull(modelBuilder);
       this.interfaceType = Objects.requireNonNull(interfaceType);
       this.settings = Objects.requireNonNull(settings);
       this.mirror = Objects.requireNonNull(mirror);
@@ -479,8 +479,8 @@ public final class ModelFactory {
       this.methodClassification = Objects.requireNonNull(methodClassification);
     }
 
-    public Builder getBuilder() {
-      return this.builder;
+    public ModelBuilder getBuilder() {
+      return this.modelBuilder;
     }
 
     public TypeElement getInterfaceType() {

@@ -40,22 +40,22 @@ public final class Model {
   private final @Nullable ToStringStrategy toStringStrategy;
   private final @Nullable AnnotationMirror deprecatedAnnotation;
 
-  private Model(Builder builder) {
-    this.packageName = Objects.requireNonNull(builder.packageName);
-    this.className = Objects.requireNonNull(builder.className);
-    this.superInterface = Objects.requireNonNull(builder.superInterface);
-    this.indent = Objects.requireNonNull(builder.indent);
-    this.setterPrefix = Objects.requireNonNull(builder.setterPrefix);
+  private Model(ModelBuilder modelBuilder) {
+    this.packageName = Objects.requireNonNull(modelBuilder.packageName);
+    this.className = Objects.requireNonNull(modelBuilder.className);
+    this.superInterface = Objects.requireNonNull(modelBuilder.superInterface);
+    this.indent = Objects.requireNonNull(modelBuilder.indent);
+    this.setterPrefix = Objects.requireNonNull(modelBuilder.setterPrefix);
 
     // Collection attributes.
-    this.constructors = CollectionUtils.freezeSet(builder.constructors);
-    this.attributes = CollectionUtils.freezeSortedSet(builder.attributes);
+    this.constructors = CollectionUtils.freezeSet(modelBuilder.constructors);
+    this.attributes = CollectionUtils.freezeSortedSet(modelBuilder.attributes);
 
     // Nullable attributes.
-    this.builderStrategy = builder.builderStrategy;
-    this.equalityStrategy = builder.equalityStrategy;
-    this.toStringStrategy = builder.toStringStrategy;
-    this.deprecatedAnnotation = builder.deprecatedAnnotation;
+    this.builderStrategy = modelBuilder.builderStrategy;
+    this.equalityStrategy = modelBuilder.equalityStrategy;
+    this.toStringStrategy = modelBuilder.toStringStrategy;
+    this.deprecatedAnnotation = modelBuilder.deprecatedAnnotation;
   }
 
   /**
@@ -196,8 +196,8 @@ public final class Model {
    * @return the builder.
    */
   @MustCall("build")
-  public static Builder builder() {
-    return new Builder();
+  public static ModelBuilder builder() {
+    return new ModelBuilder();
   }
 
   /**
@@ -205,7 +205,7 @@ public final class Model {
    */
   @SuppressWarnings("UnusedReturnValue")
   @MustCall("build")
-  public static final class Builder implements ObjectBuilder<Model> {
+  public static final class ModelBuilder implements ObjectBuilder<Model> {
 
     private final Set<Constructor> constructors;
     private final SortedSet<Attribute> attributes;
@@ -222,7 +222,7 @@ public final class Model {
     private @Nullable ToStringStrategy toStringStrategy;
     private @Nullable AnnotationMirror deprecatedAnnotation;
 
-    private Builder() {
+    private ModelBuilder() {
       this.constructors = new HashSet<>();
       this.attributes = new TreeSet<>(Comparator.comparing(Attribute::getName));
     }
@@ -235,7 +235,7 @@ public final class Model {
      * @param packageName the package name to set.
      * @return this builder.
      */
-    public Builder packageName(String packageName) {
+    public ModelBuilder packageName(String packageName) {
       this.packageName = Objects.requireNonNull(packageName);
       return this;
     }
@@ -246,7 +246,7 @@ public final class Model {
      * @param className the class name to set.
      * @return this builder.
      */
-    public Builder className(String className) {
+    public ModelBuilder className(String className) {
       this.className = Objects.requireNonNull(className);
       return this;
     }
@@ -257,7 +257,7 @@ public final class Model {
      * @param superInterface the super-interface.
      * @return this builder.
      */
-    public Builder superInterface(TypeElement superInterface) {
+    public ModelBuilder superInterface(TypeElement superInterface) {
       this.superInterface = Objects.requireNonNull(superInterface);
       return this;
     }
@@ -268,7 +268,7 @@ public final class Model {
      * @param attribute the attribute to add.
      * @return this builder.
      */
-    public Builder attribute(Attribute attribute) {
+    public ModelBuilder attribute(Attribute attribute) {
       Objects.requireNonNull(attribute);
       this.attributes.add(attribute);
       return this;
@@ -280,7 +280,7 @@ public final class Model {
      * @param constructor the constructor to add.
      * @return this builder.
      */
-    public Builder constructor(Constructor constructor) {
+    public ModelBuilder constructor(Constructor constructor) {
       Objects.requireNonNull(constructor);
       this.constructors.add(constructor);
       return this;
@@ -292,7 +292,7 @@ public final class Model {
      * @param indent the indent to use.
      * @return this builder.
      */
-    public Builder indent(String indent) {
+    public ModelBuilder indent(String indent) {
       this.indent = Objects.requireNonNull(indent);
       return this;
     }
@@ -303,7 +303,7 @@ public final class Model {
      * @param setterPrefix the setter prefix to use.
      * @return this builder.
      */
-    public Builder setterPrefix(String setterPrefix) {
+    public ModelBuilder setterPrefix(String setterPrefix) {
       this.setterPrefix = Objects.requireNonNull(setterPrefix);
       return this;
     }
@@ -314,7 +314,7 @@ public final class Model {
      * @param builderStrategy the nullable builder strategy to set.
      * @return this builder.
      */
-    public Builder builderStrategy(@Nullable BuilderStrategy builderStrategy) {
+    public ModelBuilder builderStrategy(@Nullable BuilderStrategy builderStrategy) {
       this.builderStrategy = builderStrategy;
       return this;
     }
@@ -325,7 +325,7 @@ public final class Model {
      * @param equalityStrategy the nullable equality strategy to set.
      * @return this builder.
      */
-    public Builder equalityStrategy(@Nullable EqualityStrategy equalityStrategy) {
+    public ModelBuilder equalityStrategy(@Nullable EqualityStrategy equalityStrategy) {
       this.equalityStrategy = equalityStrategy;
       return this;
     }
@@ -336,7 +336,7 @@ public final class Model {
      * @param toStringStrategy the nullable toString strategy to set.
      * @return this builder.
      */
-    public Builder toStringStrategy(@Nullable ToStringStrategy toStringStrategy) {
+    public ModelBuilder toStringStrategy(@Nullable ToStringStrategy toStringStrategy) {
       this.toStringStrategy = toStringStrategy;
       return this;
     }
@@ -347,7 +347,7 @@ public final class Model {
      * @param deprecatedAnnotation the nullable annotation mirror to set.
      * @return this builder.
      */
-    public Builder deprecatedAnnotation(@Nullable AnnotationMirror deprecatedAnnotation) {
+    public ModelBuilder deprecatedAnnotation(@Nullable AnnotationMirror deprecatedAnnotation) {
       this.deprecatedAnnotation = deprecatedAnnotation;
       return this;
     }

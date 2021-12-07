@@ -178,7 +178,7 @@ private static JavaFile buildSettingsCollectionClass(
     List<CodegenSettingSchema> settings
 ) {
   ClassName settingsCollectionTypeName = ClassName.get(packageName, "SettingsCollection")
-  ClassName builderTypeName = settingsCollectionTypeName.nestedClass("Builder")
+  ClassName builderTypeName = settingsCollectionTypeName.nestedClass("SettingsCollectionBuilder")
   ClassName settingTypeName = ClassName.get(settingPackageName, settingClassName)
 
   MethodSpec builderMethod = MethodSpec

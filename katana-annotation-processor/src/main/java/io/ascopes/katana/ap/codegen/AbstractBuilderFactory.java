@@ -7,6 +7,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import io.ascopes.katana.ap.codegen.TypeSpecMembers.TypeSpecMembersBuilder;
 import io.ascopes.katana.ap.descriptors.Attribute;
 import io.ascopes.katana.ap.descriptors.BuilderStrategy;
 import io.ascopes.katana.ap.descriptors.Model;
@@ -36,7 +37,7 @@ abstract class AbstractBuilderFactory<@Nullable T> implements BuilderFactory<T> 
     return this.createMembersFor(model, strategy, context).build();
   }
 
-  TypeSpecMembers.Builder createMembersFor(
+  TypeSpecMembersBuilder createMembersFor(
       Model model,
       BuilderStrategy strategy,
       T context
@@ -50,7 +51,7 @@ abstract class AbstractBuilderFactory<@Nullable T> implements BuilderFactory<T> 
     MethodSpec modelConstructor = this.modelConstructorFor(model, strategy).build();
     this.logger.trace("Generated constructor:\n{}", modelConstructor);
 
-    TypeSpecMembers.Builder membersBuilder = TypeSpecMembers
+    TypeSpecMembersBuilder membersTypeSpecMembersBuilder = TypeSpecMembers
         .builder()
         .type(builderType)
         .method(builderMethod)
@@ -61,11 +62,11 @@ abstract class AbstractBuilderFactory<@Nullable T> implements BuilderFactory<T> 
 
       this.logger.trace("Generated toBuilder method:\n{}", toBuilderMethod);
 
-      membersBuilder
+      membersTypeSpecMembersBuilder
           .method(toBuilderMethod);
     }
 
-    return membersBuilder;
+    return membersTypeSpecMembersBuilder;
   }
 
   MethodSpec.Builder modelConstructorFor(Model model, BuilderStrategy strategy) {

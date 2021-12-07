@@ -1,5 +1,6 @@
 package io.ascopes.katana.ap.descriptors;
 
+import io.ascopes.katana.ap.descriptors.MethodClassification.MethodClassificationBuilder;
 import io.ascopes.katana.ap.iterators.AvailableMethodsIterator;
 import io.ascopes.katana.ap.logging.Diagnostics;
 import io.ascopes.katana.ap.logging.Logger;
@@ -59,7 +60,7 @@ final class MethodClassificationFactory {
       TypeElement interfaceType,
       SettingsCollection settings
   ) {
-    MethodClassification.Builder builder = MethodClassification.builder();
+    MethodClassificationBuilder methodClassificationBuilder = MethodClassification.builder();
 
     boolean failed = false;
 
@@ -71,10 +72,10 @@ final class MethodClassificationFactory {
       if (this.isValidGetterSignature(method)) {
         failed |= this.getBooleanAttrName(method, settings)
             .orElseGet(() -> this.getAttrName(method, settings))
-            .ifOkCheck(attrName -> this.applyGetter(builder, attrName, method))
+            .ifOkCheck(attrName -> this.applyGetter(methodClassificationBuilder, attrName, method))
             .isFailed();
       } else {
-        failed |= this.processAsStaticMethod(builder, method)
+        failed |= this.processAsStaticMethod(methodClassificationBuilder, method)
             .orElseGet(() -> {
               this.failUnimplementableMethods(interfaceType, method);
               return Result.fail("Cannot implement unknown method " + method);
@@ -85,7 +86,7 @@ final class MethodClassificationFactory {
 
     return failed
         ? Result.fail("One or more methods had invalid descriptions")
-        : Result.ok(builder.build());
+        : Result.ok(methodClassificationBuilder.build());
   }
 
   private boolean isValidGetterSignature(ExecutableElement method) {
@@ -146,22 +147,22 @@ final class MethodClassificationFactory {
   }
 
   private Result<Void> applyGetter(
-      MethodClassification.Builder builder,
+      MethodClassificationBuilder methodClassificationBuilder,
       String attrName,
       ExecutableElement newMethod
   ) {
-    return builder
+    return methodClassificationBuilder
         .getExistingGetter(attrName)
         .map(existingMethod -> {
           this.failMethodAlreadyExists(existingMethod, newMethod);
           return Result.<Void>fail("Attribute already has a getter defined");
         })
         .orElseGet(Result::ok)
-        .ifOk(() -> builder.getter(attrName, newMethod));
+        .ifOk(() -> methodClassificationBuilder.getter(attrName, newMethod));
   }
 
   private Optional<Result<ExecutableElement>> processAsStaticMethod(
-      MethodClassification.Builder builder,
+      MethodClassificationBuilder methodClassificationBuilder,
       ExecutableElement method
   ) {
     // I know that this never occurs, but this keeps the interface consistent if I choose to
@@ -172,7 +173,7 @@ final class MethodClassificationFactory {
     }
 
     this.logger.trace("{} is a static method", method);
-    builder.staticMethod(method);
+    methodClassificationBuilder.staticMethod(method);
     return Optional.of(Result.ok(method));
   }
 

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import org.checkerframework.checker.mustcall.qual.MustCall;
 
 
 /**
@@ -23,10 +24,10 @@ final class TypeSpecMembers {
   private final List<FieldSpec> fields;
   private final List<TypeSpec> types;
 
-  private TypeSpecMembers(Builder builder) {
-    this.methods = CollectionUtils.freezeList(new ArrayList<>(builder.methods));
-    this.fields = CollectionUtils.freezeList(new ArrayList<>(builder.fields));
-    this.types = CollectionUtils.freezeList(new ArrayList<>(builder.types));
+  private TypeSpecMembers(TypeSpecMembersBuilder typeSpecMembersBuilder) {
+    this.methods = CollectionUtils.freezeList(new ArrayList<>(typeSpecMembersBuilder.methods));
+    this.fields = CollectionUtils.freezeList(new ArrayList<>(typeSpecMembersBuilder.fields));
+    this.types = CollectionUtils.freezeList(new ArrayList<>(typeSpecMembersBuilder.types));
   }
 
   /**
@@ -45,8 +46,8 @@ final class TypeSpecMembers {
    *
    * @return the builder.
    */
-  static Builder builder() {
-    return new Builder();
+  static TypeSpecMembersBuilder builder() {
+    return new TypeSpecMembersBuilder();
   }
 
   /**
@@ -64,13 +65,14 @@ final class TypeSpecMembers {
   /**
    * Builder for a group of members.
    */
-  static final class Builder implements ObjectBuilder<TypeSpecMembers> {
+  @MustCall("build")
+  static final class TypeSpecMembersBuilder implements ObjectBuilder<TypeSpecMembers> {
 
     private final List<MethodSpec> methods;
     private final List<FieldSpec> fields;
     private final List<TypeSpec> types;
 
-    private Builder() {
+    private TypeSpecMembersBuilder() {
       this.methods = new LinkedList<>();
       this.fields = new LinkedList<>();
       this.types = new LinkedList<>();
@@ -82,7 +84,7 @@ final class TypeSpecMembers {
      * @param method the method spec to add.
      * @return this builder.
      */
-    Builder method(MethodSpec method) {
+    TypeSpecMembersBuilder method(MethodSpec method) {
       this.methods.add(Objects.requireNonNull(method));
       return this;
     }
@@ -93,7 +95,7 @@ final class TypeSpecMembers {
      * @param field the field spec to add.
      * @return this builder.
      */
-    Builder field(FieldSpec field) {
+    TypeSpecMembersBuilder field(FieldSpec field) {
       this.fields.add(Objects.requireNonNull(field));
       return this;
     }
@@ -104,7 +106,7 @@ final class TypeSpecMembers {
      * @param type the type spec to add.
      * @return this builder.
      */
-    Builder type(TypeSpec type) {
+    TypeSpecMembersBuilder type(TypeSpec type) {
       this.types.add(Objects.requireNonNull(type));
       return this;
     }

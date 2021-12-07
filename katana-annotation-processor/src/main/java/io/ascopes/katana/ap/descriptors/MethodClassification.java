@@ -23,9 +23,9 @@ final class MethodClassification {
   private final SortedMap<String, ExecutableElement> getters;
   private final Set<ExecutableElement> staticMethods;
 
-  private MethodClassification(Builder builder) {
-    this.getters = CollectionUtils.freezeSortedMap(builder.getters);
-    this.staticMethods = CollectionUtils.freezeSet(builder.staticMethods);
+  private MethodClassification(MethodClassificationBuilder methodClassificationBuilder) {
+    this.getters = CollectionUtils.freezeSortedMap(methodClassificationBuilder.getters);
+    this.staticMethods = CollectionUtils.freezeSet(methodClassificationBuilder.staticMethods);
   }
 
   /**
@@ -64,18 +64,18 @@ final class MethodClassification {
    * @return a new builder.
    */
   @MustCall("build")
-  static Builder builder() {
-    return new Builder();
+  static MethodClassificationBuilder builder() {
+    return new MethodClassificationBuilder();
   }
 
   @SuppressWarnings("UnusedReturnValue")
   @MustCall("build")
-  static final class Builder implements ObjectBuilder<MethodClassification> {
+  static final class MethodClassificationBuilder implements ObjectBuilder<MethodClassification> {
 
     private final SortedMap<String, ExecutableElement> getters;
     private final Set<ExecutableElement> staticMethods;
 
-    private Builder() {
+    private MethodClassificationBuilder() {
       this.getters = new TreeMap<>(String::compareTo);
       this.staticMethods = new HashSet<>();
     }
@@ -98,7 +98,7 @@ final class MethodClassification {
      * @param method        the getter method.
      * @return this builder.
      */
-    Builder getter(String attributeName, ExecutableElement method) {
+    MethodClassificationBuilder getter(String attributeName, ExecutableElement method) {
       Objects.requireNonNull(attributeName);
       Objects.requireNonNull(method);
       this.getters.put(attributeName, method);
@@ -111,7 +111,7 @@ final class MethodClassification {
      * @param method the static method.
      * @return this builder.
      */
-    Builder staticMethod(ExecutableElement method) {
+    MethodClassificationBuilder staticMethod(ExecutableElement method) {
       Objects.requireNonNull(method);
       this.staticMethods.add(method);
       return this;
