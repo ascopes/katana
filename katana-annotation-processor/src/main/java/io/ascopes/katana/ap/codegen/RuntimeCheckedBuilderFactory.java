@@ -115,10 +115,15 @@ final class RuntimeCheckedBuilderFactory extends AbstractBuilderFactory<InitTrac
   }
 
   private FieldSpec trackingField(InitTracker tracker) {
-    return FieldSpec
+    FieldSpec.Builder field = FieldSpec
         .builder(tracker.getTrackerType(), TRACKING_FIELD_NAME)
-        .addModifiers(Modifier.PRIVATE, Modifier.TRANSIENT)
-        .build();
+        .addModifiers(Modifier.PRIVATE, Modifier.TRANSIENT);
+
+    if (tracker.isTrackingVariableFinal()) {
+      field.addModifiers(Modifier.FINAL);
+    }
+
+    return field.build();
   }
 
   private CodeBlock trackingFieldReference() {
