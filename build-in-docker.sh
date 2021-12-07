@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 ###
 ### Helper script to enable me to debug builds on certain targets without having to
