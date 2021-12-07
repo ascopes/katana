@@ -4,8 +4,13 @@ import io.ascopes.katana.annotations.Equality;
 import io.ascopes.katana.annotations.Equality.CustomEquals;
 import io.ascopes.katana.annotations.Equality.CustomHashCode;
 import io.ascopes.katana.annotations.MutableModel;
+import io.ascopes.katana.annotations.ToString;
+import io.ascopes.katana.annotations.ToString.CustomToString;
 import io.ascopes.katana.ap.descriptors.EqualityStrategy.CustomEqualityStrategy;
+import io.ascopes.katana.ap.descriptors.EqualityStrategy.GeneratedEqualityStrategy;
 import io.ascopes.katana.ap.descriptors.Model.Builder;
+import io.ascopes.katana.ap.descriptors.ToStringStrategy.CustomToStringStrategy;
+import io.ascopes.katana.ap.descriptors.ToStringStrategy.GeneratedToStringStrategy;
 import io.ascopes.katana.ap.logging.Diagnostics;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
@@ -117,6 +122,7 @@ public final class ModelFactory {
         .ifOkCheck(this::setAttributes)
         .ifOkCheck(this::setBuilderStrategy)
         .ifOkCheck(this::setEqualityStrategy)
+        .ifOkCheck(this::setToStringStrategy)
         .ifOkCheck(this::setIndent)
         .ifOkMap(ModelCandidate::getBuilder)
         .ifOkMap(Builder::build);
@@ -284,58 +290,111 @@ public final class ModelFactory {
   private Result<Void> setEqualityStrategy(ModelCandidate candidate) {
     this.logger.trace("Setting equality strategy for candidate");
 
+    @Nullable
+    EqualityStrategy equalityStrategy;
+
     switch (candidate.getSettings().getEqualityMode().getValue()) {
       case INCLUDE_ALL:
-        candidate
-            .getBuilder()
-            .equalityStrategy(new EqualityStrategy.GeneratedEqualityStrategy(true));
-        return Result.ok();
+        this.logger.trace("Using all-inclusive generated equality strategy");
+        equalityStrategy = new GeneratedEqualityStrategy(true);
+        break;
 
       case EXCLUDE_ALL:
-        candidate
-            .getBuilder()
-            .equalityStrategy(new EqualityStrategy.GeneratedEqualityStrategy(false));
-        return Result.ok();
+        this.logger.trace("Using all-exclusive generated equality strategy");
+        equalityStrategy = new GeneratedEqualityStrategy(false);
+        break;
 
-      case DISABLE:
-        candidate.getBuilder().equalityStrategy(null);
-        return Result.ok();
+      case CUSTOM: {
+        this.logger.trace("Using custom equality strategy");
+        Result<ExecutableElement> equalsMethod = this.featureManager
+            .getRequiredCustomMethod(
+                candidate.getInterfaceType(),
+                Equality.class,
+                CustomEquals.class,
+                candidate.getMethodClassification()
+            );
+
+        Result<ExecutableElement> hashCodeMethod = this.featureManager
+            .getRequiredCustomMethod(
+                candidate.getInterfaceType(),
+                Equality.class,
+                CustomHashCode.class,
+                candidate.getMethodClassification()
+            );
+
+        if (equalsMethod.isFailed()) {
+          return Result.fail(equalsMethod);
+        }
+
+        if (hashCodeMethod.isFailed()) {
+          return Result.fail(hashCodeMethod);
+        }
+
+        equalityStrategy = new CustomEqualityStrategy(
+            equalsMethod.unwrap(),
+            hashCodeMethod.unwrap()
+        );
+
+        break;
+      }
 
       default:
-        // Checkstyle wants this.
+        this.logger.trace("Using no equality strategy");
+        equalityStrategy = null;
         break;
     }
 
-    Result<ExecutableElement> equalsMethod = this.featureManager
-        .getRequiredCustomMethod(
-            candidate.getInterfaceType(),
-            Equality.class,
-            CustomEquals.class,
-            candidate.getMethodClassification()
-        );
+    candidate
+        .getBuilder()
+        .equalityStrategy(equalityStrategy);
 
-    Result<ExecutableElement> hashCodeMethod = this.featureManager
-        .getRequiredCustomMethod(
-            candidate.getInterfaceType(),
-            Equality.class,
-            CustomHashCode.class,
-            candidate.getMethodClassification()
-        );
+    return Result.ok();
+  }
 
-    if (equalsMethod.isFailed()) {
-      return Result.fail(equalsMethod);
+  private Result<Void> setToStringStrategy(ModelCandidate candidate) {
+    this.logger.trace("Setting toString strategy for candidate");
+
+    ToStringStrategy toStringStrategy;
+
+    switch (candidate.getSettings().getToStringMode().getValue()) {
+      case INCLUDE_ALL:
+        this.logger.trace("Using all-inclusive generated toString strategy");
+        toStringStrategy = new GeneratedToStringStrategy(true);
+        break;
+
+      case EXCLUDE_ALL:
+        this.logger.trace("Using all-exclusive generated toString strategy");
+        toStringStrategy = new GeneratedToStringStrategy(false);
+        break;
+
+      case CUSTOM: {
+        this.logger.trace("Using custom toString strategy");
+
+        Result<ExecutableElement> toStringMethod = this.featureManager
+            .getRequiredCustomMethod(
+                candidate.getInterfaceType(),
+                ToString.class,
+                CustomToString.class,
+                candidate.getMethodClassification()
+            );
+
+        if (toStringMethod.isFailed()) {
+          return Result.fail(toStringMethod);
+        }
+
+        toStringStrategy = new CustomToStringStrategy(toStringMethod.unwrap());
+        break;
+      }
+
+      default:
+        this.logger.trace("Using no toString strategy");
+        toStringStrategy = null;
+        break;
     }
 
-    if (hashCodeMethod.isFailed()) {
-      return Result.fail(hashCodeMethod);
-    }
-
-    EqualityStrategy strategy = new CustomEqualityStrategy(
-        equalsMethod.unwrap(),
-        hashCodeMethod.unwrap()
-    );
-
-    candidate.getBuilder().equalityStrategy(strategy);
+    candidate
+        .getBuilder()
+        .toStringStrategy(toStringStrategy);
 
     return Result.ok();
   }

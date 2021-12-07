@@ -37,6 +37,7 @@ public final class Model {
   // Nullable attributes
   private final @Nullable BuilderStrategy builderStrategy;
   private final @Nullable EqualityStrategy equalityStrategy;
+  private final @Nullable ToStringStrategy toStringStrategy;
   private final @Nullable AnnotationMirror deprecatedAnnotation;
 
   private Model(Builder builder) {
@@ -53,6 +54,7 @@ public final class Model {
     // Nullable attributes.
     this.builderStrategy = builder.builderStrategy;
     this.equalityStrategy = builder.equalityStrategy;
+    this.toStringStrategy = builder.toStringStrategy;
     this.deprecatedAnnotation = builder.deprecatedAnnotation;
   }
 
@@ -173,6 +175,7 @@ public final class Model {
         + "setterPrefix=" + StringUtils.quoted(this.setterPrefix) + ", "
         + "builderStrategy=" + this.builderStrategy + ", "
         + "equalityStrategy=" + this.equalityStrategy + ", "
+        + "toStringStrategy=" + this.toStringStrategy + ", "
         + "deprecatedAnnotation=" + this.deprecatedAnnotation
         + '}';
   }
@@ -206,6 +209,7 @@ public final class Model {
     // Nullable attributes
     private @Nullable BuilderStrategy builderStrategy;
     private @Nullable EqualityStrategy equalityStrategy;
+    private @Nullable ToStringStrategy toStringStrategy;
     private @Nullable AnnotationMirror deprecatedAnnotation;
 
     private Builder() {
@@ -313,6 +317,17 @@ public final class Model {
      */
     public Builder equalityStrategy(@Nullable EqualityStrategy equalityStrategy) {
       this.equalityStrategy = equalityStrategy;
+      return this;
+    }
+
+    /**
+     * Set the toString strategy.
+     *
+     * @param toStringStrategy the nullable toString strategy to set.
+     * @return this builder.
+     */
+    public Builder toStringStrategy(@Nullable ToStringStrategy toStringStrategy) {
+      this.toStringStrategy = toStringStrategy;
       return this;
     }
 

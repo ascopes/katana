@@ -44,9 +44,14 @@ public abstract class EqualityStrategy {
       return this.includeAll;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
-      return "GeneratedEqualityStrategy{includeAll=" + this.includeAll + '}';
+      return "GeneratedEqualityStrategy{"
+          + "includeAll=" + this.includeAll
+          + '}';
     }
   }
 
@@ -91,6 +96,9 @@ public abstract class EqualityStrategy {
       return this.hashCodeMethod;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
       return "CustomEqualityStrategy{"
