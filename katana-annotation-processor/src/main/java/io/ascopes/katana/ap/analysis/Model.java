@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.descriptors;
+package io.ascopes.katana.ap.analysis;
 
 import com.squareup.javapoet.ClassName;
 import io.ascopes.katana.ap.utils.CollectionUtils;

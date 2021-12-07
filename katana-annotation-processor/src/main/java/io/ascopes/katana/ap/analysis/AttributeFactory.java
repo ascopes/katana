@@ -1,9 +1,9 @@
-package io.ascopes.katana.ap.descriptors;
+package io.ascopes.katana.ap.analysis;
 
 import com.squareup.javapoet.TypeName;
 import io.ascopes.katana.annotations.FieldVisibility;
 import io.ascopes.katana.annotations.Visibility;
-import io.ascopes.katana.ap.descriptors.Attribute.AttributeBuilder;
+import io.ascopes.katana.ap.analysis.Attribute.AttributeBuilder;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;

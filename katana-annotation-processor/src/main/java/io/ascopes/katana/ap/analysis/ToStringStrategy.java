@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.descriptors;
+package io.ascopes.katana.ap.analysis;
 
 import io.ascopes.katana.ap.utils.StringUtils;
 import javax.lang.model.element.ExecutableElement;
@@ -52,6 +52,7 @@ public abstract class ToStringStrategy {
    * A strategy for using a custom defined toString method.
    */
   public static final class CustomToStringStrategy extends ToStringStrategy {
+
     private final ExecutableElement toStringMethod;
 
     /**

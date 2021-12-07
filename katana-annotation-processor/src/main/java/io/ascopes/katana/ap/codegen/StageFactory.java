@@ -1,10 +1,10 @@
 package io.ascopes.katana.ap.codegen;
 
+import io.ascopes.katana.ap.analysis.Attribute;
+import io.ascopes.katana.ap.analysis.BuilderStrategy;
+import io.ascopes.katana.ap.analysis.Model;
 import io.ascopes.katana.ap.codegen.Stages.DedicatedStage;
 import io.ascopes.katana.ap.codegen.Stages.FinalStage;
-import io.ascopes.katana.ap.descriptors.Attribute;
-import io.ascopes.katana.ap.descriptors.BuilderStrategy;
-import io.ascopes.katana.ap.descriptors.Model;
 import io.ascopes.katana.ap.iterators.KatanaIterator;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;

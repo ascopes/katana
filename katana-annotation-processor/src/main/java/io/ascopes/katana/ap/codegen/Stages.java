@@ -1,6 +1,6 @@
 package io.ascopes.katana.ap.codegen;
 
-import io.ascopes.katana.ap.descriptors.Attribute;
+import io.ascopes.katana.ap.analysis.Attribute;
 import io.ascopes.katana.ap.iterators.KatanaIterator;
 import java.util.Optional;
 import java.util.SortedSet;

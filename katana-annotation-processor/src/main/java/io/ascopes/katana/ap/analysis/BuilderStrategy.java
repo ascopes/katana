@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.descriptors;
+package io.ascopes.katana.ap.analysis;
 
 import io.ascopes.katana.annotations.Builder;
 import io.ascopes.katana.ap.utils.ObjectBuilder;

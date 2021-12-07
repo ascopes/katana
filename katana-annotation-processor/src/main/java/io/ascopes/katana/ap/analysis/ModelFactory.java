@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.descriptors;
+package io.ascopes.katana.ap.analysis;
 
 import io.ascopes.katana.annotations.Equality;
 import io.ascopes.katana.annotations.Equality.CustomEquals;
@@ -6,11 +6,11 @@ import io.ascopes.katana.annotations.Equality.CustomHashCode;
 import io.ascopes.katana.annotations.MutableModel;
 import io.ascopes.katana.annotations.ToString;
 import io.ascopes.katana.annotations.ToString.CustomToString;
-import io.ascopes.katana.ap.descriptors.EqualityStrategy.CustomEqualityStrategy;
-import io.ascopes.katana.ap.descriptors.EqualityStrategy.GeneratedEqualityStrategy;
-import io.ascopes.katana.ap.descriptors.Model.ModelBuilder;
-import io.ascopes.katana.ap.descriptors.ToStringStrategy.CustomToStringStrategy;
-import io.ascopes.katana.ap.descriptors.ToStringStrategy.GeneratedToStringStrategy;
+import io.ascopes.katana.ap.analysis.EqualityStrategy.CustomEqualityStrategy;
+import io.ascopes.katana.ap.analysis.EqualityStrategy.GeneratedEqualityStrategy;
+import io.ascopes.katana.ap.analysis.Model.ModelBuilder;
+import io.ascopes.katana.ap.analysis.ToStringStrategy.CustomToStringStrategy;
+import io.ascopes.katana.ap.analysis.ToStringStrategy.GeneratedToStringStrategy;
 import io.ascopes.katana.ap.logging.Diagnostics;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;

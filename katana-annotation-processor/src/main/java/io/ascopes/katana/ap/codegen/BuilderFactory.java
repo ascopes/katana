@@ -1,7 +1,7 @@
 package io.ascopes.katana.ap.codegen;
 
-import io.ascopes.katana.ap.descriptors.BuilderStrategy;
-import io.ascopes.katana.ap.descriptors.Model;
+import io.ascopes.katana.ap.analysis.BuilderStrategy;
+import io.ascopes.katana.ap.analysis.Model;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**

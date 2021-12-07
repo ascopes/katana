@@ -2,7 +2,7 @@ package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.MethodSpec;
-import io.ascopes.katana.ap.descriptors.Attribute;
+import io.ascopes.katana.ap.analysis.Attribute;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
 import javax.lang.model.element.Modifier;

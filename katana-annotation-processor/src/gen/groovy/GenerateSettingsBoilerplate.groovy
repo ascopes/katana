@@ -342,7 +342,7 @@ private static JavaFile buildSchemaConstants(
 private static String getMavenProperty(Map<String, String> properties, String name) {
   String property = properties.get(name)
   String err = "Maven Property " + name + " was not set"
-  System.out.printf("[INFO] Property name='%s' value='%s'%n", name, property);
+  System.out.printf("[INFO] Property name='%s' value='%s'%n", name, property)
   return Objects.requireNonNull(property, err)
 }
 

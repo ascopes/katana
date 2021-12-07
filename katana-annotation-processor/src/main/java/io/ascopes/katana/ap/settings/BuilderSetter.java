@@ -10,5 +10,6 @@ import io.ascopes.katana.ap.settings.gen.SettingsCollection.SettingsCollectionBu
  */
 @FunctionalInterface
 public interface BuilderSetter<T> {
+
   void set(SettingsCollectionBuilder builder, Setting<T> setting);
 }

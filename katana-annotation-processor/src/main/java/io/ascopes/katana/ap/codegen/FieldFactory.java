@@ -1,7 +1,7 @@
 package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.FieldSpec;
-import io.ascopes.katana.ap.descriptors.Attribute;
+import io.ascopes.katana.ap.analysis.Attribute;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.utils.CodeGenUtils;

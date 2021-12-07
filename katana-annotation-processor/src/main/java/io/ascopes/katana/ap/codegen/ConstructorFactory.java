@@ -2,9 +2,9 @@ package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
-import io.ascopes.katana.ap.descriptors.Attribute;
-import io.ascopes.katana.ap.descriptors.Constructor;
-import io.ascopes.katana.ap.descriptors.Model;
+import io.ascopes.katana.ap.analysis.Attribute;
+import io.ascopes.katana.ap.analysis.Constructor;
+import io.ascopes.katana.ap.analysis.Model;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
 import java.util.stream.Stream;

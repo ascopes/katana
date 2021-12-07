@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.descriptors;
+package io.ascopes.katana.ap.analysis;
 
 import io.ascopes.katana.annotations.internal.AttributeFeature;
 import io.ascopes.katana.annotations.internal.CustomMethodAdvice;

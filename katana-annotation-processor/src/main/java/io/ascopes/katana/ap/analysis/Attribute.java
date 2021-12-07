@@ -1,4 +1,4 @@
-package io.ascopes.katana.ap.descriptors;
+package io.ascopes.katana.ap.analysis;
 
 import com.squareup.javapoet.TypeName;
 import io.ascopes.katana.annotations.Visibility;

@@ -2,7 +2,7 @@ package io.ascopes.katana.ap.codegen;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
-import io.ascopes.katana.ap.descriptors.Attribute;
+import io.ascopes.katana.ap.analysis.Attribute;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
 import java.math.BigInteger;
