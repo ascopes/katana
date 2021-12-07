@@ -1,9 +1,11 @@
 package io.ascopes.katana.ap.utils;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.common.util.report.qual.ReportInherit;
 
@@ -27,24 +29,25 @@ public final class Result<T> {
   @PolyNull
   private final String reason;
 
-  private final StackTraceElement from;
+  @PolyNull
+  private final StackTraceGroup location;
 
   private Result() {
     this.value = null;
     this.reason = null;
-    this.from = null;
+    this.location = null;
   }
 
   private Result(T value) {
     this.value = value;
     this.reason = null;
-    this.from = null;
+    this.location = null;
   }
 
-  private Result(String reason, StackTraceElement from) {
+  private Result(String reason, StackTraceGroup location) {
     this.value = null;
     this.reason = reason;
-    this.from = from;
+    this.location = location;
   }
 
   /**
@@ -60,6 +63,24 @@ public final class Result<T> {
     }
 
     return Objects.requireNonNull(this.value);
+  }
+
+  /**
+   * Get the error's message, if this is an error.
+   *
+   * @return an optional of the error's message reason.
+   */
+  public Optional<String> getErrorReason() {
+    return Optional.ofNullable(this.reason);
+  }
+
+  /**
+   * Get the error's location, if this is an error.
+   *
+   * @return an optional of the error's location.
+   */
+  public Optional<StackTraceGroup> getErrorLocation() {
+    return Optional.ofNullable(this.location);
   }
 
   /**
@@ -243,7 +264,7 @@ public final class Result<T> {
     return "Result{"
         + "failed, "
         + "reason=" + StringUtils.quoted(this.reason) + ", "
-        + "raisedAt=" + StringUtils.quoted(this.from)
+        + "chainedFailures=" + Objects.requireNonNull(this.location).causes.length + 1
         + "}";
   }
 
@@ -278,8 +299,7 @@ public final class Result<T> {
    * @return a failed result with no value.
    */
   public static <T> Result<T> fail(String reason) {
-    StackTraceElement frame = Thread.currentThread().getStackTrace()[2];
-    return new Result<>(reason, frame);
+    return new Result<>(reason, stackTraceGroup(null));
   }
 
   /**
@@ -292,7 +312,16 @@ public final class Result<T> {
     if (!failedResult.isFailed()) {
       throw new IllegalStateException("Cannot create a failed result from a non-failed result");
     }
-    return new Result<>(failedResult.reason, failedResult.from);
+    return new Result<>(failedResult.reason, stackTraceGroup(failedResult.location));
+  }
+
+  private static StackTraceGroup stackTraceGroup(@Nullable StackTraceGroup previousGroup) {
+    // 0: .getStackTrace
+    // 1: .stackTraceGroup
+    // 2: .fail
+    // 3: location of failure
+    StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+    return new StackTraceGroup(3, stackTrace, previousGroup);
   }
 
   @SuppressWarnings("unchecked")
@@ -300,5 +329,56 @@ public final class Result<T> {
     assert result.isNotOk();
     // Type erasure is a beautiful thing sometimes.
     return (Result<T>) result;
+  }
+
+  /**
+   * Descriptor of an erroneous result location, similar to that of an exception but without
+   * actually throwing anything.
+   */
+  public static final class StackTraceGroup {
+    private final StackTraceElement[] currentFrames;
+    private final StackTraceElement[][] causes;
+
+    private StackTraceGroup(
+        int offset,
+        StackTraceElement[] currentFrames,
+        @Nullable StackTraceGroup cause
+    ) {
+      this.currentFrames = new StackTraceElement[currentFrames.length - offset];
+      System.arraycopy(currentFrames, offset, this.currentFrames, 0, this.currentFrames.length);
+
+      if (cause == null) {
+        this.causes = new StackTraceElement[0][];
+      } else {
+        this.causes = new StackTraceElement[cause.causes.length + 1][];
+        this.causes[0] = cause.currentFrames;
+        System.arraycopy(cause.causes, 0, this.causes, 1, this.causes.length);
+      }
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder builder = new StringBuilder("Triggered by ");
+      appendTrace(builder, this.currentFrames);
+      for (StackTraceElement[] cause : this.causes) {
+        if (cause.length > 0) {
+          builder.append("Caused by ");
+          appendTrace(builder, cause);
+        }
+      }
+      return builder.toString();
+    }
+
+    private static void appendTrace(StringBuilder builder, StackTraceElement[] frames) {
+      builder.append("Result.fail() in ")
+          .append(frames[0].getClassName())
+          .append("#")
+          .append(frames[0].getMethodName())
+          .append("\n");
+
+      for (StackTraceElement frame : frames) {
+        builder.append("     at ").append(frame).append("\n");
+      }
+    }
   }
 }

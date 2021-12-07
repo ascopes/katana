@@ -8,6 +8,8 @@ package io.ascopes.katana.ap.logging;
  */
 public interface Logger {
 
+  boolean isEnabled(LoggingLevel level);
+
   void error(String format, Object... args);
 
   void info(String format, Object... args);

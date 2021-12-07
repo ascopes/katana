@@ -11,8 +11,10 @@ import io.ascopes.katana.ap.codegen.JavaModelFactory;
 import io.ascopes.katana.ap.logging.Diagnostics;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
+import io.ascopes.katana.ap.logging.LoggingLevel;
 import io.ascopes.katana.ap.utils.Result;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -129,13 +131,7 @@ public final class KatanaProcessor extends AbstractProcessor {
         .stream()
         .flatMap(annotationType -> this.generateModelsForAnnotation(annotationType, roundEnv))
         .map(model -> model.ifOkFlatMap(this::buildJavaFile))
-        .forEach(result -> {
-          if (result.isFailed()) {
-            failed.incrementAndGet();
-            this.logger.error("Failed to create model. Result was {}", result);
-          }
-          processed.incrementAndGet();
-        });
+        .forEach(result -> this.handleResult(result, processed, failed));
 
     long delta = System.nanoTime() - start;
     double rate = (double) delta / processed.get();
@@ -149,6 +145,37 @@ public final class KatanaProcessor extends AbstractProcessor {
     );
 
     return true;
+  }
+
+  private void handleResult(
+      Result<?> result,
+      AtomicInteger processedCount,
+      AtomicInteger failedCount
+  ) {
+    processedCount.incrementAndGet();
+
+    if (!result.isFailed()) {
+      this.logger.debug("Pass succeeded");
+      return;
+    }
+
+    failedCount.incrementAndGet();
+
+    if (!this.logger.isEnabled(LoggingLevel.DEBUG)) {
+      this.logger.error(
+          "Failed to create model: {} (enable debug logs for more info)",
+          result.getErrorReason().orElse("No message")
+      );
+      return;
+    }
+
+    this.logger.error("Failed to create model: {}\n{}",
+        result.getErrorReason().orElse("No message"),
+        result.getErrorLocation()
+            .map(Objects::toString)
+            .orElse("No trace present")
+    );
+
   }
 
   private Stream<Result<Model>> generateModelsForAnnotation(

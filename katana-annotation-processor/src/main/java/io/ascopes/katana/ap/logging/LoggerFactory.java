@@ -87,6 +87,11 @@ public final class LoggerFactory {
     }
 
     @Override
+    public boolean isEnabled(LoggingLevel level) {
+      return LoggerFactory.this.globalLevel.permits(level);
+    }
+
+    @Override
     public void error(String format, Object... args) {
       LoggerFactory.this.log(LoggingLevel.ERROR, this.name, format, args);
     }
