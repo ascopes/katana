@@ -151,6 +151,16 @@ public final class Model {
   }
 
   /**
+   * Get the strategy to use to generate toString methods.
+   *
+   * @return the toString strategy, or an empty optional if not enabled.
+   */
+  @MaybePresent
+  public Optional<ToStringStrategy> getToStringStrategy() {
+    return Optional.ofNullable(this.toStringStrategy);
+  }
+
+  /**
    * Get the deprecated annotation to apply to the generated model type, if one is provided on the
    * super-interface.
    *
