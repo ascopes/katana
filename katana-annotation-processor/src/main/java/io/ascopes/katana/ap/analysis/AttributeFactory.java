@@ -101,7 +101,7 @@ final class AttributeFactory {
   }
 
   private Result<Void> processFinal(AttributeCandidate candidate) {
-    candidate.getBuilder().finalField(candidate.isMutableModel());
+    candidate.getBuilder().finalField(!candidate.isMutableModel());
     return Result.ok();
   }
 
