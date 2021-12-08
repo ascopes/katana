@@ -133,14 +133,14 @@ public final class KatanaProcessor extends AbstractProcessor {
         .map(model -> model.ifOkFlatMap(this::buildJavaFile))
         .forEach(result -> this.handleResult(result, processed, failed));
 
-    long delta = System.nanoTime() - start;
-    double rate = (double) delta / processed.get();
+    double delta = (System.nanoTime() - start) / 1_000_000_000D;
+    double rate = processed.get() / delta;
 
     this.logger.info(
         "Processed {} in {} ({}) ({} failures)",
         processed.get() == 1 ? "1 model definition" : processed.get() + " model definitions",
-        String.format("~%.1fms", delta / 1_000_000.0),
-        String.format("~%.1f per second", rate / 1_000_000.0),
+        String.format("~%.3fs", delta),
+        String.format("~%.3f per second", rate),
         failed.get()
     );
 
