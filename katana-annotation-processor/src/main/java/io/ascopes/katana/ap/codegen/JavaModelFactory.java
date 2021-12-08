@@ -23,6 +23,8 @@ public final class JavaModelFactory {
   private final SetterFactory setterFactory;
   private final ConstructorFactory constructorFactory;
   private final DelegatingBuilderFactory delegatingBuilderFactory;
+  private final EqualsHashCodeFactory equalsHashCodeFactory;
+  private final ToStringFactory toStringFactory;
 
   /**
    * Initialize this factory.
@@ -34,6 +36,8 @@ public final class JavaModelFactory {
     this.setterFactory = new SetterFactory();
     this.constructorFactory = new ConstructorFactory();
     this.delegatingBuilderFactory = new DelegatingBuilderFactory();
+    this.equalsHashCodeFactory = new EqualsHashCodeFactory();
+    this.toStringFactory = new ToStringFactory();
   }
 
   /**
@@ -65,15 +69,20 @@ public final class JavaModelFactory {
         .addSuperinterface(model.getSuperInterface().asType())
         .addAnnotation(CodeGenUtils.generated(model.getSuperInterface()));
 
-    model.getDeprecatedAnnotation()
-        .map(CodeGenUtils::copyDeprecatedFrom)
-        .ifPresent(builder::addAnnotation);
-
+    this.applyDeprecation(builder, model);
     this.applyAttributes(builder, model);
     this.applyConstructors(builder, model);
     this.applyBuilders(builder, model);
+    this.applyEqualsHashCode(builder, model);
+    this.applyToString(builder, model);
 
     return builder.build();
+  }
+
+  private void applyDeprecation(TypeSpec.Builder typeSpecBuilder, Model model) {
+    model.getDeprecatedAnnotation()
+        .map(CodeGenUtils::copyDeprecatedFrom)
+        .ifPresent(typeSpecBuilder::addAnnotation);
   }
 
   private void applyAttributes(TypeSpec.Builder typeSpecBuilder, Model model) {
@@ -100,5 +109,16 @@ public final class JavaModelFactory {
         .map(strategy -> this.delegatingBuilderFactory.create(model, strategy))
         .ifPresent(members -> members.applyTo(typeSpecBuilder));
   }
-}
 
+  private void applyEqualsHashCode(TypeSpec.Builder typeSpecBuilder, Model model) {
+    this.equalsHashCodeFactory
+        .create(model)
+        .ifPresent(members -> members.applyTo(typeSpecBuilder));
+  }
+
+  private void applyToString(TypeSpec.Builder typeSpecBuilder, Model model) {
+    this.toStringFactory
+        .create(model)
+        .ifPresent(typeSpecBuilder::addMethod);
+  }
+}

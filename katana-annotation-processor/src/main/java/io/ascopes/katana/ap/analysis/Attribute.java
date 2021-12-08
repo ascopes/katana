@@ -121,7 +121,7 @@ public final class Attribute {
    *
    * @return true if included, false if excluded.
    */
-  public boolean getIncludeInEqualsAndHashCode() {
+  public boolean isIncludeInEqualsAndHashCode() {
     return this.includeInEqualsAndHashCode;
   }
 
@@ -132,7 +132,7 @@ public final class Attribute {
    *
    * @return true if included, false if excluded.
    */
-  public boolean getIncludeInToStrnig() {
+  public boolean isIncludeInToString() {
     return this.includeInToString;
   }
 
