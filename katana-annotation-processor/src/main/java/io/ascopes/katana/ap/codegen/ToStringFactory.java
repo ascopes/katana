@@ -1,6 +1,5 @@
 package io.ascopes.katana.ap.codegen;
 
-
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import io.ascopes.katana.ap.analysis.Attribute;
