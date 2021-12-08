@@ -112,7 +112,7 @@ private static CodeBlock parseDefaultValue(List<String> exprs, Class<?> targetTy
   }
   if (char.isAssignableFrom(targetType)) {
     assert expr.length() == 1: "Strings for char literals must be 1 char, but I got '$expr'"
-    return CodeBlock.of('$L', expr.charAt(0))
+    return CodeBlock.of('\'$L\'', expr.charAt(0))
   }
   if (float.isAssignableFrom(targetType)) {
     return CodeBlock.of('$L', Float.parseFloat(expr))
