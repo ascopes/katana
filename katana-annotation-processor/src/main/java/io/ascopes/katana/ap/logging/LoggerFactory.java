@@ -56,10 +56,10 @@ public final class LoggerFactory {
         String arg = Objects.toString(args[argIndex++]);
         for (int j = 0; j < arg.length(); ++j) {
           char argChar = arg.charAt(j);
+          message.append(argChar);
           if (argChar == '\n') {
             this.formatLineStart(message, level, name);
           }
-          message.append(argChar);
         }
       } else if (msgChar == '\n') {
         newLine = true;
