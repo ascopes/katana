@@ -40,7 +40,7 @@ public final class LoggerFactory {
     if (!this.globalLevel.permits(level)) {
       return;
     }
-    
+
     int argIndex = 0;
     boolean newLine = true;
     for (int i = 0; i < format.length(); ++i) {

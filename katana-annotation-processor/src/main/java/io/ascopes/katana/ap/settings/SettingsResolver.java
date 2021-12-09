@@ -3,11 +3,10 @@ package io.ascopes.katana.ap.settings;
 import io.ascopes.katana.annotations.ImmutableModel;
 import io.ascopes.katana.annotations.MutableModel;
 import io.ascopes.katana.annotations.Settings;
-import io.ascopes.katana.ap.iterators.PackageIterator;
-import io.ascopes.katana.ap.iterators.SupertypeIterator;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection;
 import io.ascopes.katana.ap.settings.gen.SettingsCollection.SettingsCollectionBuilder;
 import io.ascopes.katana.ap.settings.gen.SettingsSchemas;
+import io.ascopes.katana.ap.types.SupertypeIterator;
 import io.ascopes.katana.ap.utils.AnnotationUtils;
 import io.ascopes.katana.ap.utils.Functors;
 import io.ascopes.katana.ap.utils.Result;
@@ -115,8 +114,8 @@ public final class SettingsResolver {
         .collect(Collectors.toList());
   }
 
-  private <T> Setting<T> wrappedDetermineSettingFor(
-      SettingSchema<T> schema,
+  private <T> SettingDescriptor<T> wrappedDetermineSettingFor(
+      SettingSchemaDescriptor<T> schema,
       boolean mutable,
       List<SettingCandidate> annotations
   ) {
@@ -127,8 +126,8 @@ public final class SettingsResolver {
     }
   }
 
-  private <T> Setting<T> determineSettingFor(
-      SettingSchema<T> schema,
+  private <T> SettingDescriptor<T> determineSettingFor(
+      SettingSchemaDescriptor<T> schema,
       boolean mutable,
       List<SettingCandidate> annotations
   ) {
@@ -152,14 +151,14 @@ public final class SettingsResolver {
           + ", from " + annotation.description;
 
       // We found the setting, so return it.
-      SettingValueHolder<T> valueHolder = new SettingValueHolder<>(
+      SettingValueDescriptor<T> valueHolder = new SettingValueDescriptor<>(
           actualValue,
           annotation.declaringElement,
           annotation.mirror,
           possibleAnnotationValue.get()
       );
 
-      return new Setting<>(
+      return new SettingDescriptor<>(
           valueHolder,
           description,
           schema
@@ -172,7 +171,7 @@ public final class SettingsResolver {
 
     String description = "default Katana setting '" + schema.getName() + "'";
 
-    return new Setting<>(new SettingValueHolder<>(defaultValue), description, schema);
+    return new SettingDescriptor<>(new SettingValueDescriptor<>(defaultValue), description, schema);
   }
 
   @MaybePresent

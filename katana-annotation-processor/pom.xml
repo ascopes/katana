@@ -24,9 +24,9 @@
   <properties>
     <settings.packageName>io.ascopes.katana.ap.settings</settings.packageName>
     <settings.settingPackageName>${settings.packageName}</settings.settingPackageName>
-    <settings.settingClassName>Setting</settings.settingClassName>
+    <settings.settingClassName>SettingDescriptor</settings.settingClassName>
     <settings.settingSchemaPackageName>${settings.packageName}</settings.settingSchemaPackageName>
-    <settings.settingSchemaClassName>SettingSchema</settings.settingSchemaClassName>
+    <settings.settingSchemaClassName>SettingSchemaDescriptor</settings.settingSchemaClassName>
     <settings.generatedOutputRoot>${project.build.directory}/generated-sources/settings
     </settings.generatedOutputRoot>
     <settings.generatedPackageName>${settings.packageName}.gen</settings.generatedPackageName>
