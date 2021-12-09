@@ -53,7 +53,9 @@ public final class LoggerFactory {
       char msgChar = format.charAt(i);
       if (msgChar == '{' && i < format.length() - 1 && format.charAt(i + 1) == '}') {
         ++i;
+
         String arg = Objects.toString(args[argIndex++]);
+
         for (int j = 0; j < arg.length(); ++j) {
           char argChar = arg.charAt(j);
           message.append(argChar);
@@ -61,12 +63,15 @@ public final class LoggerFactory {
             this.formatLineStart(message, level, name);
           }
         }
-      } else if (msgChar == '\n') {
-        newLine = true;
-        message.append('\n');
-      } else {
-        message.append(msgChar);
+
+        continue;
       }
+
+      if (msgChar == '\n') {
+        newLine = true;
+      }
+
+      message.append(msgChar);
     }
 
     this.outputStream.println(message);
