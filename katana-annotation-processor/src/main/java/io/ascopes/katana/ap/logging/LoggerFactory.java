@@ -52,7 +52,7 @@ public final class LoggerFactory {
     message = String.join("\n  |    ", message.split("\n"));
 
     this.outputStream.printf(
-        "[ %s ] %.3f - %s - %s%n",
+        "[%s] %.3f - %s - %s%n",
         level.name(),
         this.runtimeMxBean.getUptime() / 1_000.0,
         name,
