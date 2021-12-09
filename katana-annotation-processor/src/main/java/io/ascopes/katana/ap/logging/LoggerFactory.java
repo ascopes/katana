@@ -95,7 +95,7 @@ public final class LoggerFactory {
     this.outputStream.print(this.runtimeMxBean.getUptime());
     this.outputStream.print(" <");
     this.outputStream.print(name);
-    this.outputStream.print("> ::");
+    this.outputStream.print("> :: ");
   }
 
 
