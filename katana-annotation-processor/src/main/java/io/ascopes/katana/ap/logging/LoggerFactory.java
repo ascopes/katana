@@ -82,9 +82,9 @@ public final class LoggerFactory {
         .append(level.name())
         .append("] ")
         .append(this.runtimeMxBean.getUptime())
-        .append(' ')
+        .append(" <")
         .append(name)
-        .append(' ');
+        .append("> :: ");
   }
 
 
