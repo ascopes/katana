@@ -49,7 +49,7 @@ public final class LoggerFactory {
     }
 
     // Indent additional lines to make code snippets easier to read.
-    message = String.join("\n  |    ", message.split("\n"));
+    message = String.join("\n  |  ", message.split("\n"));
 
     this.outputStream.printf(
         "[%s] %.3f - %s - %s%n",
