@@ -46,21 +46,30 @@ public final class LoggerFactory {
     int argIndex = 0;
     boolean newLine = true;
     for (int i = 0; i < format.length(); ++i) {
+
       if (newLine) {
         newLine = false;
         this.formatLineStart(message, level, name);
       }
+
       char msgChar = format.charAt(i);
+
       if (msgChar == '{' && i < format.length() - 1 && format.charAt(i + 1) == '}') {
         ++i;
 
         String arg = Objects.toString(args[argIndex++]);
 
         for (int j = 0; j < arg.length(); ++j) {
+          if (newLine) {
+            newLine = false;
+            this.formatLineStart(message, level, name);
+          }
+
           char argChar = arg.charAt(j);
           message.append(argChar);
+
           if (argChar == '\n') {
-            this.formatLineStart(message, level, name);
+            newLine = true;
           }
         }
 
