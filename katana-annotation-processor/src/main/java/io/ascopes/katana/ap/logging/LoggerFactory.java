@@ -4,8 +4,6 @@ import io.ascopes.katana.ap.utils.StringUtils;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.time.Clock;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,14 +28,12 @@ public final class LoggerFactory {
 
   private final RuntimeMXBean runtimeMxBean;
   private final PrintStream outputStream;
-  private final Clock clock;
   private volatile LoggingLevel globalLevel;
 
   private LoggerFactory() {
     this.runtimeMxBean = ManagementFactory.getRuntimeMXBean();
     this.globalLevel = LoggingLevel.INFO;
     this.outputStream = System.out;
-    this.clock = Clock.systemDefaultZone();
   }
 
   private void log(LoggingLevel level, String name, String format, Object... args) {
@@ -56,9 +52,8 @@ public final class LoggerFactory {
     message = String.join("\n  |    ", message.split("\n"));
 
     this.outputStream.printf(
-        "[ %1.1s ] %s (up %.3fs) - %s - %s%n",
+        "[ %s ] %.3f - %s - %s%n",
         level.name(),
-        LocalDateTime.now(this.clock),
         this.runtimeMxBean.getUptime() / 1_000.0,
         name,
         message
