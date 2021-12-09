@@ -42,35 +42,51 @@ public final class LoggerFactory {
     }
 
     StringBuilder message = new StringBuilder();
+    
     int argIndex = 0;
     boolean newLine = true;
     for (int i = 0; i < format.length(); ++i) {
       if (newLine) {
         newLine = false;
-        message
-            .append('[')
-            .append(level.name())
-            .append("] ")
-            .append(this.runtimeMxBean.getUptime())
-            .append(' ')
-            .append(name)
-            .append(' ');
+        this.formatLineStart(message, level, name);
       }
-
-      char c = format.charAt(i);
-      if (c == '{' && i < format.length() - 1 && format.charAt(i + 1) == '}') {
+      char msgChar = format.charAt(i);
+      if (msgChar == '{' && i < format.length() - 1 && format.charAt(i + 1) == '}') {
         ++i;
-        message.append(args[argIndex++]);
-      } else if (c == '\n') {
+        String arg = Objects.toString(args[argIndex++]);
+        for (int j = 0; j < arg.length(); ++j) {
+          char argChar = arg.charAt(j);
+          if (argChar == '\n') {
+            this.formatLineStart(message, level, name);
+          }
+          message.append(argChar);
+        }
+      } else if (msgChar == '\n') {
         newLine = true;
         message.append('\n');
       } else {
-        message.append(c);
+        message.append(msgChar);
       }
     }
 
     this.outputStream.println(message);
   }
+
+  private void formatLineStart(
+      StringBuilder message, 
+      LoggingLevel level, 
+      String name
+  ) {
+    message
+        .append('[')
+        .append(level.name())
+        .append("] ")
+        .append(this.runtimeMxBean.getUptime())
+        .append(' ')
+        .append(name)
+        .append(' ');
+  }
+
 
   private final class LoggerImpl implements Logger {
 
