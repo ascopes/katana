@@ -41,24 +41,52 @@ public final class LoggerFactory {
       return;
     }
 
-    String message;
-    if (args.length == 0) {
-      message = format;
-    } else {
-      message = String.format(format.replace("{}", "%s"), args);
+    StringBuilder message = new StringBuilder();
+    
+    int argIndex = 0;
+    boolean newLine = true;
+    for (int i = 0; i < format.length(); ++i) {
+      if (newLine) {
+        newLine = false;
+        this.formatLineStart(message, level, name);
+      }
+      char msgChar = format.charAt(i);
+      if (msgChar == '{' && i < format.length() - 1 && format.charAt(i + 1) == '}') {
+        ++i;
+        String arg = Objects.toString(args[argIndex++]);
+        for (int j = 0; j < arg.length(); ++j) {
+          char argChar = arg.charAt(j);
+          message.append(argChar);
+          if (argChar == '\n') {
+            this.formatLineStart(message, level, name);
+          }
+        }
+      } else if (msgChar == '\n') {
+        newLine = true;
+        message.append('\n');
+      } else {
+        message.append(msgChar);
+      }
     }
 
-    // Indent additional lines to make code snippets easier to read.
-    message = String.join("\n  |  ", message.split("\n"));
-
-    this.outputStream.printf(
-        "[%s] %.3f - %s - %s%n",
-        level.name(),
-        this.runtimeMxBean.getUptime() / 1_000.0,
-        name,
-        message
-    );
+    this.outputStream.println(message);
   }
+
+  private void formatLineStart(
+      StringBuilder message, 
+      LoggingLevel level, 
+      String name
+  ) {
+    message
+        .append('[')
+        .append(level.name())
+        .append("] ")
+        .append(this.runtimeMxBean.getUptime())
+        .append(" <")
+        .append(name)
+        .append("> :: ");
+  }
+
 
   private final class LoggerImpl implements Logger {
 
@@ -72,7 +100,10 @@ public final class LoggerFactory {
           nameBuilder.append('.');
         }
 
-        if (i + 2 >= parts.length) {
+        // All but the last 2 bits of the package name
+        // should be abbreviated if they are more than 2
+        // characters long
+        if (i + 2 >= parts.length || parts[i].length() <= 2) {
           nameBuilder.append(parts[i]);
         } else {
           nameBuilder.append(parts[i].charAt(0));
