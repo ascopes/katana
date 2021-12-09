@@ -40,8 +40,6 @@ public final class LoggerFactory {
     if (!this.globalLevel.permits(level)) {
       return;
     }
-
-    StringBuilder message = new StringBuilder();
     
     int argIndex = 0;
     boolean newLine = true;
@@ -49,7 +47,7 @@ public final class LoggerFactory {
 
       if (newLine) {
         newLine = false;
-        this.formatLineStart(message, level, name);
+        this.formatLineStart(level, name);
       }
 
       char msgChar = format.charAt(i);
@@ -62,11 +60,11 @@ public final class LoggerFactory {
         for (int j = 0; j < arg.length(); ++j) {
           if (newLine) {
             newLine = false;
-            this.formatLineStart(message, level, name);
+            this.formatLineStart(level, name);
           }
 
           char argChar = arg.charAt(j);
-          message.append(argChar);
+          this.outputStream.print(argChar);
 
           if (argChar == '\n') {
             newLine = true;
@@ -80,25 +78,24 @@ public final class LoggerFactory {
         newLine = true;
       }
 
-      message.append(msgChar);
+      this.outputStream.print(msgChar);
     }
 
-    this.outputStream.println(message);
+    if (!newLine) {
+      this.outputStream.print('\n');
+    }
+
+    this.outputStream.flush();
   }
 
-  private void formatLineStart(
-      StringBuilder message, 
-      LoggingLevel level, 
-      String name
-  ) {
-    message
-        .append('[')
-        .append(level.name())
-        .append("] ")
-        .append(this.runtimeMxBean.getUptime())
-        .append(" <")
-        .append(name)
-        .append("> :: ");
+  private void formatLineStart(LoggingLevel level, String name) {
+    this.outputStream.print('[');
+    this.outputStream.print(level.name());
+    this.outputStream.print("] ");
+    this.outputStream.print(this.runtimeMxBean.getUptime());
+    this.outputStream.print(" <");
+    this.outputStream.print(name);
+    this.outputStream.print("> ::");
   }
 
 
