@@ -253,4 +253,23 @@ public @interface Settings {
    * @return the indent string to use.
    */
   String indent() default "    ";
+
+  ///////////////////////
+  //// Null-checking ////
+  ///////////////////////
+
+  /**
+   * Determine whether to enforce non-null checks.
+   *
+   * <p>If enabled, null values are not allowed to be provided for attributes unless the type
+   * is wrapped in {@link java.util.Optional}, or is annotated with {@link NullableAttribute}.
+   *
+   * <p>It is also worth noting that this will disallow overriding a non-null attribute in a
+   * super-interface with one that is nullable. You can however override a nullable attribute in a
+   * super-interface with one that is non-null by using the {@link NullableAttribute} annotation
+   * with a value of {@code false}.
+   *
+   * @return true if null-checking is enabled, or false if it is disabled.
+   */
+  boolean enforceNonNull() default true;
 }

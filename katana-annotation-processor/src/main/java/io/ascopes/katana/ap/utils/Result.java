@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.common.util.report.qual.ReportInherit;
@@ -197,22 +196,6 @@ public final class Result<T> {
   }
 
   /**
-   * If this result is OK, replace this result with the given result. Otherwise, return this
-   * result.
-   *
-   * @param then the supplier of the result to replace with if this result is OK.
-   * @param <U>  the new result type.
-   * @return the new result.
-   */
-  public <U> Result<U> ifOkReplace(Supplier<Result<U>> then) {
-    Objects.requireNonNull(then);
-    return this.isOk()
-        ? Objects.requireNonNull(then.get())
-        : castFailed(this);
-  }
-
-
-  /**
    * If the result is OK, then drop the value.
    *
    * <p>Acts as a cast to {@code Result<Void>} from any other generic result type.
@@ -264,7 +247,7 @@ public final class Result<T> {
     return "Result{"
         + "failed, "
         + "reason=" + StringUtils.quoted(this.reason) + ", "
-        + "chainedFailures=" + Objects.requireNonNull(this.location).causes.length + 1
+        + "causes=" + Objects.requireNonNull(this.location).causes.length + 1
         + "}";
   }
 
@@ -336,6 +319,7 @@ public final class Result<T> {
    * actually throwing anything.
    */
   public static final class StackTraceGroup {
+
     private final StackTraceElement[] currentFrames;
     private final StackTraceElement[][] causes;
 

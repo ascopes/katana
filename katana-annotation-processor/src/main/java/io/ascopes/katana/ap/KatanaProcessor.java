@@ -1,18 +1,18 @@
 package io.ascopes.katana.ap;
 
-import com.squareup.javapoet.JavaFile;
 import io.ascopes.katana.annotations.ImmutableModel;
 import io.ascopes.katana.annotations.MutableModel;
-import io.ascopes.katana.ap.analysis.InterfaceSearcher;
-import io.ascopes.katana.ap.analysis.Model;
-import io.ascopes.katana.ap.analysis.ModelFactory;
-import io.ascopes.katana.ap.codegen.JavaFileWriter;
-import io.ascopes.katana.ap.codegen.JavaModelFactory;
+import io.ascopes.katana.ap.files.CompilationUnitWriter;
 import io.ascopes.katana.ap.logging.Diagnostics;
 import io.ascopes.katana.ap.logging.Logger;
 import io.ascopes.katana.ap.logging.LoggerFactory;
 import io.ascopes.katana.ap.logging.LoggingLevel;
+import io.ascopes.katana.ap.types.DataClassSourceFactory;
+import io.ascopes.katana.ap.types.InterfaceSearcher;
+import io.ascopes.katana.ap.types.ModelDescriptor;
+import io.ascopes.katana.ap.types.ModelDescriptorFactory;
 import io.ascopes.katana.ap.utils.Result;
+import io.ascopes.katana.ap.utils.TimerUtils;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
@@ -44,9 +44,9 @@ public final class KatanaProcessor extends AbstractProcessor {
   private static final String LOGGING_LEVEL = "logging.level";
 
   private @MonotonicNonNull InterfaceSearcher interfaceSearcher;
-  private @MonotonicNonNull ModelFactory modelFactory;
-  private @MonotonicNonNull JavaModelFactory javaModelFactory;
-  private @MonotonicNonNull JavaFileWriter javaFileWriter;
+  private @MonotonicNonNull ModelDescriptorFactory modelDescriptorFactory;
+  private @MonotonicNonNull DataClassSourceFactory dataClassSourceFactory;
+  private @MonotonicNonNull CompilationUnitWriter compilationUnitWriter;
   private @MonotonicNonNull Logger logger;
 
   @Override
@@ -85,15 +85,15 @@ public final class KatanaProcessor extends AbstractProcessor {
 
     this.interfaceSearcher = new InterfaceSearcher(diagnostics);
 
-    this.modelFactory = new ModelFactory(
+    this.modelDescriptorFactory = new ModelDescriptorFactory(
         diagnostics,
         this.processingEnv.getElementUtils(),
         this.processingEnv.getTypeUtils()
     );
 
-    this.javaModelFactory = new JavaModelFactory();
+    this.dataClassSourceFactory = new DataClassSourceFactory();
 
-    this.javaFileWriter = new JavaFileWriter(
+    this.compilationUnitWriter = new CompilationUnitWriter(
         this.processingEnv.getFiler(),
         diagnostics
     );
@@ -125,23 +125,21 @@ public final class KatanaProcessor extends AbstractProcessor {
 
     AtomicInteger processed = new AtomicInteger();
     AtomicInteger failed = new AtomicInteger();
-    long start = System.nanoTime();
 
-    annotationTypes
+    double duration = TimerUtils.timing(() -> annotationTypes
         .stream()
         .flatMap(annotationType -> this.generateModelsForAnnotation(annotationType, roundEnv))
-        .map(model -> model.ifOkFlatMap(this::buildJavaFile))
-        .forEach(result -> this.handleResult(result, processed, failed));
-
-    double delta = (System.nanoTime() - start) / 1_000_000_000D;
-    double rate = processed.get() / delta;
+        .map(model -> model.ifOkMap(this.dataClassSourceFactory::create))
+        .map(javaFile -> javaFile.ifOkFlatMap(this.compilationUnitWriter::write))
+        .forEach(result -> this.handleResult(result, processed, failed)));
 
     this.logger.info(
-        "Processed {} in {} ({}) ({} failures)",
+        "Processed {} in {} ({}) ({} failures - {})",
         processed.get() == 1 ? "1 model definition" : processed.get() + " model definitions",
-        String.format("~%.3fs", delta),
-        String.format("~%.3f per second", rate),
-        failed.get()
+        String.format("~%.3fs", duration),
+        String.format("~%.3f per second", processed.get() / duration),
+        failed.get(),
+        String.format("~%.3f per second", failed.get() > 0 ? failed.get() / duration : 0)
     );
 
     return true;
@@ -178,18 +176,13 @@ public final class KatanaProcessor extends AbstractProcessor {
 
   }
 
-  private Stream<Result<Model>> generateModelsForAnnotation(
+  private Stream<Result<ModelDescriptor>> generateModelsForAnnotation(
       TypeElement annotationType,
       RoundEnvironment roundEnv
   ) {
     return this
         .interfaceSearcher
         .findAllInterfacesWithAnnotation(annotationType, roundEnv)
-        .map(interfaceType -> this.modelFactory.create(annotationType, interfaceType));
-  }
-
-  private Result<Void> buildJavaFile(Model model) {
-    JavaFile file = this.javaModelFactory.create(model);
-    return this.javaFileWriter.writeOutFile(model.getQualifiedName().reflectionName(), file);
+        .map(interfaceType -> this.modelDescriptorFactory.create(annotationType, interfaceType));
   }
 }
