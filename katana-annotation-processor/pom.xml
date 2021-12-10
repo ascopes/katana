@@ -155,10 +155,10 @@
             </goals>
             <configuration>
               <bindAllProjectProperties>true</bindAllProjectProperties>
-              <bindAllSessionUserProperties>true</bindAllSessionUserProperties>
               <includeClasspath>PROJECT_AND_PLUGIN</includeClasspath>
               <scripts>
-                <script>${project.basedir}/src/gen/groovy/GenerateSettingsBoilerplate.groovy
+                <script>
+                  ${project.basedir}/src/gen/groovy/GenerateSettingsBoilerplate.groovy
                 </script>
               </scripts>
             </configuration>
