@@ -23,7 +23,7 @@ import javax.lang.model.element.Modifier;
  *
  * <p>This will define a custom interface for every mandatory attribute, forcing the builder type
  * to implement these interfaces as to force the user to call specific methods to be able to reach
- * the {@code .build} method at the end successfully. attributeDescriptor
+ * the {@code .build()} method at the end successfully.
  *
  * @author Ashley Scopes
  * @since 0.0.1
