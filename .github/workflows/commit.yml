@@ -21,7 +21,8 @@ jobs:
           - "openjdk:16"
           - "openjdk:17"
           - "openjdk:18"
-          - "openjdk:19"
+          # Not yet supported by Groovy.
+          # - "openjdk:19"
 
     steps:
       - uses: actions/checkout@v2
