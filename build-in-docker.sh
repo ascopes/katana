@@ -14,7 +14,6 @@ if [ $# -lt 1 ]; then
 fi
 
 set -e
-set -x
 
 if echo "${1}" | grep -qE '^[0-9]+$'; then
   image="openjdk:${1}"
@@ -27,13 +26,19 @@ user_id="$(id -u "${USER}")"
 group_id="$(id -g "${USER}")"
 shift 1
 
-(docker run \
+echo -e "\e[1;32mIMAGE:\e[0;32m ${image}\e[0m"
+echo -e "\e[1;32mCWD:\e[0;32m ${this_dir}\e[0m"
+echo -e "\e[1;32mUSER ID:\e[0;32m ${user_id}\e[0m"
+echo -e "\e[1;32mGROUP ID:\e[0;32m ${group_id}\e[0m"
+echo -e "\e[1;32mCOMMAND:\e[0;32m ./mvnw $@\e[0m"
+
+docker run \
     --rm \
     -u "${user_id}:${group_id}" \
     -v "${this_dir}:${this_dir}" \
     -w "${this_dir}" \
     "${image}" \
     "${this_dir}/mvnw" $@ \
-    2>&1 && set +x) \
+    2>&1 \
   | while read line; do echo -e "\e[1;36m[DOCKER]\e[0m ${line}"; done
   
