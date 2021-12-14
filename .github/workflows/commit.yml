@@ -9,9 +9,22 @@ jobs:
 
     strategy:
       matrix:
-        java-version: [ "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18" ]
+        image:
+          - openjdk:8-alpine
+          - openjdk:9-alpine
+          - openjdk:10-alpine
+          - openjdk:11-alpine
+          - openjdk:12-alpine
+          - openjdk:13-alpine
+          - openjdk:14-alpine
+          - openjdk:15-alpine
+          - openjdk:16-alpine
+          - openjdk:17-alpine
+          - openjdk:18-alpine
+          - openjdk:19          # no alpine, yet!
+          
 
     steps:
       - uses: actions/checkout@v2
       - name: Build with Maven
-        run: ./build-in-docker.sh openjdk:${{matrix.java-version}} -B -T3 clean verify
+        run: ./build-in-docker.sh "${{matrix.image}}" -B -T3 clean verify
