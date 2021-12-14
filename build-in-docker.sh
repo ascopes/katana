@@ -33,9 +33,9 @@ echo -e "\e[1;32m[GROUP ID]:\e[0;32m ${group_id}\e[0m"
 echo -e "\e[1;32m[USER ENTRY]:\e[0;32m $(whoami)\e[0m"
 echo -e "\e[1;32m[SYSTEM]:\e[0;32m $(uname -a)\e[0m"
 echo -e "\e[1;32m[COMMAND]:\e[0;32m ./mvnw $@\e[0m"
-echo -en "\e[1;32m[DOCKER VERSION]:\e[0;32m $(docker --version | xargs)\e[0m"
+echo -e "\e[1;32m[DOCKER VERSION]:\e[0;32m $(docker --version | xargs)\e[0m"
 
-docker run \
+time docker run \
     --rm \
     -u "${user_id}:${group_id}" \
     -v "${this_dir}:${this_dir}" \
