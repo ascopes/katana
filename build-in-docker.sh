@@ -27,13 +27,13 @@ user_id="$(id -u "${USER}")"
 group_id="$(id -g "${USER}")"
 shift 1
 
-docker run \
+(docker run \
     --rm \
     -u "${user_id}:${group_id}" \
     -v "${this_dir}:${this_dir}" \
     -w "${this_dir}" \
     "${image}" \
     "${this_dir}/mvnw" $@ \
-    2>&1 \
+    2>&1 && set +x) \
   | while read line; do echo -e "\e[1;36m[DOCKER]\e[0m ${line}"; done
   
