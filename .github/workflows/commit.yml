@@ -10,19 +10,18 @@ jobs:
     strategy:
       matrix:
         image:
-          - openjdk:8-alpine
-          - openjdk:9-alpine
-          - openjdk:10-alpine
-          - openjdk:11-alpine
-          - openjdk:12-alpine
-          - openjdk:13-alpine
-          - openjdk:14-alpine
-          - openjdk:15-alpine
-          - openjdk:16-alpine
-          - openjdk:17-alpine
-          - openjdk:18-alpine
-          - openjdk:19          # no alpine, yet!
-          
+          - "openjdk:8"
+          - "openjdk:9"
+          - "openjdk:10"
+          - "openjdk:11"
+          - "openjdk:12"
+          - "openjdk:13"
+          - "openjdk:14"
+          - "openjdk:15"
+          - "openjdk:16"
+          - "openjdk:17"
+          - "openjdk:18"
+          - "openjdk:19"
 
     steps:
       - uses: actions/checkout@v2
