@@ -30,10 +30,10 @@ echo -e "\e[1;32m[IMAGE]:\e[0;32m ${image}\e[0m"
 echo -e "\e[1;32m[CWD]:\e[0;32m ${this_dir}\e[0m"
 echo -e "\e[1;32m[USER ID]:\e[0;32m ${user_id}\e[0m"
 echo -e "\e[1;32m[GROUP ID]:\e[0;32m ${group_id}\e[0m"
-echo -e "\e[1;32m[USER ENTRY]:\e[0;32m $(getent ${user_id} || true)\e[0m"
+echo -e "\e[1;32m[USER ENTRY]:\e[0;32m $(whoami)\e[0m"
 echo -e "\e[1;32m[SYSTEM]:\e[0;32m $(uname -a)\e[0m"
 echo -e "\e[1;32m[COMMAND]:\e[0;32m ./mvnw $@\e[0m"
-echo -en "\e[1;32m[DOCKER VERSION]:\e[0;32m$(docker --version | xargs)\e[0m"
+echo -en "\e[1;32m[DOCKER VERSION]:\e[0;32m $(docker --version | xargs)\e[0m"
 
 docker run \
     --rm \
