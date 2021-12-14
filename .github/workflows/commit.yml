@@ -9,17 +9,22 @@ jobs:
 
     strategy:
       matrix:
-        java-version: [ "8", "9", "10", "11", "12", "13", "14", "15", "16", "17" ]
-        java-distribution:
-          - zulu
+        image:
+          - "openjdk:8"
+          - "openjdk:9"
+          - "openjdk:10"
+          - "openjdk:11"
+          - "openjdk:12"
+          - "openjdk:13"
+          - "openjdk:14"
+          - "openjdk:15"
+          - "openjdk:16"
+          - "openjdk:17"
+          - "openjdk:18"
+          # Not yet supported by Groovy.
+          # - "openjdk:19"
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up ${{ matrix.java-distribution }} JDK ${{ matrix.java-version }}
-        uses: actions/setup-java@v2
-        with:
-          java-version: ${{ matrix.java-version }}
-          distribution: ${{ matrix.java-distribution }}
-          cache: "maven"
       - name: Build with Maven
-        run: ./mvnw -B clean verify
+        run: ./build-in-docker.sh "${{matrix.image}}" -B -T3 clean verify
