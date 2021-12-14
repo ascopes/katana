@@ -3,7 +3,6 @@ package io.ascopes.katana.ap.builders;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.MethodSpec.Builder;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -52,7 +51,7 @@ public final class CompileCheckedBuilderFactory extends AbstractBuilderFactory<S
   }
 
   @Override
-  Builder builderMethodFor(
+  MethodSpec.Builder builderMethodFor(
       ModelDescriptor model,
       BuilderStrategyDescriptor strategy,
       Stages context
@@ -102,7 +101,7 @@ public final class CompileCheckedBuilderFactory extends AbstractBuilderFactory<S
   }
 
   @Override
-  Builder builderBuildFor(
+  MethodSpec.Builder builderBuildFor(
       ModelDescriptor model,
       BuilderStrategyDescriptor strategy,
       Stages context
