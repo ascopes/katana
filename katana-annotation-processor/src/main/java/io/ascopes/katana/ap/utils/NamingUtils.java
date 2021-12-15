@@ -89,20 +89,55 @@ public final class NamingUtils {
   public static Optional<String> removePrefixCamelCase(ExecutableElement method, String prefix) {
     // TODO(ascopes): unit tests
     String name = method.getSimpleName().toString();
+    int nameLength = name.length();
     int prefixLength = prefix.length();
 
     if (prefixLength == 0) {
       // The prefix may be empty if we are using fluent naming.
-      return Optional.of(method.getSimpleName().toString());
+      return Optional.of(name);
     }
 
-    if (name.length() - prefixLength < 0 || !name.startsWith(prefix)) {
+    // If we don't have at least n + 1 chars, where n is the prefix
+    // size, then we cannot start with the prefix.
+    // Likewise if we start with the prefix but the next character is
+    // not uppercase, then this is likely a false positive. For example,
+    // we would not want to match 'getterFactory' as having a prefix
+    // of 'get' and a name of 'terFactory'.
+    boolean noPrefix = nameLength - prefixLength < 1
+        || !name.startsWith(prefix)
+        || !Character.isUpperCase(name.charAt(prefixLength));
+
+    if (noPrefix) {
       return Optional.empty();
     }
 
-    String unprefixed = name.substring(prefixLength);
-    char firstChar = Character.toLowerCase(unprefixed.charAt(0));
-    return Optional.of(firstChar + unprefixed.substring(1));
+    // Make all leading capital letters into lowercase. If we start
+    // with 5 capitals, such as HTMLView, we should make the first 4
+    // characters into lowercase, as to get htmlView.
+    // We know the first letter is capitalised already.
+    StringBuilder sb = new StringBuilder();
+    int index = prefixLength;
+    
+    while (index < nameLength - 1) {
+      char thisChar = name.charAt(index);
+      char nextChar = name.charAt(index + 1);
+
+      // Handle if they use underscores properly.
+      boolean thisIsUpper = Character.isUpperCase(thisChar);
+      boolean nextIsUnderscore = nextChar == '_';
+      boolean nextIsUpper = Character.isUpperCase(nextChar);
+
+      if (nextIsUnderscore || nextIsUpper) {
+        sb.append(Character.toLowerCase(thisChar));
+        ++index;
+      } else {
+        break;
+      }
+    }
+
+    sb.append(name.substring(index));
+
+    return Optional.of(sb.toString());
   }
 
   /**
