@@ -14,6 +14,7 @@ if [ $# -lt 1 ]; then
 fi
 
 set -e
+set -o pipefail
 
 if echo "${1}" | grep -qE '^[0-9]+$'; then
   image="openjdk:${1}"
