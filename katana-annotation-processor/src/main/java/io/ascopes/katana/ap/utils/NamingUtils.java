@@ -137,7 +137,7 @@ public final class NamingUtils {
 
     sb.append(name.substring(index));
 
-    return sb.toString();
+    return Optional.of(sb.toString());
   }
 
   /**
