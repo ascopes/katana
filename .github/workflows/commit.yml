@@ -40,7 +40,6 @@ jobs:
         run: |
           ./build-in-docker.sh "openjdk:17" \
               -B -T3 clean verify \
-              -Dmaven.main.skip=true \
               -Dmaven.test.skip=true \
               -Dmaven.site.skip=true \
               -Dmaven.javadoc.skip=true
