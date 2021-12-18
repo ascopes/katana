@@ -15,8 +15,6 @@
  */
 
 /**
- * Generated settings collection class, and generated schema details. This keeps the logic around
- * parsing individual settings up-to-date with the definition of {@link
- * io.ascopes.katana.annotations.Settings}.
+ * Compilation unit generation and handling.
  */
-package io.ascopes.katana.ap.settings.gen;
+package io.ascopes.katana.ap.files;

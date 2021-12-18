@@ -253,7 +253,13 @@
     </module>
     <module name="CommentsIndentation"/>
 
-    <!-- Custom stuff I have added for Katana -->
+    <!-- Ashley Scopes: require this-qualification on all elements that it applies to. -->
     <module name="RequireThis"/>
+  </module>
+
+  <!-- Ashley Scopes: ensure license headers are set -->
+  <module name="Header">
+    <property name="headerFile" value="${checkstyle.header.file}"/>
+    <property name="fileExtensions" value="java, groovy"/>
   </module>
 </module>

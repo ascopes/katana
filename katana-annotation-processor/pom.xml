@@ -30,6 +30,7 @@
     <settings.generatedOutputRoot>${project.build.directory}/generated-sources/settings
     </settings.generatedOutputRoot>
     <settings.generatedPackageName>${settings.packageName}.gen</settings.generatedPackageName>
+    <settings.generateScript>${project.basedir}/src/gen/groovy/GenerateSettingsBoilerplate.groovy</settings.generateScript>
   </properties>
 
   <dependencies>
@@ -100,11 +101,6 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <compilerArgs>
@@ -157,9 +153,7 @@
               <bindAllProjectProperties>true</bindAllProjectProperties>
               <includeClasspath>PROJECT_AND_PLUGIN</includeClasspath>
               <scripts>
-                <script>
-                  ${project.basedir}/src/gen/groovy/GenerateSettingsBoilerplate.groovy
-                </script>
+                <script>${settings.generateScript}</script>
               </scripts>
             </configuration>
           </execution>

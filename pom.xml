@@ -24,6 +24,10 @@
   </modules>
 
   <properties>
+    <!--suppress UnresolvedMavenProperty -->
+    <checkstyle-config-location>${maven.multiModuleProjectDirectory}/.mvn/checkstyle
+    </checkstyle-config-location>
+
     <katana.description>
       Katana is an annotation processor for Java 8 and higher which produces data class
       implementations
@@ -33,6 +37,7 @@
     </katana.description>
 
     <katana.jdk.version>8</katana.jdk.version>
+    <scm.url>https://github.com/ascopes/katana</scm.url>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -129,15 +134,17 @@
               </goals>
               <configuration>
                 <!--suppress UnresolvedMavenProperty -->
-                <configLocation>${maven.multiModuleProjectDirectory}/checkstyle.xml</configLocation>
+                <configLocation>${checkstyle-config-location}/checkstyle.xml</configLocation>
                 <consoleOutput>true</consoleOutput>
                 <encoding>UTF-8</encoding>
                 <failsOnError>true</failsOnError>
+                <headerLocation>${checkstyle-config-location}/license-header-java-groovy.txt
+                </headerLocation>
                 <sourceDirectories>
                   <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
                 </sourceDirectories>
-                <!--suppress UnresolvedMavenProperty -->
-                <suppressionsLocation>${maven.multiModuleProjectDirectory}/checkstyle-suppressions.xml</suppressionsLocation>
+                <suppressionsLocation>${checkstyle-config-location}/checkstyle-suppressions.xml
+                </suppressionsLocation>
                 <violationSeverity>info</violationSeverity>
               </configuration>
             </execution>
@@ -251,5 +258,33 @@
         </plugin>
       </plugins>
     </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+      </plugin>
+    </plugins>
   </build>
+
+  <inceptionYear>2021</inceptionYear>
+
+  <organization>
+    <name>Ashley Scopes</name>
+    <url>https://github.com/ascopes</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>Apache License V2.0</name>
+      <url>${scm.url}/blob/${project.scm.tag}/LICENSE.txt</url>
+    </license>
+  </licenses>
+
+  <scm>
+    <url>scm:git:${scm.url}</url>
+    <connection>scm:git:${scm.url}</connection>
+    <developerConnection>scm:git:${scm.url}</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
 </project>
