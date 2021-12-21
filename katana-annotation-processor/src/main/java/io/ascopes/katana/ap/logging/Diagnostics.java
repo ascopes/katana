@@ -81,23 +81,54 @@ public final class Diagnostics {
    * {@code -Werror} is enabled on the compiler, then this will also result in the compilation
    * aborting at some point before the process is killed.
    *
+   * @deprecated use {@link #builder(Class)} instead.
    * @return the builder.
    */
+  @Deprecated
   @MustCall("kind")
   public KindStage builder() {
-    return this.builder(Thread.currentThread().getStackTrace()[2].getClassName());
+    // Frame 0: .getStackTrace()
+    // Frame 1: .builder()
+    // Frame 2: Callee frame.
+    String className = Thread
+        .currentThread()
+        .getStackTrace()[2]
+        .getClassName();
+    return this.builder(className);
   }
 
+  /**
+   * Return a builder for a diagnostic message that will be sent to the compiler once completed.
+   *
+   * <p>If the kind is {@link Kind#ERROR}, the compilation will be aborted at some point before
+   * the process is killed.
+   *
+   * <p>Likewise, if the kind is {@link Kind#WARNING} or {@link Kind#MANDATORY_WARNING}, and
+   * {@code -Werror} is enabled on the compiler, then this will also result in the compilation
+   * aborting at some point before the process is killed.
+   *
+   * @param calleeClass the class that the message will be reported from. This affects the
+   *     path that the handlebars template will be read from.
+   * @return the builder.
+   */
+  @SuppressWarnings("deprecation")
+  @MustCall("kind")
+  public KindStage builder(Class<?> calleeClass) {
+    return this.builder(calleeClass.getCanonicalName());
+  }
+
+  @Deprecated
   @MustCall("kind")
   private KindStage builder(String className) {
-    return new MessageBuilder("/" + className.replace(".", "/"));
+    String handlebarsTemplatePath = "/" + className.replace(".", "/");
+    return new MessageBuilder(handlebarsTemplatePath);
   }
 
   private final class MessageBuilder
       implements KindStage, ElementStage, MessageStage, ParamsStage, FinishStage {
 
     private final String directory;
-    private final Map<String, Object> params;
+    private final Map<String, @Nullable Object> params;
     private @MonotonicNonNull Kind kind;
     private @Nullable Element element;
     private @Nullable AnnotationMirror annotationMirror;
@@ -146,9 +177,20 @@ public final class Diagnostics {
 
     @Override
     @MustCall({"log", "render"})
-    public ParamsStage param(String name, Object value) {
+    public ParamsStage param(String name, @Nullable Object value) {
       Objects.requireNonNull(name, "name of param was null");
       this.params.put(name, value);
+      return this;
+    }
+
+    @Override
+    @MustCall({"log", "render"})
+    public ParamsStage param(String name, Throwable ex) {
+      Objects.requireNonNull(name, "name of param was null");
+      Objects.requireNonNull(ex, "Throwable was null");
+
+      this.params.put(name, exToString(ex));
+
       return this;
     }
 
@@ -156,9 +198,12 @@ public final class Diagnostics {
     public void log() {
       try {
         String path = this.directory + "/" + this.template;
-        String message = Diagnostics.this.handlebars.compile(path).apply(this.params);
+        String message = Diagnostics.this.handlebars
+            .compile(path)
+            .apply(this.params);
 
-        Diagnostics.this.logger.debug("Reporting error to compiler [{}]:\n{}", path, message);
+        Diagnostics.this.logger
+            .debug("Reporting error to compiler [{}]:\n{}", path, message);
 
         Diagnostics.this.messager.printMessage(
             this.kind,
@@ -167,26 +212,26 @@ public final class Diagnostics {
             this.annotationMirror,
             this.annotationValue
         );
-      } catch (IOException | HandlebarsException ex) {
-        String stackTrace = ex.getClass()
-            + ": "
-            + ex.getMessage()
-            + "\n"
-            + stackTraceToString(ex.getStackTrace());
 
-        Diagnostics.this.logger.error("Failed to generate error template:\n{}", stackTrace);
+      } catch (IOException | HandlebarsException ex) {
+        String stackTrace = exToString(ex);
+
+        Diagnostics.this.logger
+            .error("Failed to generate error template:\n{}", stackTrace);
 
         throw new RuntimeException(ex);
       }
     }
   }
 
-  private static String stackTraceToString(StackTraceElement[] stack) {
-    StringBuilder builder = new StringBuilder();
-    for (StackTraceElement stackTraceElement : stack) {
-      builder.append("\t").append(stackTraceElement.toString()).append("\n");
-    }
-    return builder.toString();
+  private static String exToString(Throwable ex) {
+    Objects.requireNonNull(ex, "Throwable was null");
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    ex.printStackTrace(printWriter);
+
+    return ex.toString();
   }
 
   /**
@@ -280,7 +325,7 @@ public final class Diagnostics {
      * @return this stage.
      */
     @MustCall("log")
-    ParamsStage param(String name, Object value);
+    ParamsStage param(String name, @Nullable Object value);
 
 
     /**
@@ -291,12 +336,7 @@ public final class Diagnostics {
      * @return this stage.
      */
     @MustCall("log")
-    default ParamsStage param(String name, Throwable ex) {
-      StringWriter stringWriter = new StringWriter();
-      PrintWriter printWriter = new PrintWriter(stringWriter);
-      ex.printStackTrace(printWriter);
-      return this.param(name, stringWriter.toString());
-    }
+    default ParamsStage param(String name, Throwable ex);
   }
 
   /**
