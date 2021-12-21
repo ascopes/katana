@@ -21,6 +21,7 @@
     <module>katana</module>
     <module>katana-annotations</module>
     <module>katana-annotation-processor</module>
+    <module>katana-compiler-testing</module>
   </modules>
 
   <properties>

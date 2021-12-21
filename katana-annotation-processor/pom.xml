@@ -127,7 +127,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Automatic-Module-Name>io.ascopes.katana.ap</Automatic-Module-Name>
+              <Automatic-Module-Name>katana.ap</Automatic-Module-Name>
             </manifestEntries>
           </archive>
         </configuration>
