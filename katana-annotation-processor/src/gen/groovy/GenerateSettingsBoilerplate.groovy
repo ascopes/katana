@@ -182,7 +182,7 @@ private static CodeBlock stringifyDefaultValue(Object value, Class<?> targetType
 private static void dumpFile(JavaFile file) {
   System.out.printf(
       "[INFO] Generated file:%s%n",
-      ("\n" + file).replace("\n", "\n  |    ")
+      ("\n" + file).replace("\n", "\n[INFO] ")
   )
 }
 
@@ -391,14 +391,14 @@ private static void generateJavaFiles(def properties) {
       schemas
   )
 
-// Can't use Path.of in Java 8 builds
+  // Can't use Path.of in Java 8 builds
   Path outputPath = Paths.get(generatedOutputRoot).toAbsolutePath()
   System.out.printf("[INFO] Writing out generated code to %s%n", outputPath)
 
   dataClass.writeTo(outputPath)
   schemaDefinition.writeTo(outputPath)
 
-  System.out.println("[INFO] Done")
+  System.out.println("[INFO] Completed.")
 }
 
 //noinspection GrUnresolvedAccess
