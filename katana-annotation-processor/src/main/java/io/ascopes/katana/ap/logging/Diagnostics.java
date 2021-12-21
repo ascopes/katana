@@ -336,7 +336,7 @@ public final class Diagnostics {
      * @return this stage.
      */
     @MustCall("log")
-    default ParamsStage param(String name, Throwable ex);
+    ParamsStage param(String name, Throwable ex);
   }
 
   /**
