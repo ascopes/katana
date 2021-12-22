@@ -19,6 +19,7 @@ package io.ascopes.katana.ap.utils;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ExecutableElement;
 import org.checkerframework.common.util.report.qual.ReportCreation;
@@ -33,7 +34,6 @@ import org.checkerframework.common.util.report.qual.ReportInherit;
 @ReportCreation
 @ReportInherit
 public final class NamingUtils {
-
   private NamingUtils() {
     throw new UnsupportedOperationException("static-only class");
   }
@@ -127,33 +127,10 @@ public final class NamingUtils {
       return Optional.empty();
     }
 
-    // Make all leading capital letters into lowercase. If we start
-    // with 5 capitals, such as HTMLView, we should make the first 4
-    // characters into lowercase, as to get htmlView.
-    // We know the first letter is capitalised already.
-    StringBuilder sb = new StringBuilder();
-    int index = prefixLength;
-    
-    while (index < nameLength - 1) {
-      char thisChar = name.charAt(index);
-      char nextChar = name.charAt(index + 1);
+    String result = Character.toLowerCase(name.charAt(prefixLength))
+        + name.substring(prefixLength + 1);
 
-      // Handle if they use underscores properly.
-      boolean thisIsUpper = Character.isUpperCase(thisChar);
-      boolean nextIsUnderscore = nextChar == '_';
-      boolean nextIsUpper = Character.isUpperCase(nextChar);
-
-      if (nextIsUnderscore || nextIsUpper) {
-        sb.append(Character.toLowerCase(thisChar));
-        ++index;
-      } else {
-        break;
-      }
-    }
-
-    sb.append(name.substring(index));
-
-    return Optional.of(sb.toString());
+    return Optional.of(result);
   }
 
   /**
