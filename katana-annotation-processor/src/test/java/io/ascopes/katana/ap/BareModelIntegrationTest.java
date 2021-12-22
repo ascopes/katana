@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 
-class BareModelIntegrationTestDescriptorDescriptor {
+class BareModelIntegrationTest {
 
   KatanaProcessor processor;
 
