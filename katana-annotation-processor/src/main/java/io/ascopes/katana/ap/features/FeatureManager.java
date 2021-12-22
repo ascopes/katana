@@ -216,7 +216,7 @@ public final class FeatureManager {
     if (featureClass.isAnnotationPresent(CustomMethodAdvice.class)) {
       CustomMethodAdvice advice = featureClass.getAnnotation(CustomMethodAdvice.class);
       this.logger.trace("Got advice for {} from {}", featureClass, advice);
-      return Stream.of();
+      return Stream.of(advice);
     }
 
     CustomMethodAdvices advices = featureClass.getAnnotation(CustomMethodAdvices.class);

@@ -60,7 +60,7 @@ class BareModelIntegrationTest {
                 "",
                 "@MutableModel",
                 "@ImmutableModel",
-                "@Settings(builder = Builder.TYPESAFE)",
+                "@Settings(builder = Builder.TYPESAFE, toStringMode = ToString.CUSTOM)",
                 "public interface BareModel {",
                 "  String getFoo();",
                 "  int getBar();",
