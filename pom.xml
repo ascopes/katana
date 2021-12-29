@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.ascopes.katana</groupId>
+  <artifactId>katana-parent</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>katana-compiler-testing</module>
+  </modules>
+
+  <properties>
+    <jimfs.version>1.2</jimfs.version>
+    <junit.version>5.8.2</junit.version>
+    <kotlin.version>1.6.10</kotlin.version>
+
+    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+
+    <java-api-version>11</java-api-version>
+    <kotlin-api-version>1.6</kotlin-api-version>
+
+    <java-sources-dir>${project.basedir}/src/main/java</java-sources-dir>
+    <kotlin-sources-dir>${project.basedir}/src/main/kotlin</kotlin-sources-dir>
+    <java-tests-dir>${project.basedir}/src/test/java</java-tests-dir>
+    <kotlin-tests-dir>${project.basedir}/src/test/kotlin</kotlin-tests-dir>
+
+    <kotlin.compiler.apiVersion>${kotlin-api-version}</kotlin.compiler.apiVersion>
+    <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
+    <kotlin.compiler.jvmTarget>${java-api-version}</kotlin.compiler.jvmTarget>
+    <kotlin.compiler.languageVersion>${kotlin-api-version}</kotlin.compiler.languageVersion>
+
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.jimfs</groupId>
+        <artifactId>jimfs</artifactId>
+        <version>${jimfs.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-stdlib-jdk8</artifactId>
+        <version>${kotlin.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-test-junit5</artifactId>
+        <version>${kotlin.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.jetbrains.kotlin</groupId>
+          <artifactId>kotlin-maven-plugin</artifactId>
+          <version>${kotlin.version}</version>
+
+          <configuration>
+            <args>
+              <!-- Enable strict mode for JSR-305 annotations -->
+              <arg>-Xjsr305=strict</arg>
+            </args>
+          </configuration>
+
+          <executions>
+            <execution>
+              <id>kotlin-compile</id>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+              <configuration>
+                <sourceDirs>
+                  <sourceDir>${java-sources-dir}</sourceDir>
+                  <sourceDir>${kotlin-sources-dir}</sourceDir>
+                </sourceDirs>
+              </configuration>
+            </execution>
+            <execution>
+              <id>kotlin-test-compile</id>
+              <goals>
+                <goal>test-compile</goal>
+              </goals>
+              <configuration>
+                <sourceDirs>
+                  <sourceDir>${java-tests-dir}</sourceDir>
+                  <sourceDir>${kotlin-tests-dir}</sourceDir>
+                </sourceDirs>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
+          <executions>
+            <!--
+              Replacing default-compile and default-testCompile so that we can handle joint Kotlin
+              and Java sources together. Both the aforementioned targets get treated in a special
+              way by Maven, which would cause us issues.
+            -->
+            <execution>
+              <id>default-compile</id>
+              <phase>none</phase>
+            </execution>
+
+            <execution>
+              <id>default-testCompile</id>
+              <phase>none</phase>
+            </execution>
+
+            <execution>
+              <id>java-compile</id>
+              <phase>compile</phase>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+              <configuration>
+                <source>${java-api-version}</source>
+                <target>${java-api-version}</target>
+              </configuration>
+            </execution>
+
+            <execution>
+              <id>java-test-compile</id>
+              <phase>test-compile</phase>
+              <goals>
+                <goal>testCompile</goal>
+              </goals>
+              <configuration>
+                <testSource>${java-api-version}</testSource>
+                <testTarget>${java-api-version}</testTarget>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
