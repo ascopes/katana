@@ -8,7 +8,7 @@ class CompilerIntegrationTest {
     InMemoryCompiler
         .javac()
         .options("-g", "-Werror")
-        .sourceAndTargetVersion(8)
+        .sourceAndTargetVersion(11)
         .file(
             "my/packagename/here/HelloWorld.java",
             """

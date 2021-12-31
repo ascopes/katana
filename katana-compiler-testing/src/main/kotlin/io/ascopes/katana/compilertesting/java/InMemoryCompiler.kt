@@ -41,7 +41,7 @@ class InMemoryCompiler(private val compiler: JavaCompiler) {
    * @return this object.
    */
   @Suppress("MemberVisibilityCanBePrivate")
-  fun sourceVersion(version: Int) = this.options("--source", version.toString())
+  fun sourceVersion(version: Int) = this.options("-source", version.toString())
 
   /**
    * Set the target version to use.
@@ -50,7 +50,7 @@ class InMemoryCompiler(private val compiler: JavaCompiler) {
    * @return this object.
    */
   @Suppress("MemberVisibilityCanBePrivate")
-  fun targetVersion(version: Int) = this.options("--target", version.toString())
+  fun targetVersion(version: Int) = this.options("-target", version.toString())
 
   /**
    * Set the source and target version to use.

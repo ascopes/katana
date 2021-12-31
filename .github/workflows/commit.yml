@@ -10,9 +10,6 @@ jobs:
     strategy:
       matrix:
         image:
-          - "openjdk:8"
-          - "openjdk:9"
-          - "openjdk:10"
           - "openjdk:11"
           - "openjdk:12"
           - "openjdk:13"
