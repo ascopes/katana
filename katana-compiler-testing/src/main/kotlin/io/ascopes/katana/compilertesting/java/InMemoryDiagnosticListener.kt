@@ -27,7 +27,7 @@ class InMemoryDiagnosticListener : DiagnosticListener<JavaFileObject> {
   override fun report(diagnostic: Diagnostic<out JavaFileObject>) {
     // Last two frames just hold the stacktrace accessor call and this report function,
     // so skip them.
-    val stackTrace = Thread.currentThread().stackTrace.drop(2).toTypedArray()
+    val stackTrace = Thread.currentThread().stackTrace.drop(2).toList()
     this._diagnostics.add(DiagnosticWithTrace(diagnostic, stackTrace))
   }
 }
