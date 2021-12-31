@@ -14,8 +14,22 @@ import javax.tools.Diagnostic
  */
 class DiagnosticWithTrace<S>(
     private val diagnostic: Diagnostic<S>,
-    private val stacktrace: Array<StackTraceElement>
+    private val stacktrace: List<StackTraceElement>
 ) : Diagnostic<S> by diagnostic {
+  
+  override fun equals(other: Any?): Boolean {
+    if (other is DiagnosticWithTrace<*>) {
+      return this.diagnostic = other.diagnostic
+    }
+
+    if (other is Diagnostic<*>) {
+      return this.diagnostic == other
+    }
+
+    return false
+  }
+  
+  override fun hashCode() = this.diagnostic.hashCode()
 
   override fun toString(): String {
     return StringBuilder()
@@ -24,11 +38,12 @@ class DiagnosticWithTrace<S>(
         .append(this.code)
         .append('\n')
         .append(this.getMessage(Locale.ROOT))
-        .append('\n')
+        .append("\n\nDiagnostic was reported at:\n")
+
         .also { builder ->
           this.stacktrace.forEach { frame ->
             builder
-                .append("\tat ")
+                .append('\t')
                 .append(frame)
                 .append('\n')
           }
