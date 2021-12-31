@@ -6,7 +6,9 @@ package io.ascopes.katana.compilertesting.java
  * @author Ashley Scopes
  * @since 0.0.1
  */
-sealed interface Outcome
+sealed interface Outcome {
+  val description: String
+}
 
 /**
  * Marker to indicate a successful compilation.
@@ -14,7 +16,9 @@ sealed interface Outcome
  * @author Ashley Scopes
  * @since 0.0.1
  */
-object Ok : Outcome
+object Success : Outcome {
+  override val description = "success"
+}
 
 /**
  * Marker to indicate compilation failed in a non-exceptional way.
@@ -22,8 +26,9 @@ object Ok : Outcome
  * @author Ashley Scopes
  * @since 0.0.1
  */
-object Failure : Outcome
-
+object Failure : Outcome {
+  override val description = "failure"
+}
 
 /**
  * Marker to indicate compilation failed with an exception, unexpectedly.
@@ -31,4 +36,13 @@ object Failure : Outcome
  * @author Ashley Scopes
  * @since 0.0.1
  */
-class FatalError(val reason: Throwable) : Outcome
+class FatalError(
+    @Suppress("MemberVisibilityCanBePrivate") val reason: Throwable
+) : Outcome {
+  override val description: String
+    get() = "${Companion.description} due to ${this.reason.javaClass.simpleName}"
+
+  companion object {
+    const val description: String = "fatal compiler error"
+  }
+}

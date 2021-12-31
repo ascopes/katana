@@ -162,7 +162,7 @@ class InMemoryCompiler(private val compiler: JavaCompiler) {
     task.setProcessors(this.processors)
 
     val outcome = try {
-      if (task.call()) Ok else Failure
+      if (task.call()) Success else Failure
     } catch (ex: Exception) {
       FatalError(ex)
     }

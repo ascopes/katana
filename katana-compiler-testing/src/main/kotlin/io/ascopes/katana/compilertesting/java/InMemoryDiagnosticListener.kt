@@ -1,5 +1,6 @@
 package io.ascopes.katana.compilertesting.java
 
+import java.time.Instant
 import javax.tools.Diagnostic
 import javax.tools.DiagnosticListener
 import javax.tools.JavaFileObject
@@ -25,9 +26,19 @@ class InMemoryDiagnosticListener : DiagnosticListener<JavaFileObject> {
    * @param diagnostic the diagnostic to report.
    */
   override fun report(diagnostic: Diagnostic<out JavaFileObject>) {
+    val stackTrace = Thread
+        .currentThread()
+        .stackTrace
+        .drop(Companion.FRAMES_TO_DROP)
+        .toList()
+
+    val now = Instant.now()
+    this._diagnostics.add(DiagnosticWithTrace(now, diagnostic, stackTrace))
+  }
+
+  companion object {
     // Last two frames just hold the stacktrace accessor call and this report function,
     // so skip them.
-    val stackTrace = Thread.currentThread().stackTrace.drop(2).toTypedArray()
-    this._diagnostics.add(DiagnosticWithTrace(diagnostic, stackTrace))
+    private const val FRAMES_TO_DROP = 2
   }
 }

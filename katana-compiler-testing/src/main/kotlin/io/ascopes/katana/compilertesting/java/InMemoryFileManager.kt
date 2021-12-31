@@ -77,6 +77,37 @@ class InMemoryFileManager(
   }
 
   /**
+   * Get a reference to an in-memory file, if it exists.
+   *
+   * If it does not exist, return null.
+   *
+   * @param location the location of the file.
+   * @param fileName the name of the file.
+   * @return the file object, if it exists, otherwise `null`.
+   */
+  fun getInMemoryFile(location: Location, fileName: String): InMemoryFileObject? {
+    if (location !in Companion.virtualLocations) {
+      throw UnsupportedOperationException("Can get existing files from in-memory file system")
+    }
+
+    val path = this.fileToPath(location, "", fileName)
+    val obj = InMemoryFileObject(location, path.toUri())
+    return if (obj.exists()) obj else null
+  }
+
+  /**
+   * Get an iterable across all in-memory files.
+   *
+   * @return the iterable sequence.
+   */
+  fun listAllInMemoryFiles(): Iterable<InMemoryFileObject> {
+    return Companion
+        .virtualLocations
+        .flatMap { this.list(it, "", setOf(Kind.OTHER), true) }
+        .map { it as InMemoryFileObject }
+  }
+
+  /**
    * Get a file for use as an input.
    *
    * @param location the location of the file.
@@ -94,7 +125,7 @@ class InMemoryFileManager(
     }
 
     val path = this.fileToPath(location, packageName, relativeName)
-    val obj = InMemoryFileObject(path.toUri())
+    val obj = InMemoryFileObject(location, path.toUri())
     return if (obj.exists()) obj else null
   }
 
@@ -116,10 +147,9 @@ class InMemoryFileManager(
     }
 
     val path = this.sourceToPath(location, className, kind)
-    val obj = InMemoryFileObject(path.toUri())
+    val obj = InMemoryFileObject(location, path.toUri())
     return if (obj.exists()) obj else null
   }
-
 
   /**
    * Get a file for use as an output.
@@ -142,7 +172,7 @@ class InMemoryFileManager(
 
     val path = this.fileToPath(location, packageName, relativeName)
     this.createNewFileWithDirectories(path)
-    return InMemoryFileObject(path.toUri())
+    return InMemoryFileObject(location, path.toUri())
   }
 
 
@@ -167,7 +197,7 @@ class InMemoryFileManager(
 
     val path = this.sourceToPath(location, className, kind)
     this.createNewFileWithDirectories(path)
-    return InMemoryFileObject(path.toUri())
+    return InMemoryFileObject(location, path.toUri())
   }
 
   /**
@@ -203,7 +233,7 @@ class InMemoryFileManager(
           val kind = kinds.find { path.toString().endsWith(it.extension) }
 
           if (kind != null) {
-            filesFound += InMemoryFileObject(path.toUri(), kind)
+            filesFound += InMemoryFileObject(location, path.toUri(), kind)
           }
         }
 

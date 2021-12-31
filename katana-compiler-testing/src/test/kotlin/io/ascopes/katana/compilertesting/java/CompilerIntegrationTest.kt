@@ -10,18 +10,19 @@ class CompilerIntegrationTest {
         .options("-g", "-Werror")
         .sourceAndTargetVersion(8)
         .file(
-            "my/packagename/HelloWorld.java",
+            "my/packagename/here/HelloWorld.java",
             """
-            |package my.packagename.here;
-            |
-            |public class HelloWorld {
-            |  public static void main(String[] args) {
-            |    System.out.println("Hello, World!");!
-            |  }
-            |}
-            """.trimMargin()
+            package my.packagename.here;
+            
+            public class HelloWorld {
+              public static void main(String[] args) {
+                System.out.println("Hello, World!");
+              }
+            }
+            """.trimIndent()
         )
         .compile()
-        .assertSucceeded()
+        .succeededWithoutWarnings()
+        .generatedClassFile("my/packagename/HelloWorld.class")
   }
 }
