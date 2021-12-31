@@ -345,7 +345,7 @@ class InMemoryCompilationResult(
 
   private fun hadOutcome(expected: Outcome) = this.apply {
     this.outcome == expected || throw JavaCompilerAssertionError(
-        "Unexpected compilation outcome",
+        "Unexpected compilation outcome: ${this.outcome.description}",
         this.fileManager,
         this.diagnostics,
         this.logs,

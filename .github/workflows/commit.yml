@@ -1,0 +1,45 @@
+name: Build Commit
+
+on:
+  - push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        image:
+          - "openjdk:8"
+          - "openjdk:9"
+          - "openjdk:10"
+          - "openjdk:11"
+          - "openjdk:12"
+          - "openjdk:13"
+          - "openjdk:14"
+          - "openjdk:15"
+          - "openjdk:16"
+          - "openjdk:17"
+          - "openjdk:18"
+          # Not yet supported by Groovy.
+          # - "openjdk:19"
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+          ./build-in-docker.sh "${{matrix.image}}" \
+              -B -T3 clean package \
+              -Dcheckstyle.skip=true
+
+  checkstyle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Checkstyle
+        run: |
+          ./build-in-docker.sh "openjdk:17" \
+              -B -T3 clean verify \
+              -Dmaven.test.skip=true \
+              -Dmaven.site.skip=true \
+              -Dmaven.javadoc.skip=true

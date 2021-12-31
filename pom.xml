@@ -18,6 +18,7 @@
     <jimfs.version>1.2</jimfs.version>
     <junit.version>5.8.2</junit.version>
     <kotlin.version>1.6.10</kotlin.version>
+    <opentest4j.version>1.2.0</opentest4j.version>
 
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
@@ -64,6 +65,12 @@
         <version>${junit.version}</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+
+      <dependency>
+        <groupId>org.opentest4j</groupId>
+        <artifactId>opentest4j</artifactId>
+        <version>${opentest4j.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -23,6 +23,6 @@ class CompilerIntegrationTest {
         )
         .compile()
         .succeededWithoutWarnings()
-        .generatedClassFile("my/packagename/HelloWorld.class")
+        .generatedClassFile("my/packagename/here/HelloWorld.class")
   }
 }
