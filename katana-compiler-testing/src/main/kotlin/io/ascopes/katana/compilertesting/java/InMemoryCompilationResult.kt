@@ -311,7 +311,7 @@ class InMemoryCompilationResult internal constructor(
   fun satisfies(
       description: String? = "custom condition",
       predicate: InMemoryCompilationResult.() -> Boolean
-  ) = this.chain {
+  ) = this.apply {
     if (!this.predicate()) {
       this.fail("Expected '$description' to succeed, but it failed")
     }
@@ -345,7 +345,7 @@ class InMemoryCompilationResult internal constructor(
         ?: this.fail("Generated header file $fileName did not exist")
   }
 
-  private fun hadOutcome(expected: Outcome) = this.chain {
+  private fun hadOutcome(expected: Outcome) = this.apply {
     if (this.outcome != expected) {
       this.fail(
           "Unexpected compilation outcome: ${this.outcome.description}",
@@ -356,7 +356,7 @@ class InMemoryCompilationResult internal constructor(
     }
   }
 
-  private fun hadDiagnosticCount(kind: Kind, expectedCount: Int) = this.chain {
+  private fun hadDiagnosticCount(kind: Kind, expectedCount: Int) = this.apply {
     val actualCount = this.diagnostics.count { it.kind == kind }
 
     if (expectedCount != actualCount) {
@@ -372,7 +372,7 @@ class InMemoryCompilationResult internal constructor(
       kind: Kind,
       message: String,
       ignoreCase: Boolean
-  ) = this.chain {
+  ) = this.apply {
     val kindName = this.singularKind(kind)
     val insensitivity = if (ignoreCase) "(case insensitive)" else "(case sensitive)"
 
@@ -386,17 +386,12 @@ class InMemoryCompilationResult internal constructor(
   private fun hadDiagnosticMatching(
       kind: Kind,
       regex: Regex
-  ) = this.chain {
+  ) = this.apply {
     val kindName = this.singularKind(kind)
 
     this.diagnostics
         .find { it.getMessage(Locale.ROOT).matches(regex) }
         ?: this.fail("no $kindName with a message matching pattern '$regex' found")
-  }
-
-  private fun chain(operation: () -> Unit): InMemoryCompilationResult {
-    operation()
-    return this
   }
 
   private fun singularKind(kind: Kind) =

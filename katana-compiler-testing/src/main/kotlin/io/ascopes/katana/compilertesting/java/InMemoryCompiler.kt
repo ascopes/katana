@@ -124,14 +124,14 @@ class InMemoryCompiler internal constructor(
    *
    * @return this object for further call chaining.
    */
-  fun treatWarningsAsErrors() = this.chain { this.options += "-Werror" }
+  fun treatWarningsAsErrors() = this.apply { this.options += "-Werror" }
 
   /**
    * Request that the compiler produces native headers for JNI interop.
    *
    * @return this object for further call chaining.
    */
-  fun generateHeaders() = this.chain {
+  fun generateHeaders() = this.apply {
     val headerLocation = this.fileManager.getLocationFor(StandardLocation.NATIVE_HEADER_OUTPUT)
     this.options += listOf("-h", headerLocation.path.absolutePathString())
   }
@@ -142,7 +142,7 @@ class InMemoryCompiler internal constructor(
    * @param options the options to add.
    * @return this object for further call chaining.
    */
-  fun options(vararg options: String) = this.chain { this.options += options }
+  fun options(vararg options: String) = this.apply { this.options += options }
 
   /**
    * Add the given modules to the compiler.
@@ -150,7 +150,7 @@ class InMemoryCompiler internal constructor(
    * @param modules the modules to add.
    * @return this object for further call chaining.
    */
-  fun modules(vararg modules: String) = this.chain { this.modules += modules }
+  fun modules(vararg modules: String) = this.apply { this.modules += modules }
 
   /**
    * Add the given processors to the compiler.
@@ -158,7 +158,7 @@ class InMemoryCompiler internal constructor(
    * @param processors the processors to add.
    * @return this object for further call chaining.
    */
-  fun processors(vararg processors: Processor) = this.chain { this.processors += processors }
+  fun processors(vararg processors: Processor) = this.apply { this.processors += processors }
 
   /**
    * Perform operations on input source files.
@@ -293,11 +293,6 @@ class InMemoryCompiler internal constructor(
         diagnostics = this.diagnosticListener.diagnostics,
         fileManager = this.fileManager
     )
-  }
-
-  private fun chain(operation: () -> Unit): InMemoryCompiler {
-    operation()
-    return this
   }
 
   private fun sourceToInt(sourceVersion: SourceVersion) = sourceVersion
