@@ -7,18 +7,15 @@ import javax.tools.Diagnostic.Kind.MANDATORY_WARNING
 import javax.tools.Diagnostic.Kind.NOTE
 import javax.tools.Diagnostic.Kind.OTHER
 import javax.tools.Diagnostic.Kind.WARNING
-import javax.tools.JavaFileManager.Location
 import javax.tools.JavaFileObject
-import javax.tools.StandardLocation.CLASS_OUTPUT
-import javax.tools.StandardLocation.NATIVE_HEADER_OUTPUT
-import javax.tools.StandardLocation.SOURCE_OUTPUT
+import javax.tools.StandardLocation
 
 
 /**
  * Results for an in-memory compilation pass.
  *
  * @author Ashley Scopes
- * @since 0.0.1
+ * @since 0.1.0
  * @param outcome the outcome description of the compilation.
  * @param logs the standard output for the compiler.
  * @param diagnostics the diagnostics that the compiler output, along with call location details.
@@ -298,33 +295,6 @@ class InMemoryCompilationResult(
   fun hadOtherDiagnosticMatching(regex: String) = this.hadDiagnosticMatching(OTHER, regex.toRegex())
 
   /**
-   * Assert that the compilation generated a file in the generated class file output location.
-   *
-   * @param path the path of the generated file to expect.
-   * @return this object for further call chaining.
-   */
-  fun generatedClassFile(path: String) = this.createdFileNamed(CLASS_OUTPUT, path)
-
-  /**
-   * Assert that the compilation generated a file in the generated source code output location.
-   *
-   * @param path the path of the generated file to expect.
-   * @return this object for further call chaining.
-   */
-  fun generatedSourceFile(path: String) = this.createdFileNamed(SOURCE_OUTPUT, path)
-
-  /**
-   * Assert that the compilation generated a file in the C/C++ header output location.
-   *
-   * @param path the path of the generated file to expect.
-   * @return this object for further call chaining.
-   */
-  fun generatedHeaderFile(path: String) = this.createdFileNamed(
-      NATIVE_HEADER_OUTPUT,
-      path
-  )
-
-  /**
    * Check if the given condition is satisfied or not.
    *
    * @param description optional custom description.
@@ -334,7 +304,7 @@ class InMemoryCompilationResult(
   fun satisfies(
       description: String? = "custom condition",
       predicate: InMemoryCompilationResult.() -> Boolean
-  ) = this.apply {
+  ) = this.chain {
     this.predicate() || throw JavaCompilerAssertionError(
         "Expected '$description' to succeed, but it failed",
         this.fileManager,
@@ -343,75 +313,84 @@ class InMemoryCompilationResult(
     )
   }
 
-  private fun hadOutcome(expected: Outcome) = this.apply {
-    this.outcome == expected || throw JavaCompilerAssertionError(
-        "Unexpected compilation outcome: ${this.outcome.description}",
-        this.fileManager,
-        this.diagnostics,
-        this.logs,
-        expected.description,
-        this.outcome.description,
-        if (this.outcome is FatalError) this.outcome.reason else null
-    )
+  fun generatedSourceFile(fileName: String) = this.apply {
+    this.fileManager
+        .getLocationFor(StandardLocation.SOURCE_OUTPUT)
+        .getFile(fileName)
+        ?: this.fail("Generated source file $fileName did not exist")
   }
 
-  private fun hadDiagnosticCount(kind: Kind, expectedCount: Int) = this.apply {
+  fun generatedSourceFile(fileName: String, moduleName: String) = this.apply {
+    this.fileManager
+        .getLocationFor(StandardLocation.SOURCE_OUTPUT, moduleName)
+        .getFile(fileName)
+        ?: this.fail("Generated source file $moduleName/$fileName did not exist")
+  }
+
+  fun generatedClassFile(fileName: String) = this.apply {
+    this.fileManager
+        .getLocationFor(StandardLocation.CLASS_OUTPUT)
+        .getFile(fileName)
+        ?: this.fail("Generated class file $fileName did not exist")
+  }
+
+  fun generatedHeaderFile(fileName: String) = this.apply {
+    this.fileManager
+        .getLocationFor(StandardLocation.NATIVE_HEADER_OUTPUT)
+        .getFile(fileName)
+        ?: this.fail("Generated header file $fileName did not exist")
+  }
+
+  private fun hadOutcome(expected: Outcome) = this.chain {
+    if (this.outcome != expected) {
+      this.fail(
+          "Unexpected compilation outcome: ${this.outcome.description}",
+          expected.description,
+          this.outcome.description,
+          if (this.outcome is FatalError) this.outcome.reason else null
+      )
+    }
+  }
+
+  private fun hadDiagnosticCount(kind: Kind, expectedCount: Int) = this.chain {
     val actualCount = this.diagnostics.count { it.kind == kind }
 
-    expectedCount == actualCount || throw JavaCompilerAssertionError(
-        "Unexpected number of " + this.pluralizeKind(kind),
-        this.fileManager,
-        this.diagnostics,
-        this.logs,
-        this.quantifyKind(kind, expectedCount),
-        this.quantifyKind(kind, actualCount),
-    )
+    if (expectedCount != actualCount) {
+      this.fail(
+          "Unexpected number of " + this.pluralizeKind(kind),
+          this.quantifyKind(kind, expectedCount),
+          this.quantifyKind(kind, actualCount),
+      )
+    }
   }
 
   private fun hadDiagnosticContaining(
       kind: Kind,
       message: String,
       ignoreCase: Boolean
-  ) = this.apply {
+  ) = this.chain {
     val kindName = this.singularKind(kind)
     val insensitivity = if (ignoreCase) "(case insensitive)" else "(case sensitive)"
 
     this.diagnostics
         .find { it.getMessage(Locale.ROOT).contains(message, ignoreCase) }
-        ?: throw JavaCompilerAssertionError(
-            "no $kindName with a message containing '$message' $insensitivity found",
-            this.fileManager,
-            this.diagnostics,
-            this.logs
+        ?: this.fail(
+            "no $kindName with a message containing '$message' $insensitivity found"
         )
   }
 
   private fun hadDiagnosticMatching(
       kind: Kind,
       regex: Regex
-  ) = this.apply {
+  ) = this.chain {
     val kindName = this.singularKind(kind)
 
     this.diagnostics
         .find { it.getMessage(Locale.ROOT).matches(regex) }
-        ?: throw JavaCompilerAssertionError(
-            "no $kindName with a message matching pattern '$regex' found",
-            this.fileManager,
-            this.diagnostics,
-            this.logs
-        )
+        ?: this.fail("no $kindName with a message matching pattern '$regex' found")
   }
 
-  private fun createdFileNamed(location: Location, path: String) = this.apply {
-    this.fileManager.getInMemoryFile(location, path) ?: throw JavaCompilerAssertionError(
-        "no ${location.name} file created with path $path",
-        this.fileManager,
-        this.diagnostics,
-        this.logs
-    )
-  }
-
-  private fun apply(operation: () -> Unit): InMemoryCompilationResult {
+  private fun chain(operation: () -> Unit): InMemoryCompilationResult {
     operation()
     return this
   }
@@ -446,4 +425,26 @@ class InMemoryCompilationResult(
         'a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y' -> "an $text"
         else -> "a $text"
       }
+
+  private fun fail(message: String, expected: Any?, actual: Any?, cause: Throwable? = null) {
+    throw JavaCompilerAssertionError(
+        message,
+        this.fileManager,
+        this.diagnostics,
+        this.logs,
+        expected,
+        actual,
+        cause
+    )
+  }
+
+  private fun fail(message: String, cause: Throwable? = null) {
+    throw JavaCompilerAssertionError(
+        message,
+        this.fileManager,
+        this.diagnostics,
+        this.logs,
+        cause
+    )
+  }
 }

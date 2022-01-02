@@ -4,7 +4,7 @@ package io.ascopes.katana.compilertesting.java
  * Base marker interface for a compilation outcome.
  *
  * @author Ashley Scopes
- * @since 0.0.1
+ * @since 0.1.0
  */
 sealed interface Outcome {
   val description: String
@@ -14,7 +14,7 @@ sealed interface Outcome {
  * Marker to indicate a successful compilation.
  *
  * @author Ashley Scopes
- * @since 0.0.1
+ * @since 0.1.0
  */
 object Success : Outcome {
   override val description = "success"
@@ -24,7 +24,7 @@ object Success : Outcome {
  * Marker to indicate compilation failed in a non-exceptional way.
  *
  * @author Ashley Scopes
- * @since 0.0.1
+ * @since 0.1.0
  */
 object Failure : Outcome {
   override val description = "failure"
@@ -34,7 +34,7 @@ object Failure : Outcome {
  * Marker to indicate compilation failed with an exception, unexpectedly.
  *
  * @author Ashley Scopes
- * @since 0.0.1
+ * @since 0.1.0
  */
 class FatalError(
     @Suppress("MemberVisibilityCanBePrivate") val reason: Throwable

@@ -9,7 +9,7 @@ import javax.tools.JavaFileObject
  * Collector of diagnostics.
  *
  * @author Ashley Scopes
- * @since 0.0.1
+ * @since 0.1.0
  */
 class InMemoryDiagnosticListener : DiagnosticListener<JavaFileObject> {
   private val _diagnostics = mutableListOf<DiagnosticWithTrace<out JavaFileObject>>()
@@ -36,9 +36,9 @@ class InMemoryDiagnosticListener : DiagnosticListener<JavaFileObject> {
     this._diagnostics.add(DiagnosticWithTrace(now, diagnostic, stackTrace))
   }
 
-  companion object {
+  private companion object {
     // Last two frames just hold the stacktrace accessor call and this report function,
     // so skip them.
-    private const val FRAMES_TO_DROP = 2
+    const val FRAMES_TO_DROP = 2
   }
 }

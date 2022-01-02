@@ -24,10 +24,16 @@ import javax.tools.JavaFileObject.Kind
 import javax.tools.StandardJavaFileManager
 import javax.tools.StandardLocation
 import kotlin.io.path.createDirectories
-import kotlin.io.path.createDirectory
 import kotlin.io.path.createFile
 import kotlin.io.path.deleteIfExists
+import kotlin.io.path.isDirectory
 import kotlin.io.path.isRegularFile
+import kotlin.io.path.notExists
+import kotlin.io.path.relativeTo
+import kotlin.io.path.toPath
+import kotlin.io.path.writeBytes
+import kotlin.io.path.writeLines
+import kotlin.streams.asSequence
 
 
 /**
@@ -41,8 +47,10 @@ import kotlin.io.path.isRegularFile
  * This makes this very useful in tests where we need to present a full file system
  * to the compiler API.
  *
+ * This also supports basic multimodule compilation, at the time of writing...
+ *
  * @author Ashley Scopes
- * @since 0.0.1
+ * @since 0.1.0
  * @param standardFileManager the compiler-supplied standard file manager to delegate most calls to.
  */
 class InMemoryFileManager(
@@ -50,49 +58,66 @@ class InMemoryFileManager(
 ) : ForwardingJavaFileManager<JavaFileManager>(standardFileManager) {
   private val fs: FileSystem
   private val rootPath: Path
+  private val inMemoryLocations: Map<StandardLocation, InMemoryLocation>
 
   init {
     val fsName = UUID.randomUUID().toString()
     this.fs = Jimfs.newFileSystem(fsName, Configuration.unix())
     this.rootPath = this.fs.getPath("/")
 
-    // Create the root directories ready.
-    Companion.virtualLocations.forEach { this.rootPath.resolve(it.name).createDirectory() }
+    this.inMemoryLocations = mapOf(
+        this.mapLocationFor(StandardLocation.SOURCE_PATH, "input/main"),
+        this.mapLocationFor(StandardLocation.MODULE_SOURCE_PATH, "input/modules"),
+        this.mapLocationFor(StandardLocation.SOURCE_OUTPUT, "output/sources"),
+        this.mapLocationFor(StandardLocation.CLASS_OUTPUT, "output/classes"),
+        this.mapLocationFor(StandardLocation.NATIVE_HEADER_OUTPUT, "output/headers"),
+    )
+
+    this.inMemoryLocations.values.forEach { it.path.createDirectories() }
 
     // On garbage collection, destroy any created files within the temporary root we created.
     Companion.cleaner.register(this, VfsRootHandle(this.fs))
   }
 
   /**
-   * Create a file and return the path to it.
+   * Get the location operations for a non-module location.
    *
-   * @param location the location of the file.
-   * @param fileName the name of the file.
-   * @return the path of the file, which can be used to open a writer quickly.
+   * @param location the location.
+   * @return the location operations.
    */
-  fun createFile(location: Location, fileName: String): Path {
-    val path = this.fileToPath(location, "", fileName)
-    this.createNewFileWithDirectories(path)
-    return path
+  fun getLocationFor(location: Location): LocationOperations {
+    if (location !is InMemoryLocation) {
+      val mappedLocation = this.inMemoryLocations[location]
+      if (mappedLocation == null) {
+        throw UnsupportedOperationException("Can only handle in-memory locations, not $location")
+      } else {
+        return this.getLocationFor(mappedLocation)
+      }
+    }
+
+    return this.LocationOperations(location)
   }
 
   /**
-   * Get a reference to an in-memory file, if it exists.
+   * Get the location operations for a module location.
    *
-   * If it does not exist, return null.
-   *
-   * @param location the location of the file.
-   * @param fileName the name of the file.
-   * @return the file object, if it exists, otherwise `null`.
+   * @param location the location.
+   * @param moduleName the name of the module.
+   * @return the location operations.
    */
-  fun getInMemoryFile(location: Location, fileName: String): InMemoryFileObject? {
-    if (location !in Companion.virtualLocations) {
-      throw UnsupportedOperationException("Can get existing files from in-memory file system")
+  fun getLocationFor(location: Location, moduleName: String): LocationOperations {
+    if (location !is InMemoryLocation) {
+      val mappedLocation = this.inMemoryLocations[location]
+      if (mappedLocation == null) {
+        throw UnsupportedOperationException("Can only handle in-memory locations, not $location")
+      } else {
+        return this.getLocationFor(mappedLocation, moduleName)
+      }
     }
 
-    val path = this.fileToPath(location, "", fileName)
-    val obj = InMemoryFileObject(location, path.toUri())
-    return if (obj.exists()) obj else null
+    // Modules themselves cannot be module-oriented for whatever reason.
+    val moduleLocation = InMemoryLocation(location, location.path.resolve(moduleName), moduleName)
+    return this.LocationOperations(moduleLocation)
   }
 
   /**
@@ -101,8 +126,7 @@ class InMemoryFileManager(
    * @return the iterable sequence.
    */
   fun listAllInMemoryFiles(): Iterable<InMemoryFileObject> {
-    return Companion
-        .virtualLocations
+    return this.inMemoryLocations.values
         .flatMap { this.list(it, "", setOf(Kind.OTHER), true) }
         .map { it as InMemoryFileObject }
   }
@@ -120,11 +144,16 @@ class InMemoryFileManager(
       packageName: String,
       relativeName: String
   ): FileObject? {
-    if (location !in Companion.virtualLocations) {
-      return super.getFileForInput(location, packageName, relativeName)
+    if (location !is InMemoryLocation) {
+      val mappedLocation = this.inMemoryLocations[location]
+      return if (mappedLocation == null) {
+        super.getFileForInput(location, packageName, relativeName)
+      } else {
+        this.getFileForInput(mappedLocation, packageName, relativeName)
+      }
     }
 
-    val path = this.fileToPath(location, packageName, relativeName)
+    val path = this.fileToPath(location, "$packageName/$relativeName")
     val obj = InMemoryFileObject(location, path.toUri())
     return if (obj.exists()) obj else null
   }
@@ -142,8 +171,13 @@ class InMemoryFileManager(
       className: String,
       kind: Kind
   ): JavaFileObject? {
-    if (location !in Companion.virtualLocations) {
-      return super.getJavaFileForInput(location, className, kind)
+    if (location !is InMemoryLocation) {
+      val mappedLocation = this.inMemoryLocations[location]
+      return if (mappedLocation == null) {
+        super.getJavaFileForInput(location, className, kind)
+      } else {
+        this.getJavaFileForInput(mappedLocation, className, kind)
+      }
     }
 
     val path = this.sourceToPath(location, className, kind)
@@ -166,11 +200,16 @@ class InMemoryFileManager(
       relativeName: String,
       sibling: FileObject?
   ): FileObject {
-    if (location !in Companion.virtualLocations) {
-      return super.getFileForOutput(location, packageName, relativeName, sibling)!!
+    if (location !is InMemoryLocation) {
+      val mappedLocation = this.inMemoryLocations[location]
+      return if (mappedLocation == null) {
+        super.getFileForOutput(location, packageName, relativeName, sibling)
+      } else {
+        this.getFileForOutput(mappedLocation, packageName, relativeName, sibling)
+      }
     }
 
-    val path = this.fileToPath(location, packageName, relativeName)
+    val path = this.fileToPath(location, "$packageName/$relativeName")
     this.createNewFileWithDirectories(path)
     return InMemoryFileObject(location, path.toUri())
   }
@@ -191,13 +230,124 @@ class InMemoryFileManager(
       kind: Kind,
       sibling: FileObject?
   ): JavaFileObject {
-    if (location !in Companion.virtualLocations) {
-      return super.getJavaFileForOutput(location, className, kind, sibling)!!
+    if (location !is InMemoryLocation) {
+      val mappedLocation = this.inMemoryLocations[location]
+      return if (mappedLocation == null) {
+        super.getJavaFileForOutput(location, className, kind, sibling)
+      } else {
+        this.getJavaFileForOutput(mappedLocation, className, kind, sibling)
+      }
     }
 
     val path = this.sourceToPath(location, className, kind)
     this.createNewFileWithDirectories(path)
     return InMemoryFileObject(location, path.toUri())
+  }
+
+  /**
+   * Get the location for a module.
+   *
+   * @param location the location all modules are held in.
+   * @param moduleName the name of the module.
+   * @return the location of the module.
+   */
+  override fun getLocationForModule(location: Location, moduleName: String): Location {
+    if (location !is InMemoryLocation) {
+      val mappedLocation = this.inMemoryLocations[location]
+      return if (mappedLocation == null) {
+        super.getLocationForModule(location, moduleName)
+      } else {
+        this.getLocationForModule(mappedLocation, moduleName)
+      }
+    }
+
+    return InMemoryLocation(location, location.path.resolve(moduleName), moduleName)
+  }
+
+  /**
+   * Get the location for the module that the given file object is in.
+   *
+   * @param location the location that all modules are held in.
+   * @param fileObject the file object for an element in the module.
+   * @return the location of the module.
+   */
+  override fun getLocationForModule(location: Location, fileObject: JavaFileObject): Location {
+    if (location !is InMemoryLocation) {
+      val mappedLocation = this.inMemoryLocations[location]
+      return if (mappedLocation == null) {
+        super.getLocationForModule(location, fileObject)
+      } else {
+        this.getLocationForModule(mappedLocation, fileObject)
+      }
+    }
+
+    val moduleName = location.path.relativize(fileObject.toUri().toPath()).first().toString()
+
+    // The first nested directory is the module name.
+    // Modules themselves cannot be module-oriented for whatever reason.
+    return this.getLocationForModule(location, moduleName)
+  }
+
+  /**
+   * Determine if the given location exists or not.
+   *
+   * @param location the location to look up.
+   * @return true if the location exists, or false otherwise.
+   */
+  override fun hasLocation(location: Location): Boolean {
+    if (location is InMemoryLocation) {
+      return true
+    }
+
+    val mappedLocation = this.inMemoryLocations[location]
+
+    return if (mappedLocation == null) {
+      super.hasLocation(location)
+    } else {
+      this.hasLocation(mappedLocation)
+    }
+  }
+
+  /**
+   * Determine if two file objects are considered to be the same file.
+   *
+   * @param a the first file.
+   * @param b the second file.
+   */
+  override fun isSameFile(a: FileObject, b: FileObject): Boolean {
+    return a.toUri() == b.toUri()
+  }
+
+  /**
+   * Infer the canonical name for a class represented in a Java class file.
+   *
+   * @param location the location of the file.
+   * @param file the source file.
+   * @return the canonical name.
+   */
+  override fun inferBinaryName(location: Location, file: JavaFileObject): String {
+    if (location !is InMemoryLocation) {
+      return super.inferBinaryName(location, file)
+    }
+
+    return file.toUri().toPath().relativeTo(location.path)
+        .toString()
+        .removeSuffix(file.kind.extension)
+        .replace('/', '.')
+  }
+
+  /**
+   * Infer the correct module name for a location that has a module bound to it.
+   *
+   * @param location the location.
+   * @return the module name.
+   */
+  override fun inferModuleName(location: Location): String {
+    return if (location is InMemoryLocation && location.moduleName != null) {
+      location.moduleName
+    } else {
+      super.inferModuleName(location)
+    }
   }
 
   /**
@@ -216,11 +366,22 @@ class InMemoryFileManager(
       kinds: Set<Kind>,
       recurse: Boolean
   ): Iterable<JavaFileObject> {
-    if (location !in Companion.virtualLocations) {
-      return super.list(location, packageName, kinds, recurse)
+    if (location !is InMemoryLocation) {
+      val mappedLocation = this.inMemoryLocations[location]
+      return if (mappedLocation == null) {
+        super.list(location, packageName, kinds, recurse)
+      } else {
+        this.list(mappedLocation, packageName, kinds, recurse)
+      }
     }
 
-    val basePath = this.fileToPath(location, packageName, ".")
+    val basePath = this.sourceToPath(location, packageName, Kind.OTHER)
+
+    if (basePath.notExists()) {
+      // Package does not exist yet, probably.
+      return emptyList()
+    }
+
     val visitOpts = emptySet<FileVisitOption>()
     val maxDepth = if (recurse) Int.MAX_VALUE else 1
     val filesFound = mutableListOf<InMemoryFileObject>()
@@ -246,29 +407,126 @@ class InMemoryFileManager(
     return filesFound
   }
 
-  private fun fileToPath(location: Location, packageName: String, relativeName: String): Path {
-    return this.rootPath
-        .resolve(location.name)
-        .resolve(packageName)
-        .resolve(relativeName)
-        .normalize()
-        .toAbsolutePath()
+  /**
+   * List the locations for modules in the given location.
+   *
+   * @param location the location to consider.
+   * @return the iterable across the set of locations.
+   */
+  override fun listLocationsForModules(location: Location): Iterable<Set<Location>> {
+    if (location !is InMemoryLocation) {
+      val mappedLocation = this.inMemoryLocations[location]
+      return if (mappedLocation == null) {
+        super.listLocationsForModules(location)
+      } else {
+        this.listLocationsForModules(mappedLocation)
+      }
+    }
+
+    val path = location.path
+
+    val files = Files
+        .list(path)
+        .filter { it.isDirectory() }
+        .filter { dir ->
+          Files
+              .list(dir)
+              .filter { it.isRegularFile() }
+              .anyMatch { it.fileName.toString() == "module-info.java" }
+        }
+        .map { InMemoryLocation(location, it, it.fileName.toString()) }
+        .asSequence()
+        .toSet()
+
+    return listOf(files)
   }
 
-  private fun sourceToPath(location: Location, className: String, kind: Kind): Path {
-    val classNameAsPath = className.removePrefix("/").replace('.', '/') + kind.extension
+  private fun sourceToPath(location: InMemoryLocation, className: String, kind: Kind): Path {
+    val classNameAsPath = this.classNameAsPath(className, kind)
 
-    return this.rootPath
-        .resolve(location.name)
+    return location
+        .path
         .resolve(classNameAsPath)
         .normalize()
         .toAbsolutePath()
   }
 
+  private fun fileToPath(location: InMemoryLocation, relativeName: String): Path {
+    return location
+        .path
+        .resolve(relativeName)
+        .normalize()
+        .toAbsolutePath()
+  }
+
+  private fun classNameAsPath(className: String, kind: Kind) = className
+      .removePrefix("/")
+      .replace('.', '/') + kind.extension
+
   private fun createNewFileWithDirectories(path: Path) {
     path.parent.createDirectories()
     path.deleteIfExists()
     path.createFile()
+  }
+
+  private fun mapLocationFor(location: StandardLocation, dirName: String) =
+      location to InMemoryLocation(
+          location,
+          this.rootPath.resolve(dirName),
+          null
+      )
+
+  /**
+   * Operations for a location.
+   *
+   * @author Ashley Scopes
+   * @since 0.1.0
+   */
+  inner class LocationOperations(private val location: InMemoryLocation) {
+    /**
+     * Create a file and fill it with the given byte content.
+     *
+     * @param fileName the file name.
+     * @param content the file content.
+     * @return the path to the created file.
+     */
+    fun createFile(fileName: String, content: ByteArray) = this
+        .createFile(fileName)
+        .apply { this.writeBytes(content) }
+
+    /**
+     * Create a file and fill it with the given lines of text.
+     *
+     * @param fileName the file name.
+     * @param lines the lines of text.
+     * @return the path to the created file.
+     */
+    fun createFile(fileName: String, vararg lines: String) = this
+        .createFile(fileName)
+        .apply { this.writeLines(lines.asSequence()) }
+
+    /**
+     * Get an existing file.
+     *
+     * @param fileName the name of the file.
+     * @return the file object, if it exists, else null.
+     */
+    fun getFile(fileName: String): InMemoryFileObject? {
+      val path = this@InMemoryFileManager.fileToPath(this.location, fileName)
+      val obj = InMemoryFileObject(this.location, path.toUri())
+      return if (obj.exists()) obj else null
+    }
+
+    /**
+     * Create a file only.
+     *
+     * @return the path to the empty file.
+     */
+    private fun createFile(fileName: String): Path {
+      val path = this@InMemoryFileManager.fileToPath(this.location, fileName)
+      path.parent.createDirectories()
+      return path.createFile()
+    }
   }
 
   private class VfsRootHandle(private val fs: FileSystem) : Runnable {
@@ -278,15 +536,6 @@ class InMemoryFileManager(
   companion object {
     // Garbage collector hook to free memory after we've finished with it.
     private val cleaner = Cleaner.create()
-
-    // The standard locations to consider to be represented virtually.
-    private val virtualLocations = setOf(
-        StandardLocation.SOURCE_OUTPUT,
-        StandardLocation.SOURCE_PATH,
-        StandardLocation.CLASS_OUTPUT,
-        StandardLocation.NATIVE_HEADER_OUTPUT,
-        //StandardLocation.MODULE_SOURCE_PATH
-    )
 
     /**
      * Create a [InMemoryFileManager] that wraps a given [JavaCompiler]'s

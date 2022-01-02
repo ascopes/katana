@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.LinkOption
 import java.nio.file.StandardOpenOption
 import javax.lang.model.element.NestingKind
-import javax.tools.JavaFileManager.Location
 import javax.tools.JavaFileObject.Kind
 import javax.tools.SimpleJavaFileObject
 import kotlin.io.path.deleteIfExists
@@ -28,13 +27,13 @@ import kotlin.io.path.toPath
  * jimfs in-memory file system.
  *
  * @author Ashley Scopes
- * @since 0.0.1
+ * @since 0.1.0
  * @param location the location of the file.
  * @param uri the URI of the in-memory file.
  * @param kind the kind of the file.
  */
 class InMemoryFileObject(
-    val location: Location,
+    val location: InMemoryLocation,
     uri: URI,
     kind: Kind = Kind.OTHER,
 ) : SimpleJavaFileObject(uri, kind) {

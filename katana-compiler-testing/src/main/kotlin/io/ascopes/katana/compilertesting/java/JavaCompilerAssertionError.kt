@@ -9,7 +9,7 @@ import javax.tools.JavaFileObject
  * expectation.
  *
  * @author Ashley Scopes
- * @since 0.0.1
+ * @since 0.1.0
  */
 @Suppress("MemberVisibilityCanBePrivate")
 class JavaCompilerAssertionError : AssertionFailedError {
@@ -71,21 +71,22 @@ class JavaCompilerAssertionError : AssertionFailedError {
       this.appendLine("Compilation produced the following diagnostics:")
 
       diagnostics.forEach { diagnostic ->
-        val headline = if (diagnostic.code != null) {
+        val title = if (diagnostic.code != null) {
           "${diagnostic.timestamp} - ${diagnostic.code}"
         } else {
           diagnostic.timestamp.toString()
         }
+        val locationTitle = "Reporting location"
         val messageLines = diagnostic.toString().lines()
         val stackTraceLines = Companion.formatStackTraceLines(diagnostic.stacktrace)
-        val maxLineLength = sequenceOf(listOf(headline), messageLines, stackTraceLines)
+        val maxLineLength = sequenceOf(listOf(title, locationTitle), messageLines, stackTraceLines)
             .flatten()
-            .maxOf { it.length }
+            .maxOf { it.length } + 5
 
-        this.appendTopOfBox(headline, maxLineLength)
+        this.appendTopOfBox(title, maxLineLength)
             .appendBoxLine("", maxLineLength)
             .appendBoxLines(messageLines, maxLineLength)
-            .appendBoxSeparator("Reporting location", maxLineLength)
+            .appendBoxSeparator(locationTitle, maxLineLength)
             .appendBoxLines(stackTraceLines, maxLineLength)
             .appendBottomOfBox(maxLineLength)
       }
@@ -116,7 +117,7 @@ class JavaCompilerAssertionError : AssertionFailedError {
       val outputHeader = "Output files"
       val maxLineLength = sequenceOf(listOf(inputHeader, outputHeader), files.map { it.name })
           .flatten()
-          .maxOf { it.length }
+          .maxOf { it.length } + 5
 
       return this
           .appendTopOfBox(inputHeader, maxLineLength)

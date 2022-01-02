@@ -8,7 +8,7 @@ import javax.tools.Diagnostic
  * Diagnostic that also includes the stacktrace of the callee.
  *
  * @author Ashley Scopes
- * @since 0.0.1
+ * @since 0.1.0
  * @param timestamp the timestamp that the diagnostic was reported at.
  * @param diagnostic the original diagnostic to wrap.
  * @param stacktrace the stacktrace of the call to log the diagnostic.
