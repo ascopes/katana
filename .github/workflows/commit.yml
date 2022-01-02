@@ -29,14 +29,15 @@ jobs:
               -B -T3 clean package \
               -Dcheckstyle.skip=true
 
-  checkstyle:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run Checkstyle
-        run: |
-          ./build-in-docker.sh "openjdk:17" \
-              -B -T3 clean verify \
-              -Dmaven.test.skip=true \
-              -Dmaven.site.skip=true \
-              -Dmaven.javadoc.skip=true
+# TODO: enforce checkstyle.
+#  checkstyle:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Run Checkstyle
+#        run: |
+#          ./build-in-docker.sh "openjdk:17" \
+#              -B -T3 clean verify \
+#              -Dmaven.test.skip=true \
+#              -Dmaven.site.skip=true \
+#              -Dmaven.javadoc.skip=true
