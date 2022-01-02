@@ -15,6 +15,7 @@
   </modules>
 
   <properties>
+    <assertj.version>5.7</assertj.version>
     <jimfs.version>1.2</jimfs.version>
     <junit.version>5.8.2</junit.version>
     <kotlin.version>1.6.10</kotlin.version>

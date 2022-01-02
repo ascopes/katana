@@ -1,6 +1,8 @@
 package io.ascopes.katana.compilertesting.java
 
-import io.ascopes.katana.compilertesting.java.InMemoryFileManager.LocationOperations
+import io.ascopes.katana.compilertesting.java.InMemoryCompilationResult.Failure
+import io.ascopes.katana.compilertesting.java.InMemoryCompilationResult.FatalError
+import io.ascopes.katana.compilertesting.java.InMemoryCompilationResult.Success
 import java.io.StringWriter
 import java.nio.charset.StandardCharsets
 import java.util.Locale
@@ -11,6 +13,7 @@ import javax.tools.JavaFileManager.Location
 import javax.tools.JavaFileObject.Kind
 import javax.tools.StandardLocation
 import javax.tools.ToolProvider
+import kotlin.io.path.absolutePathString
 
 /**
  * Support for compiling files located in a virtual in-memory filesystem.
@@ -20,7 +23,7 @@ import javax.tools.ToolProvider
  * @param compiler the Java Compiler implementation to use.
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class InMemoryCompiler(
+class InMemoryCompiler internal constructor(
     private val compiler: JavaCompiler,
     private val diagnosticListener: InMemoryDiagnosticListener,
     private val fileManager: InMemoryFileManager,
@@ -117,19 +120,29 @@ class InMemoryCompiler(
       .targetVersion(version)
 
   /**
+   * Treat all warnings as errors.
+   *
+   * @return this object for further call chaining.
+   */
+  fun treatWarningsAsErrors() = this.chain { this.options += "-Werror" }
+
+  /**
+   * Request that the compiler produces native headers for JNI interop.
+   *
+   * @return this object for further call chaining.
+   */
+  fun generateHeaders() = this.chain {
+    val headerLocation = this.fileManager.getLocationFor(StandardLocation.NATIVE_HEADER_OUTPUT)
+    this.options += listOf("-h", headerLocation.path.absolutePathString())
+  }
+
+  /**
    * Add the given options to the compiler.
    *
    * @param options the options to add.
    * @return this object for further call chaining.
    */
   fun options(vararg options: String) = this.chain { this.options += options }
-
-  /**
-   * Treat all warnings as errors.
-   *
-   * @return this object for further call chaining.
-   */
-  fun treatWarningsAsErrors() = this.chain { this.options += "-Werror" }
 
   /**
    * Add the given modules to the compiler.
@@ -153,7 +166,7 @@ class InMemoryCompiler(
    * @param operation the operation to perform, in a closure.
    * @return this object for further call chaining.
    */
-  fun sources(operation: LocationOperations.() -> Unit) = this
+  fun sources(operation: InMemoryLocationOperations.() -> Unit) = this
       .files(StandardLocation.SOURCE_PATH, operation)
 
   /**
@@ -162,7 +175,7 @@ class InMemoryCompiler(
    * @param operation the operation to perform, in a closure.
    * @return this object for further call chaining.
    */
-  fun moduleSources(moduleName: String, operation: LocationOperations.() -> Unit) = this
+  fun moduleSources(moduleName: String, operation: InMemoryLocationOperations.() -> Unit) = this
       .moduleFiles(StandardLocation.MODULE_SOURCE_PATH, moduleName, operation)
 
   /**
@@ -171,7 +184,7 @@ class InMemoryCompiler(
    * @param operation the operation to perform, in a closure.
    * @return this object for further call chaining.
    */
-  fun generatedSources(operation: LocationOperations.() -> Unit) = this
+  fun generatedSources(operation: InMemoryLocationOperations.() -> Unit) = this
       .files(StandardLocation.SOURCE_OUTPUT, operation)
 
   /**
@@ -180,7 +193,7 @@ class InMemoryCompiler(
    * @param operation the operation to perform, in a closure.
    * @return this object for further call chaining.
    */
-  fun generatedClasses(operation: LocationOperations.() -> Unit) = this
+  fun generatedClasses(operation: InMemoryLocationOperations.() -> Unit) = this
       .files(StandardLocation.CLASS_OUTPUT, operation)
 
 
@@ -190,7 +203,7 @@ class InMemoryCompiler(
    * @param operation the operation to perform, in a closure.
    * @return this object for further call chaining.
    */
-  fun generatedHeaders(operation: LocationOperations.() -> Unit) = this
+  fun generatedHeaders(operation: InMemoryLocationOperations.() -> Unit) = this
       .files(StandardLocation.NATIVE_HEADER_OUTPUT, operation)
 
   /**
@@ -200,7 +213,7 @@ class InMemoryCompiler(
    * @param operation the operation to perform, in a closure.
    * @return this object for further call chaining.
    */
-  fun files(location: Location, operation: LocationOperations.() -> Unit) = this.apply {
+  fun files(location: Location, operation: InMemoryLocationOperations.() -> Unit) = this.apply {
     this.fileManager
         .getLocationFor(location)
         .operation()
@@ -217,7 +230,7 @@ class InMemoryCompiler(
   fun moduleFiles(
       location: Location,
       moduleName: String,
-      operation: LocationOperations.() -> Unit
+      operation: InMemoryLocationOperations.() -> Unit
   ) = this.apply {
     this.fileManager
         .getLocationFor(location, moduleName)
@@ -273,6 +286,9 @@ class InMemoryCompiler(
 
     return InMemoryCompilationResult(
         outcome = outcome,
+        modules = this.modules,
+        processors = this.processors,
+        options = this.options,
         logs = stringWriter.toString(),
         diagnostics = this.diagnosticListener.diagnostics,
         fileManager = this.fileManager

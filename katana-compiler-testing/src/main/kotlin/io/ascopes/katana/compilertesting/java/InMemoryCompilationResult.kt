@@ -1,6 +1,7 @@
 package io.ascopes.katana.compilertesting.java
 
 import java.util.Locale
+import javax.annotation.processing.Processor
 import javax.tools.Diagnostic.Kind
 import javax.tools.Diagnostic.Kind.ERROR
 import javax.tools.Diagnostic.Kind.MANDATORY_WARNING
@@ -17,16 +18,22 @@ import javax.tools.StandardLocation
  * @author Ashley Scopes
  * @since 0.1.0
  * @param outcome the outcome description of the compilation.
+ * @param modules the modules passed to the compiler.
+ * @param processors the annotation processors passed to the compiler.
+ * @param options the options passed to the compiler.
  * @param logs the standard output for the compiler.
  * @param diagnostics the diagnostics that the compiler output, along with call location details.
  * @param fileManager the file manager that was used.
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class InMemoryCompilationResult(
+class InMemoryCompilationResult internal constructor(
     val outcome: Outcome,
+    val modules: List<String>,
+    val processors: List<Processor>,
+    val options: List<String>,
     val logs: String,
-    val diagnostics: List<DiagnosticWithTrace<out JavaFileObject>>,
-    private val fileManager: InMemoryFileManager
+    val diagnostics: List<InMemoryDiagnostic<out JavaFileObject>>,
+    internal val fileManager: InMemoryFileManager
 ) {
   /**
    * Assert that the compilation succeeded.
@@ -305,12 +312,9 @@ class InMemoryCompilationResult(
       description: String? = "custom condition",
       predicate: InMemoryCompilationResult.() -> Boolean
   ) = this.chain {
-    this.predicate() || throw JavaCompilerAssertionError(
-        "Expected '$description' to succeed, but it failed",
-        this.fileManager,
-        this.diagnostics,
-        this.logs
-    )
+    if (!this.predicate()) {
+      this.fail("Expected '$description' to succeed, but it failed")
+    }
   }
 
   fun generatedSourceFile(fileName: String) = this.apply {
@@ -416,35 +420,62 @@ class InMemoryCompilationResult(
 
   private fun quantifyKind(kind: Kind, count: Int) =
       when (count) {
-        1 -> this.anify(this.singularKind(kind))
+        1 -> "1 " + this.singularKind(kind)
         else -> "$count " + this.pluralizeKind(kind)
       }
 
-  private fun anify(text: String) =
-      when (text.first()) {
-        'a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y' -> "an $text"
-        else -> "a $text"
-      }
-
   private fun fail(message: String, expected: Any?, actual: Any?, cause: Throwable? = null) {
-    throw JavaCompilerAssertionError(
-        message,
-        this.fileManager,
-        this.diagnostics,
-        this.logs,
-        expected,
-        actual,
-        cause
-    )
+    throw InMemoryCompilationAssertionError(message, this, expected, actual, cause)
   }
 
   private fun fail(message: String, cause: Throwable? = null) {
-    throw JavaCompilerAssertionError(
-        message,
-        this.fileManager,
-        this.diagnostics,
-        this.logs,
-        cause
-    )
+    throw InMemoryCompilationAssertionError(message, this, cause)
+  }
+
+  /**
+   * Base marker interface for a compilation outcome.
+   *
+   * @author Ashley Scopes
+   * @since 0.1.0
+   */
+  sealed interface Outcome {
+    val description: String
+  }
+
+  /**
+   * Marker to indicate a successful compilation.
+   *
+   * @author Ashley Scopes
+   * @since 0.1.0
+   */
+  object Success : Outcome {
+    override val description = "success"
+  }
+
+  /**
+   * Marker to indicate compilation failed in a non-exceptional way.
+   *
+   * @author Ashley Scopes
+   * @since 0.1.0
+   */
+  object Failure : Outcome {
+    override val description = "failure"
+  }
+
+  /**
+   * Marker to indicate compilation failed with an exception, unexpectedly.
+   *
+   * @author Ashley Scopes
+   * @since 0.1.0
+   */
+  class FatalError(
+      @Suppress("MemberVisibilityCanBePrivate") val reason: Throwable
+  ) : Outcome {
+    override val description: String
+      get() = "${Companion.description} due to ${this.reason.javaClass.simpleName}"
+
+    companion object {
+      const val description: String = "fatal compiler error"
+    }
   }
 }

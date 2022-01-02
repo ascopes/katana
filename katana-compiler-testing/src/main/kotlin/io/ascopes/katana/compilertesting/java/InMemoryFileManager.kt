@@ -53,17 +53,17 @@ import kotlin.streams.asSequence
  * @since 0.1.0
  * @param standardFileManager the compiler-supplied standard file manager to delegate most calls to.
  */
-class InMemoryFileManager(
+internal class InMemoryFileManager(
     standardFileManager: StandardJavaFileManager
 ) : ForwardingJavaFileManager<JavaFileManager>(standardFileManager) {
   private val fs: FileSystem
   private val rootPath: Path
-  private val inMemoryLocations: Map<StandardLocation, InMemoryLocation>
+  private val inMemoryLocations: Map<StandardLocation, InMemoryFileLocation>
 
   init {
     val fsName = UUID.randomUUID().toString()
     this.fs = Jimfs.newFileSystem(fsName, Configuration.unix())
-    this.rootPath = this.fs.getPath("/")
+    this.rootPath = this.fs.getPath("/").toAbsolutePath()
 
     this.inMemoryLocations = mapOf(
         this.mapLocationFor(StandardLocation.SOURCE_PATH, "input/main"),
@@ -85,7 +85,7 @@ class InMemoryFileManager(
    * @param location the location.
    * @return the location operations.
    */
-  fun getLocationFor(location: Location): LocationOperations {
+  fun getLocationFor(location: Location): InMemoryLocationOperations {
     if (location !is InMemoryLocation) {
       val mappedLocation = this.inMemoryLocations[location]
       if (mappedLocation == null) {
@@ -95,7 +95,7 @@ class InMemoryFileManager(
       }
     }
 
-    return this.LocationOperations(location)
+    return this.InMemoryLocationOperationsImpl(location)
   }
 
   /**
@@ -105,7 +105,7 @@ class InMemoryFileManager(
    * @param moduleName the name of the module.
    * @return the location operations.
    */
-  fun getLocationFor(location: Location, moduleName: String): LocationOperations {
+  fun getLocationFor(location: Location, moduleName: String): InMemoryLocationOperations {
     if (location !is InMemoryLocation) {
       val mappedLocation = this.inMemoryLocations[location]
       if (mappedLocation == null) {
@@ -115,9 +115,9 @@ class InMemoryFileManager(
       }
     }
 
-    // Modules themselves cannot be module-oriented for whatever reason.
-    val moduleLocation = InMemoryLocation(location, location.path.resolve(moduleName), moduleName)
-    return this.LocationOperations(moduleLocation)
+    val modulePath = location.path.resolve(moduleName)
+    val moduleLocation = InMemoryModuleLocation(location, modulePath, moduleName)
+    return this.InMemoryLocationOperationsImpl(moduleLocation)
   }
 
   /**
@@ -125,10 +125,19 @@ class InMemoryFileManager(
    *
    * @return the iterable sequence.
    */
-  fun listAllInMemoryFiles(): Iterable<InMemoryFileObject> {
-    return this.inMemoryLocations.values
-        .flatMap { this.list(it, "", setOf(Kind.OTHER), true) }
-        .map { it as InMemoryFileObject }
+  fun listAllInMemoryFiles(): Iterable<Path> {
+    val files = mutableSetOf<Path>()
+
+    val visitor = object : SimpleFileVisitor<Path>() {
+      override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+        files.add(file.toAbsolutePath())
+        return FileVisitResult.CONTINUE
+      }
+    }
+
+    Files.walkFileTree(this.rootPath, visitor)
+
+    return files
   }
 
   /**
@@ -209,14 +218,14 @@ class InMemoryFileManager(
       }
     }
 
-    val path = this.fileToPath(location, "$packageName/$relativeName")
+    val path = this.fileToPath(location, Path.of(packageName, relativeName).toString())
     this.createNewFileWithDirectories(path)
     return InMemoryFileObject(location, path.toUri())
   }
 
 
   /**
-   * Get a source file for use as an outpuit.
+   * Get a source file for use as an output.
    *
    * @param location the location of the file.
    * @param className the qualified class name.
@@ -261,7 +270,7 @@ class InMemoryFileManager(
       }
     }
 
-    return InMemoryLocation(location, location.path.resolve(moduleName), moduleName)
+    return InMemoryModuleLocation(location, location.path.resolve(moduleName), moduleName)
   }
 
   /**
@@ -281,11 +290,15 @@ class InMemoryFileManager(
       }
     }
 
-    val moduleName = location.path.relativize(fileObject.toUri().toPath()).first().toString()
+    if (location.isModuleOrientedLocation) {
+      val moduleName = location.path.relativize(fileObject.toUri().toPath()).first().toString()
 
-    // The first nested directory is the module name.
-    // Modules themselves cannot be module-oriented for whatever reason.
-    return this.getLocationForModule(location, moduleName)
+      // The first nested directory is the module name.
+      // Modules themselves cannot be module-oriented for whatever reason.
+      return this.getLocationForModule(location, moduleName)
+    }
+
+    return location
   }
 
   /**
@@ -295,6 +308,14 @@ class InMemoryFileManager(
    * @return true if the location exists, or false otherwise.
    */
   override fun hasLocation(location: Location): Boolean {
+    if (location == StandardLocation.MODULE_SOURCE_PATH) {
+      // We flag this to implicitly enable this feature when we want it. Otherwise, it results in
+      // our source paths being moved around for non-modular compilation which causes issues
+      // elsewhere for us.
+      val path = this.inMemoryLocations[StandardLocation.MODULE_SOURCE_PATH]!!.path
+      return Files.list(path).count() > 0
+    }
+
     if (location is InMemoryLocation) {
       return true
     }
@@ -327,7 +348,12 @@ class InMemoryFileManager(
    */
   override fun inferBinaryName(location: Location, file: JavaFileObject): String {
     if (location !is InMemoryLocation) {
-      return super.inferBinaryName(location, file)
+      val mappedLocation = this.inMemoryLocations[location]
+      return if (mappedLocation == null) {
+        super.inferBinaryName(location, file)
+      } else {
+        this.inferBinaryName(mappedLocation, file)
+      }
     }
 
     return file.toUri().toPath().relativeTo(location.path)
@@ -343,7 +369,7 @@ class InMemoryFileManager(
    * @return the module name.
    */
   override fun inferModuleName(location: Location): String {
-    return if (location is InMemoryLocation && location.moduleName != null) {
+    return if (location is InMemoryModuleLocation) {
       location.moduleName
     } else {
       super.inferModuleName(location)
@@ -434,7 +460,7 @@ class InMemoryFileManager(
               .filter { it.isRegularFile() }
               .anyMatch { it.fileName.toString() == "module-info.java" }
         }
-        .map { InMemoryLocation(location, it, it.fileName.toString()) }
+        .map { InMemoryModuleLocation(location, it, it.fileName.toString()) }
         .asSequence()
         .toSet()
 
@@ -470,58 +496,39 @@ class InMemoryFileManager(
   }
 
   private fun mapLocationFor(location: StandardLocation, dirName: String) =
-      location to InMemoryLocation(
+      location to InMemoryFileLocation(
           location,
-          this.rootPath.resolve(dirName),
-          null
+          this.rootPath.resolve(dirName)
       )
 
-  /**
-   * Operations for a location.
-   *
-   * @author Ashley Scopes
-   * @since 0.1.0
-   */
-  inner class LocationOperations(private val location: InMemoryLocation) {
-    /**
-     * Create a file and fill it with the given byte content.
-     *
-     * @param fileName the file name.
-     * @param content the file content.
-     * @return the path to the created file.
-     */
-    fun createFile(fileName: String, content: ByteArray) = this
+  private inner class InMemoryLocationOperationsImpl(
+      override val location: InMemoryLocation
+  ) : InMemoryLocationOperations {
+
+    override val moduleName: String?
+      get() = if (this.location is InMemoryModuleLocation) {
+        this.location.moduleName
+      } else {
+        null
+      }
+
+    override val path: Path
+      get() = this.location.path
+
+    override fun createFile(fileName: String, content: ByteArray) = this
         .createFile(fileName)
         .apply { this.writeBytes(content) }
 
-    /**
-     * Create a file and fill it with the given lines of text.
-     *
-     * @param fileName the file name.
-     * @param lines the lines of text.
-     * @return the path to the created file.
-     */
-    fun createFile(fileName: String, vararg lines: String) = this
+    override fun createFile(fileName: String, vararg lines: String) = this
         .createFile(fileName)
         .apply { this.writeLines(lines.asSequence()) }
 
-    /**
-     * Get an existing file.
-     *
-     * @param fileName the name of the file.
-     * @return the file object, if it exists, else null.
-     */
-    fun getFile(fileName: String): InMemoryFileObject? {
+    override fun getFile(fileName: String): InMemoryFileObject? {
       val path = this@InMemoryFileManager.fileToPath(this.location, fileName)
       val obj = InMemoryFileObject(this.location, path.toUri())
       return if (obj.exists()) obj else null
     }
 
-    /**
-     * Create a file only.
-     *
-     * @return the path to the empty file.
-     */
     private fun createFile(fileName: String): Path {
       val path = this@InMemoryFileManager.fileToPath(this.location, fileName)
       path.parent.createDirectories()

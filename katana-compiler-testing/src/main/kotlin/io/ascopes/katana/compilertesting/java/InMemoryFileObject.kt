@@ -32,7 +32,7 @@ import kotlin.io.path.toPath
  * @param uri the URI of the in-memory file.
  * @param kind the kind of the file.
  */
-class InMemoryFileObject(
+internal class InMemoryFileObject(
     val location: InMemoryLocation,
     uri: URI,
     kind: Kind = Kind.OTHER,

@@ -1,6 +1,7 @@
 package io.ascopes.katana.compilertesting.java
 
 import org.opentest4j.AssertionFailedError
+import javax.annotation.processing.Processor
 import javax.tools.JavaFileObject
 
 
@@ -12,35 +13,31 @@ import javax.tools.JavaFileObject
  * @since 0.1.0
  */
 @Suppress("MemberVisibilityCanBePrivate")
-class JavaCompilerAssertionError : AssertionFailedError {
+internal class InMemoryCompilationAssertionError : AssertionFailedError {
   private val fullMessage: String
-  private val diagnostics: List<DiagnosticWithTrace<out JavaFileObject>>?
-  private val logs: String
+  private val compilationResult: InMemoryCompilationResult
 
-  constructor(
+  internal constructor(
       message: String,
-      files: InMemoryFileManager,
-      diagnostics: List<DiagnosticWithTrace<out JavaFileObject>>?,
-      logs: String,
+      compilationResult: InMemoryCompilationResult,
       cause: Throwable? = null
   ) : super(message, cause) {
-    this.fullMessage = Companion.generateMessageFor(super.message!!, files, diagnostics, logs)
-    this.diagnostics = diagnostics
-    this.logs = logs
+    this.fullMessage = Companion.generateMessageFor(
+        super.message!!,
+        compilationResult
+    )
+    this.compilationResult = compilationResult
   }
 
-  constructor(
+  internal constructor(
       message: String,
-      files: InMemoryFileManager,
-      diagnostics: List<DiagnosticWithTrace<out JavaFileObject>>?,
-      logs: String,
+      compilationResult: InMemoryCompilationResult,
       expected: Any?,
       actual: Any?,
       cause: Throwable? = null
   ) : super(message, expected, actual, cause) {
-    this.fullMessage = Companion.generateMessageFor(super.message!!, files, diagnostics, logs)
-    this.diagnostics = diagnostics
-    this.logs = logs
+    this.fullMessage = Companion.generateMessageFor(super.message!!, compilationResult)
+    this.compilationResult = compilationResult
   }
 
   // Doing this allows us to keep the massive error messages out of the Maven build logs, while
@@ -51,17 +48,27 @@ class JavaCompilerAssertionError : AssertionFailedError {
   companion object {
     private fun generateMessageFor(
         message: String,
-        files: InMemoryFileManager,
-        diagnostics: List<DiagnosticWithTrace<out JavaFileObject>>?,
-        logs: String?
+        compilationResult: InMemoryCompilationResult
     ) = StringBuilder(message)
-        .appendFileTree(files)
-        .appendDiagnostics(diagnostics)
-        .appendLogs(logs)
+        .appendOptions(compilationResult.options)
+        .appendModules(compilationResult.modules)
+        .appendProcessors(compilationResult.processors)
+        .appendFileTree(compilationResult.fileManager)
+        .appendDiagnostics(compilationResult.diagnostics)
+        .appendLogs(compilationResult.logs)
         .toString()
 
+    private fun StringBuilder.appendOptions(options: List<String>) = this
+        .appendSimpleBox("Options", options)
+
+    private fun StringBuilder.appendModules(modules: List<String>) = this
+        .appendSimpleBox("Modules", modules)
+
+    private fun StringBuilder.appendProcessors(processors: List<Processor>) = this
+        .appendSimpleBox("Annotation Processors", processors.map { it::class.java.canonicalName })
+
     private fun StringBuilder.appendDiagnostics(
-        diagnostics: List<DiagnosticWithTrace<out JavaFileObject>>?
+        diagnostics: List<InMemoryDiagnostic<out JavaFileObject>>?
     ): StringBuilder {
       if (diagnostics == null || diagnostics.isEmpty()) {
         return this
@@ -94,42 +101,35 @@ class JavaCompilerAssertionError : AssertionFailedError {
       return this
     }
 
-    private fun StringBuilder.appendLogs(logs: String?): StringBuilder {
-      if (logs == null || logs.isBlank()) {
-        return this
-      }
-
-      val lines = logs.lines()
-      val maxLineLength = lines.maxOf { it.length }
-
-      return this
-          .appendLine()
-          .appendTopOfBox("Compiler produced the following logs", maxLineLength)
-          .appendBoxLines(lines, maxLineLength)
-          .appendBottomOfBox(maxLineLength)
+    private fun StringBuilder.appendLogs(logs: String?) = if (logs != null && logs.isNotBlank()) {
+      this.appendSimpleBox("Compiler logs", logs.lines())
+    } else {
+      this
     }
 
     private fun StringBuilder.appendFileTree(fileManager: InMemoryFileManager): StringBuilder {
       val files = fileManager.listAllInMemoryFiles()
           .toList()
+          .sorted()
+          .map { it.toString() }
 
-      val inputHeader = "Input files"
-      val outputHeader = "Output files"
-      val maxLineLength = sequenceOf(listOf(inputHeader, outputHeader), files.map { it.name })
+      return this.appendSimpleBox("File system state", files)
+    }
+
+    private fun StringBuilder.appendSimpleBox(title: String, lines: List<String>): StringBuilder {
+
+      if (lines.isEmpty()) {
+        return this
+      }
+
+      val maxLineLength = sequenceOf(listOf(title), lines)
           .flatten()
           .maxOf { it.length } + 5
 
       return this
-          .appendTopOfBox(inputHeader, maxLineLength)
-          .appendBoxLines(
-              files.filter { !it.location.isOutputLocation }.map { it.name },
-              maxLineLength
-          )
-          .appendBoxSeparator(outputHeader, maxLineLength)
-          .appendBoxLines(
-              files.filter { it.location.isOutputLocation }.map { it.name },
-              maxLineLength
-          )
+          .appendLine()
+          .appendTopOfBox(title, maxLineLength)
+          .appendBoxLines(lines, maxLineLength)
           .appendBottomOfBox(maxLineLength)
     }
 
