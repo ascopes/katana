@@ -193,7 +193,6 @@ class InMemoryCompilationResult internal constructor(
       regex
   )
 
-
   /**
    * Assert that the compilation produced a mandatory warning containing a message that matches the
    * given regular expression.
@@ -277,7 +276,6 @@ class InMemoryCompilationResult internal constructor(
       message,
       ignoreCase
   )
-
 
   /**
    * Assert that the compilation produced an 'OTHER'-kinded diagnostic containing a message that
