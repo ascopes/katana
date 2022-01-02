@@ -1,0 +1,10 @@
+  # Everything should default to LF.
+  *       text      eol=lf
+  
+  # Windows-specific scripts. Define these explicitly as needed.
+  *.bat   text      eol=crlf
+  *.cmd   text      eol=crlf
+  
+  # Binaries. Define these explicitly as needed.
+  *.jar   binary
+  
