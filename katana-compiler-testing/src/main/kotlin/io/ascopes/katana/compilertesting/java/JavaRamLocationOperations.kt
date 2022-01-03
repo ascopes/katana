@@ -46,10 +46,27 @@ interface JavaRamLocationOperations {
   fun createFile(fileName: String, vararg lines: String): Path
 
   /**
+   * Create a file and fill it with the given lines of text.
+   *
+   * @param fileName the file name.
+   * @param lines the closure returning the text content.
+   * @return the path to the created file.
+   */
+  fun createFile(fileName: String, lines: () -> String) = this.createFile(fileName, lines())
+
+  /**
    * Get an existing file.
    *
    * @param fileName the name of the file.
    * @return the file object, if it exists, else null.
    */
   fun getFile(fileName: String): FileObject?
+
+  /**
+   * Find the top closest file names in this location that match the given file name.
+   *
+   * @param fileName the name of the file to match.
+   * @return a list of the closest matches that are still applicable.
+   */
+  fun findClosestFileNamesTo(fileName: String): List<String>
 }

@@ -2,7 +2,45 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.ascopes.katana</groupId>
+    <artifactId>katana-parent</artifactId>
+    <relativePath>../pom.xml</relativePath>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
   <artifactId>katana-compiler-testing</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.jimfs</groupId>
+      <artifactId>jimfs</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>me.xdrop</groupId>
+      <artifactId>fuzzywuzzy</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib-jdk8</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opentest4j</groupId>
+      <artifactId>opentest4j</artifactId>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
@@ -12,36 +50,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <dependencies>
-    <dependency>
-      <artifactId>jimfs</artifactId>
-      <groupId>com.google.jimfs</groupId>
-    </dependency>
-
-    <dependency>
-      <artifactId>kotlin-stdlib-jdk8</artifactId>
-      <groupId>org.jetbrains.kotlin</groupId>
-    </dependency>
-
-    <dependency>
-      <artifactId>junit-jupiter</artifactId>
-      <groupId>org.junit.jupiter</groupId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <artifactId>opentest4j</artifactId>
-      <groupId>org.opentest4j</groupId>
-    </dependency>
-  </dependencies>
-
-  <modelVersion>4.0.0</modelVersion>
-
-  <parent>
-    <artifactId>katana-parent</artifactId>
-    <groupId>io.ascopes.katana</groupId>
-    <relativePath>../pom.xml</relativePath>
-    <version>0.1.0-SNAPSHOT</version>
-  </parent>
 </project>

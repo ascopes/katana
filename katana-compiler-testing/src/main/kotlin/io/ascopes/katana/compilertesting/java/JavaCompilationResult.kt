@@ -8,6 +8,7 @@ import javax.tools.Diagnostic.Kind.MANDATORY_WARNING
 import javax.tools.Diagnostic.Kind.NOTE
 import javax.tools.Diagnostic.Kind.OTHER
 import javax.tools.Diagnostic.Kind.WARNING
+import javax.tools.JavaFileManager.Location
 import javax.tools.JavaFileObject
 import javax.tools.StandardLocation
 
@@ -315,33 +316,23 @@ class JavaCompilationResult internal constructor(
     }
   }
 
-  fun generatedSourceFile(fileName: String) = this.apply {
-    this.fileManager
-        .getOperationsFor(StandardLocation.SOURCE_OUTPUT)
-        .getFile(fileName)
-        ?: this.fail("Generated source file $fileName did not exist")
-  }
+  fun generatedSourceFile(fileName: String) = this
+      .hadFile(StandardLocation.SOURCE_OUTPUT, fileName)
 
-  fun generatedSourceFile(fileName: String, moduleName: String) = this.apply {
-    this.fileManager
-        .getOperationsFor(StandardLocation.SOURCE_OUTPUT, moduleName)
-        .getFile(fileName)
-        ?: this.fail("Generated source file $moduleName/$fileName did not exist")
-  }
+  fun generatedSourceFile(fileName: String, moduleName: String) = this
+      .hadFile(StandardLocation.SOURCE_OUTPUT, moduleName, fileName)
 
-  fun generatedClassFile(fileName: String) = this.apply {
-    this.fileManager
-        .getOperationsFor(StandardLocation.CLASS_OUTPUT)
-        .getFile(fileName)
-        ?: this.fail("Generated class file $fileName did not exist")
-  }
+  fun generatedClassFile(fileName: String) = this
+      .hadFile(StandardLocation.CLASS_OUTPUT, fileName)
 
-  fun generatedHeaderFile(fileName: String) = this.apply {
-    this.fileManager
-        .getOperationsFor(StandardLocation.NATIVE_HEADER_OUTPUT)
-        .getFile(fileName)
-        ?: this.fail("Generated header file $fileName did not exist")
-  }
+  fun generatedClassFile(moduleName: String, fileName: String) = this
+      .hadFile(StandardLocation.CLASS_OUTPUT, moduleName, fileName)
+
+  fun generatedHeaderFile(fileName: String) = this
+      .hadFile(StandardLocation.NATIVE_HEADER_OUTPUT, fileName)
+
+  fun generatedHeaderFile(moduleName: String, fileName: String) = this
+      .hadFile(StandardLocation.NATIVE_HEADER_OUTPUT, moduleName, fileName)
 
   private fun hadOutcome(expected: Outcome) = this.apply {
     if (this.outcome != expected) {
@@ -390,6 +381,63 @@ class JavaCompilationResult internal constructor(
     this.diagnostics
         .find { it.getMessage(Locale.ROOT).matches(regex) }
         ?: this.fail("no $kindName with a message matching pattern '$regex' found")
+  }
+
+  private fun hadFile(
+      location: Location,
+      fileName: String
+  ) = this.apply {
+    val ops = this.fileManager.getOperationsFor(location)
+
+    if (ops.getFile(fileName) != null) {
+      return@apply
+    }
+
+    val message = StringBuilder("No file found matching $fileName in ${location.name}")
+
+    val closestMatches = ops.findClosestFileNamesTo(fileName)
+    if (closestMatches.isNotEmpty()) {
+      message
+          .appendLine()
+          .appendLine()
+          .appendLine("Perhaps you meant one of:")
+
+
+      closestMatches.forEach {
+        message.appendLine(" - $it")
+      }
+    }
+
+    this.fail(message.toString())
+  }
+
+  private fun hadFile(
+      location: Location,
+      moduleName: String,
+      fileName: String
+  ) = this.apply {
+    val ops = this.fileManager.getOperationsFor(location, moduleName)
+
+    if (ops.getFile(fileName) != null) {
+      return@apply
+    }
+
+    val message = StringBuilder("No file found matching $fileName in ${location.name}/${moduleName}")
+
+    val closestMatches = ops.findClosestFileNamesTo(fileName)
+    if (closestMatches.isNotEmpty()) {
+      message
+          .appendLine()
+          .appendLine()
+          .appendLine("Perhaps you meant one of:")
+
+
+      closestMatches.forEach {
+        message.appendLine(" - $it")
+      }
+    }
+
+    this.fail(message.toString())
   }
 
   private fun singularKind(kind: Kind) =

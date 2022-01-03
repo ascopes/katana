@@ -2,6 +2,7 @@ package io.ascopes.katana.compilertesting.java
 
 import com.google.common.jimfs.Configuration
 import com.google.common.jimfs.Jimfs
+import me.xdrop.fuzzywuzzy.FuzzySearch
 import java.lang.ref.Cleaner
 import java.nio.charset.Charset
 import java.nio.file.FileSystem
@@ -127,6 +128,22 @@ internal class JavaRamFileManager(
   }
 
   /**
+   * Determine if the location contains a given file object.
+   *
+   * @param location the location to check.
+   * @param fileObject the file object to look for.
+   * @return `true` if it exists and is within the location, `false` otherwise.
+   */
+  override fun contains(location: Location, fileObject: FileObject): Boolean {
+    val mappedLocation = this.locationFor(location)
+        ?: return super.contains(location, fileObject)
+
+    return fileObject is JavaRamFileObject
+        && fileObject.exists()
+        && fileObject.toUri().toPath().startsWith(mappedLocation.path)
+  }
+
+  /**
    * Get a file for use as an input.
    *
    * @param location the location of the file.
@@ -192,7 +209,6 @@ internal class JavaRamFileManager(
     this.createNewFileWithDirectories(path)
     return JavaRamFileObject(mappedLocation, path.toUri())
   }
-
 
   /**
    * Get a source file for use as an output.
@@ -453,6 +469,20 @@ internal class JavaRamFileManager(
           this.rootPath.resolve(dirName)
       )
 
+  private fun findClosestFileNameMatchesFor(location: Location, fileName: String): List<String> {
+    val mappedLocation = this.locationFor(location)
+        ?: return emptyList()
+
+    val files = this
+        .list(mappedLocation, "", setOf(Kind.OTHER), true)
+        .map { it.toUri().toPath().relativeTo(mappedLocation.path).toString() }
+
+    return FuzzySearch
+        .extractTop(fileName, files, 3, 70)
+        .map { it.string }
+        .toList()
+  }
+
   private inner class InMemoryLocationOperationsImpl(
       override val location: JavaRamLocation
   ) : JavaRamLocationOperations {
@@ -480,6 +510,9 @@ internal class JavaRamFileManager(
       val obj = JavaRamFileObject(this.location, path.toUri())
       return if (obj.exists()) obj else null
     }
+
+    override fun findClosestFileNamesTo(fileName: String) = this@JavaRamFileManager
+        .findClosestFileNameMatchesFor(this.location, fileName)
 
     private fun createFile(fileName: String): Path {
       val path = this@JavaRamFileManager.fileToPath(this.location, fileName)

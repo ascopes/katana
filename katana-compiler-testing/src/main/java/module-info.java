@@ -1,4 +1,5 @@
 module katana.compilertesting {
+  requires fuzzywuzzy;
   requires java.base;
   requires java.compiler;
   requires jimfs;

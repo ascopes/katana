@@ -23,7 +23,7 @@ import kotlin.io.path.absolutePathString
  * @param compiler the Java Compiler implementation to use.
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class JavaCompiler internal constructor(
+class JavaCompilationBuilder internal constructor(
     private val compiler: JavaCompiler,
     private val diagnosticListener: JavaDiagnosticListener,
     private val fileManager: JavaRamFileManager,
@@ -143,14 +143,6 @@ class JavaCompiler internal constructor(
    * @return this object for further call chaining.
    */
   fun options(vararg options: String) = this.apply { this.options += options }
-
-  /**
-   * Add the given modules to the compiler.
-   *
-   * @param modules the modules to add.
-   * @return this object for further call chaining.
-   */
-  fun modules(vararg modules: String) = this.apply { this.modules += modules }
 
   /**
    * Add the given processors to the compiler.
@@ -305,7 +297,7 @@ class JavaCompiler internal constructor(
      * Get a virtual Java compiler with a backing virtual file system behind it.
      */
     @JvmStatic
-    fun javac(): io.ascopes.katana.compilertesting.java.JavaCompiler {
+    fun javac(): io.ascopes.katana.compilertesting.java.JavaCompilationBuilder {
       val compiler = ToolProvider.getSystemJavaCompiler()
       val diagnosticListener = JavaDiagnosticListener()
       val fileManager = JavaRamFileManager.create(
@@ -314,7 +306,7 @@ class JavaCompiler internal constructor(
           Locale.ROOT,
           StandardCharsets.UTF_8
       )
-      return JavaCompiler(compiler, diagnosticListener, fileManager)
+      return JavaCompilationBuilder(compiler, diagnosticListener, fileManager)
     }
   }
 }

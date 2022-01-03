@@ -65,7 +65,11 @@ internal class JavaCompilationAssertionError : AssertionFailedError {
         .appendSimpleBox("Modules", modules)
 
     private fun StringBuilder.appendProcessors(processors: List<Processor>) = this
-        .appendSimpleBox("Annotation Processors", processors.map { it::class.java.canonicalName })
+        .appendSimpleBox("Annotation Processors", processors.map {
+          // If a processor is a local singleton, then it will not have a canonical name
+          // available, so fall back to calling `it.toString()` instead.
+          it::class.java.canonicalName ?: it.toString()
+        })
 
     private fun StringBuilder.appendDiagnostics(
         diagnostics: List<JavaDiagnostic<out JavaFileObject>>?
@@ -93,6 +97,7 @@ internal class JavaCompilationAssertionError : AssertionFailedError {
         this.appendTopOfBox(title, maxLineLength)
             .appendBoxLine("", maxLineLength)
             .appendBoxLines(messageLines, maxLineLength)
+            .appendBoxLine("", maxLineLength)
             .appendBoxSeparator(locationTitle, maxLineLength)
             .appendBoxLines(stackTraceLines, maxLineLength)
             .appendBottomOfBox(maxLineLength)
