@@ -53,12 +53,12 @@ import kotlin.streams.asSequence
  * @since 0.1.0
  * @param standardFileManager the compiler-supplied standard file manager to delegate most calls to.
  */
-internal class InMemoryFileManager(
+internal class JavaRamFileManager(
     standardFileManager: StandardJavaFileManager
 ) : ForwardingJavaFileManager<JavaFileManager>(standardFileManager) {
   private val fs: FileSystem
   private val rootPath: Path
-  private val inMemoryLocations: Map<StandardLocation, InMemoryFileLocation>
+  private val inMemoryLocations: Map<StandardLocation, JavaRamFileLocation>
 
   init {
     val fsName = UUID.randomUUID().toString()
@@ -85,17 +85,11 @@ internal class InMemoryFileManager(
    * @param location the location.
    * @return the location operations.
    */
-  fun getLocationFor(location: Location): InMemoryLocationOperations {
-    if (location !is InMemoryLocation) {
-      val mappedLocation = this.inMemoryLocations[location]
-      if (mappedLocation == null) {
-        throw UnsupportedOperationException("Can only handle in-memory locations, not $location")
-      } else {
-        return this.getLocationFor(mappedLocation)
-      }
-    }
+  fun getOperationsFor(location: Location): JavaRamLocationOperations {
+    val mappedLocation = this.locationFor(location)
+        ?: throw UnsupportedOperationException("Location $location was not in-memory")
 
-    return this.InMemoryLocationOperationsImpl(location)
+    return this.InMemoryLocationOperationsImpl(mappedLocation)
   }
 
   /**
@@ -105,19 +99,11 @@ internal class InMemoryFileManager(
    * @param moduleName the name of the module.
    * @return the location operations.
    */
-  fun getLocationFor(location: Location, moduleName: String): InMemoryLocationOperations {
-    if (location !is InMemoryLocation) {
-      val mappedLocation = this.inMemoryLocations[location]
-      if (mappedLocation == null) {
-        throw UnsupportedOperationException("Can only handle in-memory locations, not $location")
-      } else {
-        return this.getLocationFor(mappedLocation, moduleName)
-      }
-    }
+  fun getOperationsFor(location: Location, moduleName: String): JavaRamLocationOperations {
+    val mappedLocation = this.locationForModule(location, moduleName)
+        ?: throw UnsupportedOperationException("Location $location was not non-module in-memory")
 
-    val modulePath = location.path.resolve(moduleName)
-    val moduleLocation = InMemoryModuleLocation(location, modulePath, moduleName)
-    return this.InMemoryLocationOperationsImpl(moduleLocation)
+    return this.InMemoryLocationOperationsImpl(mappedLocation)
   }
 
   /**
@@ -153,17 +139,12 @@ internal class InMemoryFileManager(
       packageName: String,
       relativeName: String
   ): FileObject? {
-    if (location !is InMemoryLocation) {
-      val mappedLocation = this.inMemoryLocations[location]
-      return if (mappedLocation == null) {
-        super.getFileForInput(location, packageName, relativeName)
-      } else {
-        this.getFileForInput(mappedLocation, packageName, relativeName)
-      }
-    }
+    val mappedLocation = this.locationFor(location)
+        ?: return super.getFileForInput(location, packageName, relativeName)
 
-    val path = this.fileToPath(location, "$packageName/$relativeName")
-    val obj = InMemoryFileObject(location, path.toUri())
+    val fullRelativeName = Path.of(packageName, relativeName).toString()
+    val path = this.fileToPath(mappedLocation, fullRelativeName)
+    val obj = JavaRamFileObject(mappedLocation, path.toUri())
     return if (obj.exists()) obj else null
   }
 
@@ -180,17 +161,11 @@ internal class InMemoryFileManager(
       className: String,
       kind: Kind
   ): JavaFileObject? {
-    if (location !is InMemoryLocation) {
-      val mappedLocation = this.inMemoryLocations[location]
-      return if (mappedLocation == null) {
-        super.getJavaFileForInput(location, className, kind)
-      } else {
-        this.getJavaFileForInput(mappedLocation, className, kind)
-      }
-    }
+    val mappedLocation = this.locationFor(location)
+        ?: return super.getJavaFileForInput(location, className, kind)
 
-    val path = this.sourceToPath(location, className, kind)
-    val obj = InMemoryFileObject(location, path.toUri())
+    val path = this.sourceToPath(mappedLocation, className, kind)
+    val obj = JavaRamFileObject(mappedLocation, path.toUri())
     return if (obj.exists()) obj else null
   }
 
@@ -209,18 +184,13 @@ internal class InMemoryFileManager(
       relativeName: String,
       sibling: FileObject?
   ): FileObject {
-    if (location !is InMemoryLocation) {
-      val mappedLocation = this.inMemoryLocations[location]
-      return if (mappedLocation == null) {
-        super.getFileForOutput(location, packageName, relativeName, sibling)
-      } else {
-        this.getFileForOutput(mappedLocation, packageName, relativeName, sibling)
-      }
-    }
+    val mappedLocation = this.locationFor(location)
+        ?: return super.getFileForOutput(location, packageName, relativeName, sibling)
 
-    val path = this.fileToPath(location, Path.of(packageName, relativeName).toString())
+    val fullRelativeName = Path.of(packageName, relativeName).toString()
+    val path = this.fileToPath(mappedLocation, fullRelativeName)
     this.createNewFileWithDirectories(path)
-    return InMemoryFileObject(location, path.toUri())
+    return JavaRamFileObject(mappedLocation, path.toUri())
   }
 
 
@@ -239,18 +209,12 @@ internal class InMemoryFileManager(
       kind: Kind,
       sibling: FileObject?
   ): JavaFileObject {
-    if (location !is InMemoryLocation) {
-      val mappedLocation = this.inMemoryLocations[location]
-      return if (mappedLocation == null) {
-        super.getJavaFileForOutput(location, className, kind, sibling)
-      } else {
-        this.getJavaFileForOutput(mappedLocation, className, kind, sibling)
-      }
-    }
+    val mappedLocation = this.locationFor(location)
+        ?: return super.getJavaFileForOutput(location, className, kind, sibling)
 
-    val path = this.sourceToPath(location, className, kind)
+    val path = this.sourceToPath(mappedLocation, className, kind)
     this.createNewFileWithDirectories(path)
-    return InMemoryFileObject(location, path.toUri())
+    return JavaRamFileObject(mappedLocation, path.toUri())
   }
 
   /**
@@ -261,16 +225,8 @@ internal class InMemoryFileManager(
    * @return the location of the module.
    */
   override fun getLocationForModule(location: Location, moduleName: String): Location {
-    if (location !is InMemoryLocation) {
-      val mappedLocation = this.inMemoryLocations[location]
-      return if (mappedLocation == null) {
-        super.getLocationForModule(location, moduleName)
-      } else {
-        this.getLocationForModule(mappedLocation, moduleName)
-      }
-    }
-
-    return InMemoryModuleLocation(location, location.path.resolve(moduleName), moduleName)
+    return this.locationForModule(location, moduleName)
+        ?: super.getLocationForModule(location, moduleName)
   }
 
   /**
@@ -281,24 +237,26 @@ internal class InMemoryFileManager(
    * @return the location of the module.
    */
   override fun getLocationForModule(location: Location, fileObject: JavaFileObject): Location {
-    if (location !is InMemoryLocation) {
-      val mappedLocation = this.inMemoryLocations[location]
-      return if (mappedLocation == null) {
-        super.getLocationForModule(location, fileObject)
-      } else {
-        this.getLocationForModule(mappedLocation, fileObject)
-      }
+    val mappedLocation = this.locationFor(location)
+        ?: return super.getLocationForModule(location, fileObject)
+
+    if (!mappedLocation.isModuleOrientedLocation) {
+      // Multi-module is enabled but the location doesn't have nested modules, I guess.
+      // TODO: check if this is the correct behaviour?
+      return mappedLocation
     }
 
-    if (location.isModuleOrientedLocation) {
-      val moduleName = location.path.relativize(fileObject.toUri().toPath()).first().toString()
+    // The first directory in the module-oriented location
+    val moduleName = mappedLocation
+        .path
+        .relativize(fileObject.toUri().toPath())
+        .first()
+        .toString()
 
-      // The first nested directory is the module name.
-      // Modules themselves cannot be module-oriented for whatever reason.
-      return this.getLocationForModule(location, moduleName)
-    }
-
-    return location
+    // The first nested directory is the module name.
+    // Remember module-oriented means it contains module locations, not that the location
+    // itself is of a module.
+    return this.getLocationForModule(location, moduleName)
   }
 
   /**
@@ -316,17 +274,8 @@ internal class InMemoryFileManager(
       return Files.list(path).count() > 0
     }
 
-    if (location is InMemoryLocation) {
-      return true
-    }
-
-    val mappedLocation = this.inMemoryLocations[location]
-
-    return if (mappedLocation == null) {
-      super.hasLocation(location)
-    } else {
-      this.hasLocation(mappedLocation)
-    }
+    val mappedLocation = this.locationFor(location)
+    return mappedLocation != null
   }
 
   /**
@@ -347,16 +296,10 @@ internal class InMemoryFileManager(
    * @return the canonical name.
    */
   override fun inferBinaryName(location: Location, file: JavaFileObject): String {
-    if (location !is InMemoryLocation) {
-      val mappedLocation = this.inMemoryLocations[location]
-      return if (mappedLocation == null) {
-        super.inferBinaryName(location, file)
-      } else {
-        this.inferBinaryName(mappedLocation, file)
-      }
-    }
+    val mappedLocation = this.locationFor(location)
+        ?: return super.inferBinaryName(location, file)
 
-    return file.toUri().toPath().relativeTo(location.path)
+    return file.toUri().toPath().relativeTo(mappedLocation.path)
         .toString()
         .removeSuffix(file.kind.extension)
         .replace('/', '.')
@@ -369,11 +312,13 @@ internal class InMemoryFileManager(
    * @return the module name.
    */
   override fun inferModuleName(location: Location): String {
-    return if (location is InMemoryModuleLocation) {
-      location.moduleName
-    } else {
-      super.inferModuleName(location)
+    val mappedLocation = this.locationFor(location)
+
+    if (mappedLocation is JavaRamModuleLocation) {
+      return mappedLocation.moduleName
     }
+
+    return super.inferModuleName(location)
   }
 
   /**
@@ -392,16 +337,10 @@ internal class InMemoryFileManager(
       kinds: Set<Kind>,
       recurse: Boolean
   ): Iterable<JavaFileObject> {
-    if (location !is InMemoryLocation) {
-      val mappedLocation = this.inMemoryLocations[location]
-      return if (mappedLocation == null) {
-        super.list(location, packageName, kinds, recurse)
-      } else {
-        this.list(mappedLocation, packageName, kinds, recurse)
-      }
-    }
+    val mappedLocation = this.locationFor(location)
+        ?: return super.list(location, packageName, kinds, recurse)
 
-    val basePath = this.sourceToPath(location, packageName, Kind.OTHER)
+    val basePath = this.sourceToPath(mappedLocation, packageName, Kind.OTHER)
 
     if (basePath.notExists()) {
       // Package does not exist yet, probably.
@@ -410,7 +349,7 @@ internal class InMemoryFileManager(
 
     val visitOpts = emptySet<FileVisitOption>()
     val maxDepth = if (recurse) Int.MAX_VALUE else 1
-    val filesFound = mutableListOf<InMemoryFileObject>()
+    val filesFound = mutableListOf<JavaRamFileObject>()
 
     val visitor = object : SimpleFileVisitor<Path>() {
       override fun visitFile(path: Path, attrs: BasicFileAttributes): FileVisitResult {
@@ -420,7 +359,7 @@ internal class InMemoryFileManager(
           val kind = kinds.find { path.toString().endsWith(it.extension) }
 
           if (kind != null) {
-            filesFound += InMemoryFileObject(location, path.toUri(), kind)
+            filesFound += JavaRamFileObject(mappedLocation, path.toUri(), kind)
           }
         }
 
@@ -440,16 +379,10 @@ internal class InMemoryFileManager(
    * @return the iterable across the set of locations.
    */
   override fun listLocationsForModules(location: Location): Iterable<Set<Location>> {
-    if (location !is InMemoryLocation) {
-      val mappedLocation = this.inMemoryLocations[location]
-      return if (mappedLocation == null) {
-        super.listLocationsForModules(location)
-      } else {
-        this.listLocationsForModules(mappedLocation)
-      }
-    }
+    val mappedLocation = this.locationFor(location)
+        ?: return super.listLocationsForModules(location)
 
-    val path = location.path
+    val path = mappedLocation.path
 
     val files = Files
         .list(path)
@@ -460,14 +393,14 @@ internal class InMemoryFileManager(
               .filter { it.isRegularFile() }
               .anyMatch { it.fileName.toString() == "module-info.java" }
         }
-        .map { InMemoryModuleLocation(location, it, it.fileName.toString()) }
+        .map { JavaRamModuleLocation(mappedLocation, it, it.fileName.toString()) }
         .asSequence()
         .toSet()
 
     return listOf(files)
   }
 
-  private fun sourceToPath(location: InMemoryLocation, className: String, kind: Kind): Path {
+  private fun sourceToPath(location: JavaRamLocation, className: String, kind: Kind): Path {
     val classNameAsPath = this.classNameAsPath(className, kind)
 
     return location
@@ -477,7 +410,7 @@ internal class InMemoryFileManager(
         .toAbsolutePath()
   }
 
-  private fun fileToPath(location: InMemoryLocation, relativeName: String): Path {
+  private fun fileToPath(location: JavaRamLocation, relativeName: String): Path {
     return location
         .path
         .resolve(relativeName)
@@ -489,6 +422,25 @@ internal class InMemoryFileManager(
       .removePrefix("/")
       .replace('.', '/') + kind.extension
 
+  private fun locationFor(parent: Location): JavaRamLocation? {
+    return when (parent) {
+      is JavaRamLocation -> parent
+      in this.inMemoryLocations -> this.inMemoryLocations[parent]!!
+      else -> null
+    }
+  }
+
+  private fun locationForModule(parent: Location, moduleName: String): JavaRamModuleLocation? {
+    val mappedParent = when (parent) {
+      is JavaRamFileLocation -> parent
+      in this.inMemoryLocations -> this.inMemoryLocations[parent]!!
+      else -> return null
+    }
+
+    val modulePath = mappedParent.path.resolve(moduleName)
+    return JavaRamModuleLocation(mappedParent, modulePath, moduleName)
+  }
+
   private fun createNewFileWithDirectories(path: Path) {
     path.parent.createDirectories()
     path.deleteIfExists()
@@ -496,17 +448,17 @@ internal class InMemoryFileManager(
   }
 
   private fun mapLocationFor(location: StandardLocation, dirName: String) =
-      location to InMemoryFileLocation(
+      location to JavaRamFileLocation(
           location,
           this.rootPath.resolve(dirName)
       )
 
   private inner class InMemoryLocationOperationsImpl(
-      override val location: InMemoryLocation
-  ) : InMemoryLocationOperations {
+      override val location: JavaRamLocation
+  ) : JavaRamLocationOperations {
 
     override val moduleName: String?
-      get() = if (this.location is InMemoryModuleLocation) {
+      get() = if (this.location is JavaRamModuleLocation) {
         this.location.moduleName
       } else {
         null
@@ -523,14 +475,14 @@ internal class InMemoryFileManager(
         .createFile(fileName)
         .apply { this.writeLines(lines.asSequence()) }
 
-    override fun getFile(fileName: String): InMemoryFileObject? {
-      val path = this@InMemoryFileManager.fileToPath(this.location, fileName)
-      val obj = InMemoryFileObject(this.location, path.toUri())
+    override fun getFile(fileName: String): JavaRamFileObject? {
+      val path = this@JavaRamFileManager.fileToPath(this.location, fileName)
+      val obj = JavaRamFileObject(this.location, path.toUri())
       return if (obj.exists()) obj else null
     }
 
     private fun createFile(fileName: String): Path {
-      val path = this@InMemoryFileManager.fileToPath(this.location, fileName)
+      val path = this@JavaRamFileManager.fileToPath(this.location, fileName)
       path.parent.createDirectories()
       return path.createFile()
     }
@@ -545,14 +497,14 @@ internal class InMemoryFileManager(
     private val cleaner = Cleaner.create()
 
     /**
-     * Create a [InMemoryFileManager] that wraps a given [JavaCompiler]'s
+     * Create a [JavaRamFileManager] that wraps a given [JavaCompiler]'s
      * [StandardJavaFileManager], a [DiagnosticListener], a [Locale], and a [Charset].
      *
      * @param compiler the compiler to get the [StandardJavaFileManager] from.
      * @param diagnosticListener the diagnostic listener to use.
      * @param locale the locale to use.
      * @param charset the charset to use.
-     * @return the wrapping [InMemoryFileManager].
+     * @return the wrapping [JavaRamFileManager].
      */
     @JvmStatic
     fun create(
@@ -560,14 +512,14 @@ internal class InMemoryFileManager(
         diagnosticListener: DiagnosticListener<JavaFileObject>,
         locale: Locale,
         charset: Charset
-    ): InMemoryFileManager {
+    ): JavaRamFileManager {
       val standardFileManager = compiler.getStandardFileManager(
           diagnosticListener,
           locale,
           charset
       )
 
-      return InMemoryFileManager(standardFileManager)
+      return JavaRamFileManager(standardFileManager)
     }
   }
 }

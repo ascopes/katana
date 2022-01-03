@@ -10,7 +10,7 @@ import javax.tools.JavaFileManager.Location
  * @author Ashley Scopes
  * @since 0.0.1
  */
-interface InMemoryLocationOperations {
+interface JavaRamLocationOperations {
   /**
    * The location being operated on.
    */

@@ -1,6 +1,6 @@
 package io.ascopes.katana.compilertesting.java.it
 
-import io.ascopes.katana.compilertesting.java.InMemoryCompiler
+import io.ascopes.katana.compilertesting.java.JavaCompiler
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.params.ParameterizedTest
@@ -104,7 +104,7 @@ class BasicCompilationIntegrationTest {
   fun `I can request that headers get produced for native sources for standard compilations`(
       version: SourceVersion
   ) {
-    InMemoryCompiler
+    JavaCompiler
         .javac()
         .releaseVersion(version)
         .generateHeaders()
@@ -133,7 +133,7 @@ class BasicCompilationIntegrationTest {
   fun `I can request that headers get produced for native sources for multimodule compilations`(
       version: SourceVersion
   ) {
-    InMemoryCompiler
+    JavaCompiler
         .javac()
         .releaseVersion(version)
         .generateHeaders()
@@ -172,7 +172,7 @@ class BasicCompilationIntegrationTest {
         .values()
         .filter { it >= SourceVersion.RELEASE_11 }
 
-    private fun unnamedModuleCompilation(version: SourceVersion) = InMemoryCompiler.javac()
+    private fun unnamedModuleCompilation(version: SourceVersion) = JavaCompiler.javac()
         .releaseVersion(version)
         .sources {
           this.createFile(
@@ -189,7 +189,7 @@ class BasicCompilationIntegrationTest {
           )
         }
 
-    private fun multiModuleCompilation(version: SourceVersion) = InMemoryCompiler.javac()
+    private fun multiModuleCompilation(version: SourceVersion) = JavaCompiler.javac()
         .releaseVersion(version)
         .moduleSources("test.greeter") {
           this.createFile(

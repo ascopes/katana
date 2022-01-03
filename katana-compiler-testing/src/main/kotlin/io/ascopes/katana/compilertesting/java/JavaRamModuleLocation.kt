@@ -13,15 +13,15 @@ import javax.tools.JavaFileManager.Location
  * @param path the absolute path of the location.
  * @param moduleName the name of the module.
  */
-internal data class InMemoryModuleLocation(
+internal data class JavaRamModuleLocation(
     private val parentLocation: Location,
     override val path: Path,
     val moduleName: String
-) : InMemoryLocation {
+) : JavaRamLocation {
   override fun getName() = this.path.toString()
   override fun isOutputLocation() = this.parentLocation.isOutputLocation
   override fun isModuleOrientedLocation() = false
-  override fun equals(other: Any?) = other is InMemoryModuleLocation
+  override fun equals(other: Any?) = other is JavaRamModuleLocation
       && this.parentLocation == other.parentLocation
       && this.moduleName == other.moduleName
 

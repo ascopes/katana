@@ -1,8 +1,8 @@
 package io.ascopes.katana.compilertesting.java
 
-import io.ascopes.katana.compilertesting.java.InMemoryCompilationResult.Failure
-import io.ascopes.katana.compilertesting.java.InMemoryCompilationResult.FatalError
-import io.ascopes.katana.compilertesting.java.InMemoryCompilationResult.Success
+import io.ascopes.katana.compilertesting.java.JavaCompilationResult.Failure
+import io.ascopes.katana.compilertesting.java.JavaCompilationResult.FatalError
+import io.ascopes.katana.compilertesting.java.JavaCompilationResult.Success
 import java.io.StringWriter
 import java.nio.charset.StandardCharsets
 import java.util.Locale
@@ -23,10 +23,10 @@ import kotlin.io.path.absolutePathString
  * @param compiler the Java Compiler implementation to use.
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class InMemoryCompiler internal constructor(
+class JavaCompiler internal constructor(
     private val compiler: JavaCompiler,
-    private val diagnosticListener: InMemoryDiagnosticListener,
-    private val fileManager: InMemoryFileManager,
+    private val diagnosticListener: JavaDiagnosticListener,
+    private val fileManager: JavaRamFileManager,
 ) {
 
   private val options = mutableListOf<String>()
@@ -132,7 +132,7 @@ class InMemoryCompiler internal constructor(
    * @return this object for further call chaining.
    */
   fun generateHeaders() = this.apply {
-    val headerLocation = this.fileManager.getLocationFor(StandardLocation.NATIVE_HEADER_OUTPUT)
+    val headerLocation = this.fileManager.getOperationsFor(StandardLocation.NATIVE_HEADER_OUTPUT)
     this.options += listOf("-h", headerLocation.path.absolutePathString())
   }
 
@@ -166,7 +166,7 @@ class InMemoryCompiler internal constructor(
    * @param operation the operation to perform, in a closure.
    * @return this object for further call chaining.
    */
-  fun sources(operation: InMemoryLocationOperations.() -> Unit) = this
+  fun sources(operation: JavaRamLocationOperations.() -> Unit) = this
       .files(StandardLocation.SOURCE_PATH, operation)
 
   /**
@@ -175,7 +175,7 @@ class InMemoryCompiler internal constructor(
    * @param operation the operation to perform, in a closure.
    * @return this object for further call chaining.
    */
-  fun moduleSources(moduleName: String, operation: InMemoryLocationOperations.() -> Unit) = this
+  fun moduleSources(moduleName: String, operation: JavaRamLocationOperations.() -> Unit) = this
       .moduleFiles(StandardLocation.MODULE_SOURCE_PATH, moduleName, operation)
 
   /**
@@ -184,7 +184,7 @@ class InMemoryCompiler internal constructor(
    * @param operation the operation to perform, in a closure.
    * @return this object for further call chaining.
    */
-  fun generatedSources(operation: InMemoryLocationOperations.() -> Unit) = this
+  fun generatedSources(operation: JavaRamLocationOperations.() -> Unit) = this
       .files(StandardLocation.SOURCE_OUTPUT, operation)
 
   /**
@@ -193,7 +193,7 @@ class InMemoryCompiler internal constructor(
    * @param operation the operation to perform, in a closure.
    * @return this object for further call chaining.
    */
-  fun generatedClasses(operation: InMemoryLocationOperations.() -> Unit) = this
+  fun generatedClasses(operation: JavaRamLocationOperations.() -> Unit) = this
       .files(StandardLocation.CLASS_OUTPUT, operation)
 
 
@@ -203,7 +203,7 @@ class InMemoryCompiler internal constructor(
    * @param operation the operation to perform, in a closure.
    * @return this object for further call chaining.
    */
-  fun generatedHeaders(operation: InMemoryLocationOperations.() -> Unit) = this
+  fun generatedHeaders(operation: JavaRamLocationOperations.() -> Unit) = this
       .files(StandardLocation.NATIVE_HEADER_OUTPUT, operation)
 
   /**
@@ -213,9 +213,9 @@ class InMemoryCompiler internal constructor(
    * @param operation the operation to perform, in a closure.
    * @return this object for further call chaining.
    */
-  fun files(location: Location, operation: InMemoryLocationOperations.() -> Unit) = this.apply {
+  fun files(location: Location, operation: JavaRamLocationOperations.() -> Unit) = this.apply {
     this.fileManager
-        .getLocationFor(location)
+        .getOperationsFor(location)
         .operation()
   }
 
@@ -230,10 +230,10 @@ class InMemoryCompiler internal constructor(
   fun moduleFiles(
       location: Location,
       moduleName: String,
-      operation: InMemoryLocationOperations.() -> Unit
+      operation: JavaRamLocationOperations.() -> Unit
   ) = this.apply {
     this.fileManager
-        .getLocationFor(location, moduleName)
+        .getOperationsFor(location, moduleName)
         .operation()
   }
 
@@ -242,7 +242,7 @@ class InMemoryCompiler internal constructor(
    *
    * @return the compilation result.
    */
-  fun compile(): InMemoryCompilationResult {
+  fun compile(): JavaCompilationResult {
     val nonModuleCompilationUnits = this.fileManager
         .list(StandardLocation.SOURCE_PATH, "", setOf(Kind.SOURCE), true)
         .toList()
@@ -284,7 +284,7 @@ class InMemoryCompiler internal constructor(
       FatalError(ex)
     }
 
-    return InMemoryCompilationResult(
+    return JavaCompilationResult(
         outcome = outcome,
         modules = this.modules,
         processors = this.processors,
@@ -305,16 +305,16 @@ class InMemoryCompiler internal constructor(
      * Get a virtual Java compiler with a backing virtual file system behind it.
      */
     @JvmStatic
-    fun javac(): InMemoryCompiler {
+    fun javac(): io.ascopes.katana.compilertesting.java.JavaCompiler {
       val compiler = ToolProvider.getSystemJavaCompiler()
-      val diagnosticListener = InMemoryDiagnosticListener()
-      val fileManager = InMemoryFileManager.create(
+      val diagnosticListener = JavaDiagnosticListener()
+      val fileManager = JavaRamFileManager.create(
           compiler,
           diagnosticListener,
           Locale.ROOT,
           StandardCharsets.UTF_8
       )
-      return InMemoryCompiler(compiler, diagnosticListener, fileManager)
+      return JavaCompiler(compiler, diagnosticListener, fileManager)
     }
   }
 }

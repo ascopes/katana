@@ -13,7 +13,7 @@ import javax.tools.Diagnostic
  * @param diagnostic the original diagnostic to wrap.
  * @param stacktrace the stacktrace of the call to log the diagnostic.
  */
-class InMemoryDiagnostic<S> internal constructor(
+class JavaDiagnostic<S> internal constructor(
     val timestamp: Instant,
     private val diagnostic: Diagnostic<S>,
     val stacktrace: List<StackTraceElement>

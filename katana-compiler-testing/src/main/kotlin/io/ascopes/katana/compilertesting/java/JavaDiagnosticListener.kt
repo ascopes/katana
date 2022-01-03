@@ -11,13 +11,13 @@ import javax.tools.JavaFileObject
  * @author Ashley Scopes
  * @since 0.1.0
  */
-internal class InMemoryDiagnosticListener : DiagnosticListener<JavaFileObject> {
-  private val _diagnostics = mutableListOf<InMemoryDiagnostic<out JavaFileObject>>()
+internal class JavaDiagnosticListener : DiagnosticListener<JavaFileObject> {
+  private val _diagnostics = mutableListOf<JavaDiagnostic<out JavaFileObject>>()
 
   /**
    * The collection of collected diagnostics.
    */
-  val diagnostics: List<InMemoryDiagnostic<out JavaFileObject>>
+  val diagnostics: List<JavaDiagnostic<out JavaFileObject>>
     get() = this._diagnostics
 
   /**
@@ -33,7 +33,7 @@ internal class InMemoryDiagnosticListener : DiagnosticListener<JavaFileObject> {
         .toList()
 
     val now = Instant.now()
-    this._diagnostics.add(InMemoryDiagnostic(now, diagnostic, stackTrace))
+    this._diagnostics.add(JavaDiagnostic(now, diagnostic, stackTrace))
   }
 
   private companion object {

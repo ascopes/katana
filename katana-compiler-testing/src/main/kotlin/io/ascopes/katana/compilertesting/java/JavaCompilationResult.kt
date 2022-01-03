@@ -26,14 +26,14 @@ import javax.tools.StandardLocation
  * @param fileManager the file manager that was used.
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class InMemoryCompilationResult internal constructor(
+class JavaCompilationResult internal constructor(
     val outcome: Outcome,
     val modules: List<String>,
     val processors: List<Processor>,
     val options: List<String>,
     val logs: String,
-    val diagnostics: List<InMemoryDiagnostic<out JavaFileObject>>,
-    internal val fileManager: InMemoryFileManager
+    val diagnostics: List<JavaDiagnostic<out JavaFileObject>>,
+    internal val fileManager: JavaRamFileManager
 ) {
   /**
    * Assert that the compilation succeeded.
@@ -308,7 +308,7 @@ class InMemoryCompilationResult internal constructor(
    */
   fun satisfies(
       description: String? = "custom condition",
-      predicate: InMemoryCompilationResult.() -> Boolean
+      predicate: JavaCompilationResult.() -> Boolean
   ) = this.apply {
     if (!this.predicate()) {
       this.fail("Expected '$description' to succeed, but it failed")
@@ -317,28 +317,28 @@ class InMemoryCompilationResult internal constructor(
 
   fun generatedSourceFile(fileName: String) = this.apply {
     this.fileManager
-        .getLocationFor(StandardLocation.SOURCE_OUTPUT)
+        .getOperationsFor(StandardLocation.SOURCE_OUTPUT)
         .getFile(fileName)
         ?: this.fail("Generated source file $fileName did not exist")
   }
 
   fun generatedSourceFile(fileName: String, moduleName: String) = this.apply {
     this.fileManager
-        .getLocationFor(StandardLocation.SOURCE_OUTPUT, moduleName)
+        .getOperationsFor(StandardLocation.SOURCE_OUTPUT, moduleName)
         .getFile(fileName)
         ?: this.fail("Generated source file $moduleName/$fileName did not exist")
   }
 
   fun generatedClassFile(fileName: String) = this.apply {
     this.fileManager
-        .getLocationFor(StandardLocation.CLASS_OUTPUT)
+        .getOperationsFor(StandardLocation.CLASS_OUTPUT)
         .getFile(fileName)
         ?: this.fail("Generated class file $fileName did not exist")
   }
 
   fun generatedHeaderFile(fileName: String) = this.apply {
     this.fileManager
-        .getLocationFor(StandardLocation.NATIVE_HEADER_OUTPUT)
+        .getOperationsFor(StandardLocation.NATIVE_HEADER_OUTPUT)
         .getFile(fileName)
         ?: this.fail("Generated header file $fileName did not exist")
   }
@@ -418,11 +418,11 @@ class InMemoryCompilationResult internal constructor(
       }
 
   private fun fail(message: String, expected: Any?, actual: Any?, cause: Throwable? = null) {
-    throw InMemoryCompilationAssertionError(message, this, expected, actual, cause)
+    throw JavaCompilationAssertionError(message, this, expected, actual, cause)
   }
 
   private fun fail(message: String, cause: Throwable? = null) {
-    throw InMemoryCompilationAssertionError(message, this, cause)
+    throw JavaCompilationAssertionError(message, this, cause)
   }
 
   /**

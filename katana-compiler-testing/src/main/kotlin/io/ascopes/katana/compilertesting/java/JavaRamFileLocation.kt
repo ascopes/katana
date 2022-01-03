@@ -11,10 +11,10 @@ import javax.tools.JavaFileManager.Location
  * @param baseLocation the base location to derive this location from.
  * @param path the absolute path of the location.
  */
-internal data class InMemoryFileLocation(
+internal data class JavaRamFileLocation(
     private val baseLocation: Location,
     override val path: Path
-) : InMemoryLocation {
+) : JavaRamLocation {
   override fun getName() = this.path.toString()
   override fun isOutputLocation() = this.baseLocation.isOutputLocation
   override fun isModuleOrientedLocation() = this.baseLocation.isModuleOrientedLocation

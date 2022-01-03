@@ -13,13 +13,13 @@ import javax.tools.JavaFileObject
  * @since 0.1.0
  */
 @Suppress("MemberVisibilityCanBePrivate")
-internal class InMemoryCompilationAssertionError : AssertionFailedError {
+internal class JavaCompilationAssertionError : AssertionFailedError {
   private val fullMessage: String
-  private val compilationResult: InMemoryCompilationResult
+  private val compilationResult: JavaCompilationResult
 
   internal constructor(
       message: String,
-      compilationResult: InMemoryCompilationResult,
+      compilationResult: JavaCompilationResult,
       cause: Throwable? = null
   ) : super(message, cause) {
     this.fullMessage = Companion.generateMessageFor(
@@ -31,7 +31,7 @@ internal class InMemoryCompilationAssertionError : AssertionFailedError {
 
   internal constructor(
       message: String,
-      compilationResult: InMemoryCompilationResult,
+      compilationResult: JavaCompilationResult,
       expected: Any?,
       actual: Any?,
       cause: Throwable? = null
@@ -48,7 +48,7 @@ internal class InMemoryCompilationAssertionError : AssertionFailedError {
   companion object {
     private fun generateMessageFor(
         message: String,
-        compilationResult: InMemoryCompilationResult
+        compilationResult: JavaCompilationResult
     ) = StringBuilder(message)
         .appendOptions(compilationResult.options)
         .appendModules(compilationResult.modules)
@@ -68,7 +68,7 @@ internal class InMemoryCompilationAssertionError : AssertionFailedError {
         .appendSimpleBox("Annotation Processors", processors.map { it::class.java.canonicalName })
 
     private fun StringBuilder.appendDiagnostics(
-        diagnostics: List<InMemoryDiagnostic<out JavaFileObject>>?
+        diagnostics: List<JavaDiagnostic<out JavaFileObject>>?
     ): StringBuilder {
       if (diagnostics == null || diagnostics.isEmpty()) {
         return this
@@ -107,7 +107,7 @@ internal class InMemoryCompilationAssertionError : AssertionFailedError {
       this
     }
 
-    private fun StringBuilder.appendFileTree(fileManager: InMemoryFileManager): StringBuilder {
+    private fun StringBuilder.appendFileTree(fileManager: JavaRamFileManager): StringBuilder {
       val files = fileManager.listAllInMemoryFiles()
           .toList()
           .sorted()

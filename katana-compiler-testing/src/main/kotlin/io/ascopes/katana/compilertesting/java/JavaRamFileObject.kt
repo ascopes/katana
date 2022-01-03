@@ -32,8 +32,8 @@ import kotlin.io.path.toPath
  * @param uri the URI of the in-memory file.
  * @param kind the kind of the file.
  */
-internal class InMemoryFileObject(
-    val location: InMemoryLocation,
+internal class JavaRamFileObject(
+    val location: JavaRamLocation,
     uri: URI,
     kind: Kind = Kind.OTHER,
 ) : SimpleJavaFileObject(uri, kind) {
