@@ -6,6 +6,7 @@ import io.ascopes.katana.compilertesting.java.JavaCompilationResult.Success
 import java.io.StringWriter
 import java.nio.charset.StandardCharsets
 import java.util.Locale
+import java.util.function.Consumer
 import javax.annotation.processing.Processor
 import javax.lang.model.SourceVersion
 import javax.tools.JavaCompiler
@@ -162,12 +163,30 @@ class JavaCompilationBuilder internal constructor(
       .files(StandardLocation.SOURCE_PATH, operation)
 
   /**
+   * Perform operations on input source files.
+   *
+   * @param operation the operation to perform, as a JVM consumer functional monad.
+   * @return this object for further call chaining.
+   */
+  fun sources(operation: Consumer<JavaRamLocationOperations>) = this
+      .files(StandardLocation.SOURCE_PATH, operation)
+
+  /**
    * Perform operations on input module source files.
    *
    * @param operation the operation to perform, in a closure.
    * @return this object for further call chaining.
    */
   fun moduleSources(moduleName: String, operation: JavaRamLocationOperations.() -> Unit) = this
+      .moduleFiles(StandardLocation.MODULE_SOURCE_PATH, moduleName, operation)
+
+  /**
+   * Perform operations on input module source files.
+   *
+   * @param operation the operation to perform, as a JVM consumer functional monad.
+   * @return this object for further call chaining.
+   */
+  fun moduleSources(moduleName: String, operation: Consumer<JavaRamLocationOperations>) = this
       .moduleFiles(StandardLocation.MODULE_SOURCE_PATH, moduleName, operation)
 
   /**
@@ -180,6 +199,15 @@ class JavaCompilationBuilder internal constructor(
       .files(StandardLocation.SOURCE_OUTPUT, operation)
 
   /**
+   * Perform operations on any generated source files.
+   *
+   * @param operation the operation to perform, as a JVM consumer functional monad.
+   * @return this object for further call chaining.
+   */
+  fun generatedSources(operation: Consumer<JavaRamLocationOperations>) = this
+      .files(StandardLocation.SOURCE_OUTPUT, operation)
+
+  /**
    * Perform operations on any generated class files.
    *
    * @param operation the operation to perform, in a closure.
@@ -188,6 +216,14 @@ class JavaCompilationBuilder internal constructor(
   fun generatedClasses(operation: JavaRamLocationOperations.() -> Unit) = this
       .files(StandardLocation.CLASS_OUTPUT, operation)
 
+  /**
+   * Perform operations on any generated class files.
+   *
+   * @param operation the operation to perform, as a JVM consumer functional monad.
+   * @return this object for further call chaining.
+   */
+  fun generatedClasses(operation: Consumer<JavaRamLocationOperations>) = this
+      .files(StandardLocation.CLASS_OUTPUT, operation)
 
   /**
    * Perform operations on any generated header files.
@@ -196,6 +232,15 @@ class JavaCompilationBuilder internal constructor(
    * @return this object for further call chaining.
    */
   fun generatedHeaders(operation: JavaRamLocationOperations.() -> Unit) = this
+      .files(StandardLocation.NATIVE_HEADER_OUTPUT, operation)
+
+  /**
+   * Perform operations on any generated header files.
+   *
+   * @param operation the operation to perform, as a JVM consumer functional monad.
+   * @return this object for further call chaining.
+   */
+  fun generatedHeaders(operation: Consumer<JavaRamLocationOperations>) = this
       .files(StandardLocation.NATIVE_HEADER_OUTPUT, operation)
 
   /**
@@ -209,6 +254,18 @@ class JavaCompilationBuilder internal constructor(
     this.fileManager
         .getOperationsFor(location)
         .operation()
+  }
+
+  /**
+   * Perform operations on files in the given location.
+   *
+   * @param location the module-oriented location.
+   * @param operation the operation to perform, in a closure.
+   * @param operation the operation to perform, as a JVM consumer functional monad.
+   * @return this object for further call chaining.
+   */
+  fun files(location: Location, operation: Consumer<JavaRamLocationOperations>) = this.apply {
+    operation.accept(this.fileManager.getOperationsFor(location))
   }
 
   /**
@@ -228,6 +285,23 @@ class JavaCompilationBuilder internal constructor(
         .getOperationsFor(location, moduleName)
         .operation()
   }
+
+  /**
+   * Perform operations on the files in the given module-oriented location.
+   *
+   * @param location the module-oriented location.
+   * @param moduleName the name of the module.
+   * @param operation the operation to perform, as a JVM consumer functional monad.
+   * @return this object for further call chaining.
+   */
+  fun moduleFiles(
+      location: Location,
+      moduleName: String,
+      operation: Consumer<JavaRamLocationOperations>
+  ) = this.apply {
+    operation.accept(this.fileManager.getOperationsFor(location, moduleName))
+  }
+
 
   /**
    * Invoke the compiler with the given inputs, and return the compilation result.
@@ -294,11 +368,21 @@ class JavaCompilationBuilder internal constructor(
 
   companion object {
     /**
-     * Get a virtual Java compiler with a backing virtual file system behind it.
+     * Get a virtual Java compiler for the system default Java compiler implementation.
+     *
+     * @return the compilation builder for testing compilation passes in-memory.
      */
     @JvmStatic
-    fun javac(): io.ascopes.katana.compilertesting.java.JavaCompilationBuilder {
-      val compiler = ToolProvider.getSystemJavaCompiler()
+    fun javac() = this.compiler(ToolProvider.getSystemJavaCompiler())
+
+    /**
+     * Get a virtual compiler for the given Java compiler implementation.
+     *
+     * @param compiler the actual Java compiler to use.
+     * @return the compilation builder for testing compilation passes in-memory.
+     */
+    @JvmStatic
+    fun compiler(compiler: JavaCompiler): JavaCompilationBuilder {
       val diagnosticListener = JavaDiagnosticListener()
       val fileManager = JavaRamFileManager.create(
           compiler,

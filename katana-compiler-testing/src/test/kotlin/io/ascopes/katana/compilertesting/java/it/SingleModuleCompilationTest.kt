@@ -20,22 +20,21 @@ class SingleModuleCompilationTest {
         .javac()
         .releaseVersion(version)
         .sources {
-          createFile(
-              "io/ascopes/helloworld/HelloWorld.java",
-              """
-                package io.ascopes.helloworld;
-                
-                public class HelloWorld {
-                  public static void main(String[] args) {
-                    System.out.println("Hello, World!");
-                  }
+          createFile("io/ascopes/helloworld/nonmodular/HelloWorld.java") {
+            """
+              package io.ascopes.helloworld.nonmodular;
+              
+              public class HelloWorld {
+                public static void main(String[] args) {
+                  System.out.println("Hello, World!");
                 }
-              """.trimIndent()
-          )
+              }
+            """.trimIndent()
+          }
         }
         .compile()
         .succeededWithoutWarnings()
-        .generatedClassFile("io/ascopes/helloworld/HelloWorld.class")
+        .generatedClassFile("io/ascopes/helloworld/nonmodular/HelloWorld.class")
   }
 
   @ParameterizedTest
@@ -45,9 +44,8 @@ class SingleModuleCompilationTest {
         .javac()
         .releaseVersion(version)
         .sources {
-          createFile(
-              "io/ascopes/helloworld/modular/HelloWorld.java",
-              """
+          createFile("io/ascopes/helloworld/modular/HelloWorld.java") {
+            """
               package io.ascopes.helloworld.modular;
               
               public class HelloWorld {
@@ -56,16 +54,15 @@ class SingleModuleCompilationTest {
                 }
               }
             """.trimIndent()
-          )
-          createFile(
-              "module-info.java",
-              """
-                module helloworld {
-                  requires java.base;
-                  exports io.ascopes.helloworld.modular;
-                }
-              """.trimIndent()
-          )
+          }
+          createFile("module-info.java") {
+            """
+              module helloworld {
+                requires java.base;
+                exports io.ascopes.helloworld.modular;
+              }
+            """.trimIndent()
+          }
         }
         .compile()
         .succeededWithoutWarnings()
@@ -95,18 +92,17 @@ class SingleModuleCompilationTest {
         .javac()
         .releaseVersion(version)
         .sources {
-          createFile(
-              "io/ascopes/helloworld/HelloWorld.java",
-              """
-                package io.ascopes.helloworld;
-                
-                public class HelloWorld {
-                  public static void main(String[] args) {
-                    System.out.println("Hello, World!");
-                  }
+          createFile("io/ascopes/helloworld/HelloWorld.java") {
+            """
+              package io.ascopes.helloworld;
+              
+              public class HelloWorld {
+                public static void main(String[] args) {
+                  System.out.println("Hello, World!");
                 }
-              """.trimIndent()
-          )
+              }
+            """.trimIndent()
+          }
         }
         .processors(annotationProcessor)
         .compile()
@@ -123,20 +119,19 @@ class SingleModuleCompilationTest {
         .javac()
         .releaseVersion(version)
         .sources {
-          createFile(
-              "io/ascopes/helloworld/HelloWorld.java",
-              """
-                package io.ascopes.helloworld;
-                
-                public class HelloWorld {
-                  public static void main(String[] args) {
-                    System.out.println(createGreeting());
-                  }
-                  
-                  private static native String createGreeting();
+          createFile("io/ascopes/helloworld/HelloWorld.java") {
+            """
+              package io.ascopes.helloworld;
+              
+              public class HelloWorld {
+                public static void main(String[] args) {
+                  System.out.println(createGreeting());
                 }
-              """.trimIndent()
-          )
+                
+                private static native String createGreeting();
+              }
+            """.trimIndent()
+          }
         }
         .generateHeaders()
         .compile()
