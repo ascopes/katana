@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run tests
         run: |
-          ./build-in-docker.sh "${{matrix.image}}" \
+          ./mvnw-docker "${{matrix.image}}" \
               -B -T3 clean package \
               -Dcheckstyle.skip=true
 
@@ -34,7 +34,7 @@ jobs:
 #      - uses: actions/checkout@v2
 #      - name: Run Checkstyle
 #        run: |
-#          ./build-in-docker.sh "openjdk:17" \
+#          ./mvnw-docker "openjdk:17" \
 #              -B -T3 clean verify \
 #              -Dmaven.test.skip=true \
 #              -Dmaven.site.skip=true \
