@@ -1,5 +1,6 @@
 package io.ascopes.katana.compilertesting.java.it
 
+import io.ascopes.katana.compilertesting.java.Each
 import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.parallel.Execution

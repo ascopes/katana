@@ -19,7 +19,13 @@ class JavaDiagnostic<S> internal constructor(
     val stacktrace: List<StackTraceElement>
 ) : Diagnostic<S> by diagnostic {
 
-  override fun equals(other: Any?) = this.diagnostic == other
+  override fun equals(other: Any?) = when (other) {
+    is JavaDiagnostic<*> -> this.diagnostic == other.diagnostic
+    is Diagnostic<*> -> this.diagnostic == other
+    else -> false
+  }
+
   override fun hashCode() = this.diagnostic.hashCode()
+
   override fun toString() = this.diagnostic.toString()
 }

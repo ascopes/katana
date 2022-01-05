@@ -1,5 +1,6 @@
 package io.ascopes.katana.compilertesting.java.it;
 
+import io.ascopes.katana.compilertesting.java.Each;
 import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder;
 import javax.lang.model.SourceVersion;
 import org.junit.jupiter.api.DisplayName;

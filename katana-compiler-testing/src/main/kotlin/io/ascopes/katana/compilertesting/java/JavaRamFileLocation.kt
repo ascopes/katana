@@ -18,6 +18,13 @@ internal data class JavaRamFileLocation(
   override fun getName() = this.path.toString()
   override fun isOutputLocation() = this.baseLocation.isOutputLocation
   override fun isModuleOrientedLocation() = this.baseLocation.isModuleOrientedLocation
-  override fun equals(other: Any?) = this.baseLocation == other
+  override fun equals(other: Any?): Boolean {
+    return when (other) {
+      is JavaRamFileLocation -> this.baseLocation == other.baseLocation
+      is Location -> this.baseLocation == other
+      else -> false
+    }
+  }
+
   override fun hashCode() = this.baseLocation.hashCode()
 }
