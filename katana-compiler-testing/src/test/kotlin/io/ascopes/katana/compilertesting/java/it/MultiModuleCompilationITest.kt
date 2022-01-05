@@ -1,5 +1,6 @@
-package io.ascopes.katana.compilertesting.java
+package io.ascopes.katana.compilertesting.java.it
 
+import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
@@ -12,11 +13,10 @@ import javax.lang.model.element.TypeElement
 
 @Execution(ExecutionMode.CONCURRENT)
 class MultiModuleCompilationITest {
+  @Each.JavaVersion
   @ParameterizedTest
-  @MethodSource("io.ascopes.katana.compilertesting.java.TestSupportKt#javaReleases")
   fun `I can compile a basic 'Hello, World!' application`(version: SourceVersion) {
-    JavaCompilationBuilder
-        .javac()
+    JavaCompilationBuilder.javac()
         .releaseVersion(version)
         .moduleSources("helloworld.greet") {
           createFile("io/ascopes/helloworld/greet/Greeter.java") {
@@ -73,8 +73,8 @@ class MultiModuleCompilationITest {
         .generatedClassFile("helloworld.main", "module-info.class")
   }
 
+  @Each.JavaVersion
   @ParameterizedTest
-  @MethodSource("io.ascopes.katana.compilertesting.java.TestSupportKt#javaReleases")
   fun `Annotation Processors get invoked on the given sources`(version: SourceVersion) {
     var invoked = false
 
@@ -91,8 +91,7 @@ class MultiModuleCompilationITest {
       }
     }
 
-    JavaCompilationBuilder
-        .javac()
+    JavaCompilationBuilder.javac()
         .releaseVersion(version)
         .moduleSources("helloworld.greet") {
           createFile("io/ascopes/helloworld/greet/Greeter.java") {
@@ -152,11 +151,10 @@ class MultiModuleCompilationITest {
     assertTrue(invoked, "annotation processor was not invoked")
   }
 
+  @Each.JavaVersion
   @ParameterizedTest
-  @MethodSource("io.ascopes.katana.compilertesting.java.TestSupportKt#javaReleases")
   fun `Headers get created for the given sources`(version: SourceVersion) {
-    JavaCompilationBuilder
-        .javac()
+    JavaCompilationBuilder.javac()
         .releaseVersion(version)
         .moduleSources("helloworld.greet") {
           createFile("io/ascopes/helloworld/greet/Greeter.java") {

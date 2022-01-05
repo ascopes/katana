@@ -1,10 +1,10 @@
-package io.ascopes.katana.compilertesting.java
+package io.ascopes.katana.compilertesting.java.it
 
+import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.MethodSource
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
@@ -12,11 +12,10 @@ import javax.lang.model.element.TypeElement
 
 @Execution(ExecutionMode.CONCURRENT)
 class SingleModuleCompilationITest {
+  @Each.JavaVersion
   @ParameterizedTest
-  @MethodSource("io.ascopes.katana.compilertesting.java.TestSupportKt#javaReleases")
   fun `I can compile a basic 'Hello, World!' application`(version: SourceVersion) {
-    JavaCompilationBuilder
-        .javac()
+    JavaCompilationBuilder.javac()
         .releaseVersion(version)
         .sources {
           createFile("io/ascopes/helloworld/nonmodular/HelloWorld.java") {
@@ -36,11 +35,10 @@ class SingleModuleCompilationITest {
         .generatedClassFile("io/ascopes/helloworld/nonmodular/HelloWorld.class")
   }
 
+  @Each.JavaVersion
   @ParameterizedTest
-  @MethodSource("io.ascopes.katana.compilertesting.java.TestSupportKt#javaReleases")
   fun `I can compile a basic 'Hello, World!' application with modules`(version: SourceVersion) {
-    JavaCompilationBuilder
-        .javac()
+    JavaCompilationBuilder.javac()
         .releaseVersion(version)
         .sources {
           createFile("io/ascopes/helloworld/modular/HelloWorld.java") {
@@ -69,8 +67,8 @@ class SingleModuleCompilationITest {
         .generatedClassFile("module-info.class")
   }
 
+  @Each.JavaVersion
   @ParameterizedTest
-  @MethodSource("io.ascopes.katana.compilertesting.java.TestSupportKt#javaReleases")
   fun `Annotation Processors get invoked on the given sources`(version: SourceVersion) {
     var invoked = false
 
@@ -87,8 +85,7 @@ class SingleModuleCompilationITest {
       }
     }
 
-    JavaCompilationBuilder
-        .javac()
+    JavaCompilationBuilder.javac()
         .releaseVersion(version)
         .sources {
           createFile("io/ascopes/helloworld/HelloWorld.java") {
@@ -111,11 +108,10 @@ class SingleModuleCompilationITest {
     assertTrue(invoked, "annotation processor was not invoked")
   }
 
+  @Each.JavaVersion
   @ParameterizedTest
-  @MethodSource("io.ascopes.katana.compilertesting.java.TestSupportKt#javaReleases")
   fun `Headers get created for the given sources`(version: SourceVersion) {
-    JavaCompilationBuilder
-        .javac()
+    JavaCompilationBuilder.javac()
         .releaseVersion(version)
         .sources {
           createFile("io/ascopes/helloworld/HelloWorld.java") {

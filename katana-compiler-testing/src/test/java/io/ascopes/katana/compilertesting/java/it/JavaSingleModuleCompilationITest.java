@@ -1,19 +1,19 @@
-package io.ascopes.katana.compilertesting.java;
+package io.ascopes.katana.compilertesting.java.it;
 
+import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder;
 import javax.lang.model.SourceVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Basic integration tests, but implemented in Java rather than Kotlin
  * as a proof that the Kotlin classes can be utilised by Java test
  * packs.
  */
-class SingleModuleCompilationITJavaSingleModuleCompilationITest {
+class JavaSingleModuleCompilationITest {
   @DisplayName("I can compile a 'Hello, World' application in a Java test case")
+  @Each.JavaVersion
   @ParameterizedTest
-  @MethodSource("io.ascopes.katana.compilertesting.java.TestSupportKt#javaReleases")
   void I_can_compile_a_hello_world_application(SourceVersion version) {
     JavaCompilationBuilder
         .javac()
