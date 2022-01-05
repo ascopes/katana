@@ -1,6 +1,5 @@
-package io.ascopes.katana.compilertesting.java.it
+package io.ascopes.katana.compilertesting.java
 
-import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
@@ -12,7 +11,7 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 
 @Execution(ExecutionMode.CONCURRENT)
-class MultiModuleCompilationTest {
+class MultiModuleCompilationITest {
   @ParameterizedTest
   @MethodSource("io.ascopes.katana.compilertesting.java.TestSupportKt#javaReleases")
   fun `I can compile a basic 'Hello, World!' application`(version: SourceVersion) {
