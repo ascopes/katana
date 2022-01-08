@@ -8,6 +8,7 @@ import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
 import java.nio.charset.StandardCharsets
 import java.nio.file.LinkOption
+import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import javax.lang.model.element.NestingKind
 import javax.tools.JavaFileObject.Kind
@@ -32,10 +33,10 @@ import kotlin.io.path.toPath
  * @param uri the URI of the in-memory file.
  * @param kind the kind of the file.
  */
-internal class JavaRamFileObject(
-    val location: JavaRamLocation,
+class JavaRamFileObject internal constructor(
+    private val location: JavaRamLocation,
     uri: URI,
-    kind: Kind = Kind.OTHER,
+    kind: Kind
 ) : SimpleJavaFileObject(uri, kind) {
   init {
     if (!uri.isAbsolute) {
@@ -48,6 +49,18 @@ internal class JavaRamFileObject(
       throw IllegalArgumentException("Expected scheme '$jimfsScheme' for in-memory file '$uri'")
     }
   }
+
+  /**
+   * Create a file object for the location and path.
+   *
+   * @param location the file location in-memory.
+   * @param path the path to the in-memory file.
+   */
+  internal constructor(location: JavaRamLocation, path: Path) : this(
+      location,
+      path.toUri(),
+      Companion.determineKindOf(path)
+  )
 
   /**
    * Determine if the file exists or not.
@@ -131,5 +144,15 @@ internal class JavaRamFileObject(
         StandardOpenOption.TRUNCATE_EXISTING,
     )
     private val linkOptions = arrayOf<LinkOption>()
+
+    private fun determineKindOf(path: Path): Kind {
+      // .endsWith acts differently for paths, where it checks the entire last segment for equality.
+      // We don't want this.
+      val fileName = path.fileName.toString()
+
+      return Kind
+          .values()
+          .first { fileName.endsWith(it.extension) }
+    }
   }
 }

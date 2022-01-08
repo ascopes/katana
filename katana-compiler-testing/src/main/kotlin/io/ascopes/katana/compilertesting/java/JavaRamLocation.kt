@@ -8,9 +8,9 @@ import javax.tools.JavaFileManager.Location
  * Base for any in-memory location.
  *
  * @author Ashley Scopes
- * @since 0.0.1
+ * @since 0.1.0
  */
-internal interface JavaRamLocation : Location {
+interface JavaRamLocation : Location {
   /**
    * The path to the location.
    */

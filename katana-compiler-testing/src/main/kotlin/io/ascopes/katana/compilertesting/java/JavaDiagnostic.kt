@@ -15,7 +15,8 @@ import javax.tools.Diagnostic
  */
 class JavaDiagnostic<S> internal constructor(
     val timestamp: Instant,
-    private val diagnostic: Diagnostic<S>,
+    // Exposed for testing purposes only.
+    internal val diagnostic: Diagnostic<S>,
     val stacktrace: List<StackTraceElement>
 ) : Diagnostic<S> by diagnostic {
 

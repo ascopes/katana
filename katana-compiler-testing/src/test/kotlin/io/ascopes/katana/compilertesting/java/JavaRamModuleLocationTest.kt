@@ -1,4 +1,4 @@
-@file:Suppress("ClassName", "UsePropertyAccessSyntax")
+@file:Suppress("UsePropertyAccessSyntax")
 
 package io.ascopes.katana.compilertesting.java
 
@@ -52,7 +52,7 @@ class JavaRamModuleLocationTest {
   }
 
   @Nested
-  inner class `equals() tests` {
+  inner class EqualsTest {
     @Test
     fun `equal to itself`() {
       val location = JavaRamModuleLocation(
@@ -130,7 +130,7 @@ class JavaRamModuleLocationTest {
   }
 
   @Nested
-  inner class `hashCode() tests` {
+  inner class HashCodeTest {
     @Test
     fun `hash codes are equal for the same instance`() {
       val location = JavaRamModuleLocation(

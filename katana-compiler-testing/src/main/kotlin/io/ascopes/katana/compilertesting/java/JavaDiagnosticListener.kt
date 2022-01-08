@@ -11,7 +11,10 @@ import javax.tools.JavaFileObject
  * @author Ashley Scopes
  * @since 0.1.0
  */
-internal class JavaDiagnosticListener : DiagnosticListener<JavaFileObject> {
+internal class JavaDiagnosticListener(
+    // Visible for testing purposes only.
+    internal val stackTraceProvider: () -> List<StackTraceElement>
+) : DiagnosticListener<JavaFileObject> {
   private val _diagnostics = mutableListOf<JavaDiagnostic<out JavaFileObject>>()
 
   /**
@@ -26,19 +29,8 @@ internal class JavaDiagnosticListener : DiagnosticListener<JavaFileObject> {
    * @param diagnostic the diagnostic to report.
    */
   override fun report(diagnostic: Diagnostic<out JavaFileObject>) {
-    val stackTrace = Thread
-        .currentThread()
-        .stackTrace
-        .drop(Companion.FRAMES_TO_DROP)
-        .toList()
-
     val now = Instant.now()
+    val stackTrace = this.stackTraceProvider()
     this._diagnostics.add(JavaDiagnostic(now, diagnostic, stackTrace))
-  }
-
-  private companion object {
-    // Last two frames just hold the stacktrace accessor call and this report function,
-    // so skip them.
-    const val FRAMES_TO_DROP = 2
   }
 }

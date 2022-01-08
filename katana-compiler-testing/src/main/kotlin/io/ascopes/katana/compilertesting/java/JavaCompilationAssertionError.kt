@@ -12,7 +12,6 @@ import javax.tools.JavaFileObject
  * @author Ashley Scopes
  * @since 0.1.0
  */
-@Suppress("MemberVisibilityCanBePrivate")
 internal class JavaCompilationAssertionError : AssertionFailedError {
   private val fullMessage: String
   private val compilationResult: JavaCompilationResult

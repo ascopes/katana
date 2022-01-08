@@ -385,30 +385,11 @@ class JavaCompilationResult internal constructor(
 
   private fun hadFile(
       location: Location,
-      fileName: String
+      fileName: String,
   ) = this.apply {
-    val ops = this.fileManager.getOperationsFor(location)
-
-    if (ops.getFile(fileName) != null) {
-      return@apply
-    }
-
-    val message = StringBuilder("No file found matching $fileName in ${location.name}")
-
-    val closestMatches = ops.findClosestFileNamesTo(fileName)
-    if (closestMatches.isNotEmpty()) {
-      message
-          .appendLine()
-          .appendLine()
-          .appendLine("Perhaps you meant one of:")
-
-
-      closestMatches.forEach {
-        message.appendLine(" - $it")
-      }
-    }
-
-    this.fail(message.toString())
+    val ramLocation = this.fileManager.getInMemoryLocationFor(location)
+    this.fileManager.getFile(ramLocation, fileName)
+        ?: this.failNoFileExists(ramLocation, fileName)
   }
 
   private fun hadFile(
@@ -416,15 +397,15 @@ class JavaCompilationResult internal constructor(
       moduleName: String,
       fileName: String
   ) = this.apply {
-    val ops = this.fileManager.getOperationsFor(location, moduleName)
+    val ramLocation = this.fileManager.getInMemoryLocationFor(location, moduleName)
+    this.fileManager.getFile(ramLocation, fileName)
+        ?: this.failNoFileExists(ramLocation, fileName)
+  }
 
-    if (ops.getFile(fileName) != null) {
-      return@apply
-    }
+  private fun failNoFileExists(location: JavaRamLocation, fileName: String) {
+    val message = StringBuilder("No file found for $fileName in $location")
 
-    val message = StringBuilder("No file found matching $fileName in ${location.name}/${moduleName}")
-
-    val closestMatches = ops.findClosestFileNamesTo(fileName)
+    val closestMatches = this.fileManager.findClosestFileNameMatchesFor(location, fileName)
     if (closestMatches.isNotEmpty()) {
       message
           .appendLine()

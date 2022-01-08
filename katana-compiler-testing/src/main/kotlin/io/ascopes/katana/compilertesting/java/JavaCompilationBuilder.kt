@@ -6,7 +6,6 @@ import io.ascopes.katana.compilertesting.java.JavaCompilationResult.Success
 import java.io.StringWriter
 import java.nio.charset.StandardCharsets
 import java.util.Locale
-import java.util.function.Consumer
 import javax.annotation.processing.Processor
 import javax.lang.model.SourceVersion
 import javax.tools.JavaCompiler
@@ -25,283 +24,15 @@ import kotlin.io.path.absolutePathString
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class JavaCompilationBuilder internal constructor(
-    private val compiler: JavaCompiler,
-    private val diagnosticListener: JavaDiagnosticListener,
-    private val fileManager: JavaRamFileManager,
+    // Exposed for testing purposes only.
+    internal val compiler: JavaCompiler,
+    internal val diagnosticListener: JavaDiagnosticListener,
+    internal val fileManager: JavaRamFileManager,
 ) {
-
-  private val options = mutableListOf<String>()
-  private val modules = mutableListOf<String>()
-  private val processors = mutableListOf<Processor>()
-
-  /**
-   * Set the source version to use.
-   *
-   * You cannot set this as well as the release version, and you can only specify this once.
-   *
-   * @param version the source version.
-   * @return this object for further call chaining.
-   */
-  fun sourceVersion(version: Int) = this.options("-source", version.toString())
-
-  /**
-   * Set the source version to use.
-   *
-   * You cannot set this as well as the release version, and you can only specify this once.
-   *
-   * @param version the source version.
-   * @return this object for further call chaining.
-   */
-  fun sourceVersion(version: SourceVersion) = this.sourceVersion(this.sourceToInt(version))
-
-  /**
-   * Set the target version to use.
-   *
-   * You cannot set this as well as the release version, and you can only specify this once.
-   *
-   * @param version the target version.
-   * @return this object for further call chaining.
-   */
-  fun targetVersion(version: Int) = this.options("-target", version.toString())
-
-  /**
-   * Set the target version to use.
-   *
-   * You cannot set this as well as the release version, and you can only specify this once.
-   *
-   * @param version the target version.
-   * @return this object for further call chaining.
-   */
-  fun targetVersion(version: SourceVersion) = this.targetVersion(this.sourceToInt(version))
-
-  /**
-   * Set the release version to use.
-   *
-   * You cannot set this as well as the source/target version, and you can only specify this once.
-   *
-   * @param version the release version.
-   * @return this object for further call chaining.
-   */
-  fun releaseVersion(version: Int) = this.options("--release", version.toString())
-
-  /**
-   * Set the release version to use.
-   *
-   * You cannot set this as well as the source/target version, and you can only specify this once.
-   *
-   * @param version the release version.
-   * @return this object for further call chaining.
-   */
-  fun releaseVersion(version: SourceVersion) = this.releaseVersion(this.sourceToInt(version))
-
-  /**
-   * Set the source and target version to use.
-   *
-   * You cannot set this as well as the release version, nor the source and target version if you
-   * specified those individually. Additionally, you can only specify this once.
-   *
-   * @param version the source and target version.
-   * @return this object for further call chaining.
-   */
-  fun sourceAndTargetVersion(version: Int) = this
-      .sourceVersion(version)
-      .targetVersion(version)
-
-  /**
-   * Set the source and target version to use.
-   *
-   * You cannot set this as well as the release version, nor the source and target version if you
-   * specified those individually. Additionally, you can only specify this once.
-   *
-   * @param version the source and target version.
-   * @return this object for further call chaining.
-   */
-  fun sourceAndTargetVersion(version: SourceVersion) = this
-      .sourceVersion(version)
-      .targetVersion(version)
-
-  /**
-   * Treat all warnings as errors.
-   *
-   * @return this object for further call chaining.
-   */
-  fun treatWarningsAsErrors() = this.apply { this.options += "-Werror" }
-
-  /**
-   * Request that the compiler produces native headers for JNI interop.
-   *
-   * @return this object for further call chaining.
-   */
-  fun generateHeaders() = this.apply {
-    val headerLocation = this.fileManager.getOperationsFor(StandardLocation.NATIVE_HEADER_OUTPUT)
-    this.options += listOf("-h", headerLocation.path.absolutePathString())
-  }
-
-  /**
-   * Add the given options to the compiler.
-   *
-   * @param options the options to add.
-   * @return this object for further call chaining.
-   */
-  fun options(vararg options: String) = this.apply { this.options += options }
-
-  /**
-   * Add the given processors to the compiler.
-   *
-   * @param processors the processors to add.
-   * @return this object for further call chaining.
-   */
-  fun processors(vararg processors: Processor) = this.apply { this.processors += processors }
-
-  /**
-   * Perform operations on input source files.
-   *
-   * @param operation the operation to perform, in a closure.
-   * @return this object for further call chaining.
-   */
-  fun sources(operation: JavaRamLocationOperations.() -> Unit) = this
-      .files(StandardLocation.SOURCE_PATH, operation)
-
-  /**
-   * Perform operations on input source files.
-   *
-   * @param operation the operation to perform, as a JVM consumer functional monad.
-   * @return this object for further call chaining.
-   */
-  fun sources(operation: Consumer<JavaRamLocationOperations>) = this
-      .files(StandardLocation.SOURCE_PATH, operation)
-
-  /**
-   * Perform operations on input module source files.
-   *
-   * @param operation the operation to perform, in a closure.
-   * @return this object for further call chaining.
-   */
-  fun moduleSources(moduleName: String, operation: JavaRamLocationOperations.() -> Unit) = this
-      .moduleFiles(StandardLocation.MODULE_SOURCE_PATH, moduleName, operation)
-
-  /**
-   * Perform operations on input module source files.
-   *
-   * @param operation the operation to perform, as a JVM consumer functional monad.
-   * @return this object for further call chaining.
-   */
-  fun moduleSources(moduleName: String, operation: Consumer<JavaRamLocationOperations>) = this
-      .moduleFiles(StandardLocation.MODULE_SOURCE_PATH, moduleName, operation)
-
-  /**
-   * Perform operations on any generated source files.
-   *
-   * @param operation the operation to perform, in a closure.
-   * @return this object for further call chaining.
-   */
-  fun generatedSources(operation: JavaRamLocationOperations.() -> Unit) = this
-      .files(StandardLocation.SOURCE_OUTPUT, operation)
-
-  /**
-   * Perform operations on any generated source files.
-   *
-   * @param operation the operation to perform, as a JVM consumer functional monad.
-   * @return this object for further call chaining.
-   */
-  fun generatedSources(operation: Consumer<JavaRamLocationOperations>) = this
-      .files(StandardLocation.SOURCE_OUTPUT, operation)
-
-  /**
-   * Perform operations on any generated class files.
-   *
-   * @param operation the operation to perform, in a closure.
-   * @return this object for further call chaining.
-   */
-  fun generatedClasses(operation: JavaRamLocationOperations.() -> Unit) = this
-      .files(StandardLocation.CLASS_OUTPUT, operation)
-
-  /**
-   * Perform operations on any generated class files.
-   *
-   * @param operation the operation to perform, as a JVM consumer functional monad.
-   * @return this object for further call chaining.
-   */
-  fun generatedClasses(operation: Consumer<JavaRamLocationOperations>) = this
-      .files(StandardLocation.CLASS_OUTPUT, operation)
-
-  /**
-   * Perform operations on any generated header files.
-   *
-   * @param operation the operation to perform, in a closure.
-   * @return this object for further call chaining.
-   */
-  fun generatedHeaders(operation: JavaRamLocationOperations.() -> Unit) = this
-      .files(StandardLocation.NATIVE_HEADER_OUTPUT, operation)
-
-  /**
-   * Perform operations on any generated header files.
-   *
-   * @param operation the operation to perform, as a JVM consumer functional monad.
-   * @return this object for further call chaining.
-   */
-  fun generatedHeaders(operation: Consumer<JavaRamLocationOperations>) = this
-      .files(StandardLocation.NATIVE_HEADER_OUTPUT, operation)
-
-  /**
-   * Perform operations on files in the given location.
-   *
-   * @param location the module-oriented location.
-   * @param operation the operation to perform, in a closure.
-   * @return this object for further call chaining.
-   */
-  fun files(location: Location, operation: JavaRamLocationOperations.() -> Unit) = this.apply {
-    this.fileManager
-        .getOperationsFor(location)
-        .operation()
-  }
-
-  /**
-   * Perform operations on files in the given location.
-   *
-   * @param location the module-oriented location.
-   * @param operation the operation to perform, in a closure.
-   * @param operation the operation to perform, as a JVM consumer functional monad.
-   * @return this object for further call chaining.
-   */
-  fun files(location: Location, operation: Consumer<JavaRamLocationOperations>) = this.apply {
-    operation.accept(this.fileManager.getOperationsFor(location))
-  }
-
-  /**
-   * Perform operations on the files in the given module-oriented location.
-   *
-   * @param location the module-oriented location.
-   * @param moduleName the name of the module.
-   * @param operation the operation to perform, in a closure.
-   * @return this object for further call chaining.
-   */
-  fun moduleFiles(
-      location: Location,
-      moduleName: String,
-      operation: JavaRamLocationOperations.() -> Unit
-  ) = this.apply {
-    this.fileManager
-        .getOperationsFor(location, moduleName)
-        .operation()
-  }
-
-  /**
-   * Perform operations on the files in the given module-oriented location.
-   *
-   * @param location the module-oriented location.
-   * @param moduleName the name of the module.
-   * @param operation the operation to perform, as a JVM consumer functional monad.
-   * @return this object for further call chaining.
-   */
-  fun moduleFiles(
-      location: Location,
-      moduleName: String,
-      operation: Consumer<JavaRamLocationOperations>
-  ) = this.apply {
-    operation.accept(this.fileManager.getOperationsFor(location, moduleName))
-  }
-
+  // Exposed for testing purposes only.
+  internal val options = mutableListOf<String>()
+  internal val modules = mutableListOf<String>()
+  internal val processors = mutableListOf<Processor>()
 
   /**
    * Invoke the compiler with the given inputs, and return the compilation result.
@@ -361,12 +92,230 @@ class JavaCompilationBuilder internal constructor(
     )
   }
 
-  private fun sourceToInt(sourceVersion: SourceVersion) = sourceVersion
-      .name
-      .substringAfterLast('_')
-      .toInt()
+  /**
+   * Get a file builder for the given location and optional module name.
+   *
+   * This will fail if the location is not an in-memory location, which only covers
+   * [StandardLocation.SOURCE_PATH], [StandardLocation.SOURCE_OUTPUT],
+   * [StandardLocation.MODULE_SOURCE_PATH], [StandardLocation.NATIVE_HEADER_OUTPUT],
+   * and [StandardLocation.CLASS_OUTPUT].
+   *
+   * If you write any files to [StandardLocation.MODULE_SOURCE_PATH], it will make the compilation
+   * invalid for anything in [StandardLocation.SOURCE_PATH], just as is the case with `javac`
+   * itself.
+   *
+   * @param location the location.
+   * @param moduleName the module name, or null if not applicable.
+   * @return the file builder.
+   */
+  @JvmOverloads
+  fun files(location: Location, moduleName: String? = null): FileBuilder {
+    val ramLocation = if (moduleName == null) {
+      this.fileManager.getInMemoryLocationFor(location)
+    } else {
+      this.fileManager.getInMemoryLocationFor(location, moduleName)
+    }
+
+    return FileBuilder(ramLocation)
+  }
+
+  /**
+   * Request that the compiler produces native headers for JNI interop.
+   *
+   * @return this object for further call chaining.
+   */
+  fun generateHeaders() = this.options(
+      Companion.HEADER_FLAG,
+      this.fileManager
+          .getInMemoryLocationFor(StandardLocation.NATIVE_HEADER_OUTPUT)
+          .path
+          .absolutePathString()
+  )
+
+  /**
+   * Get a file builder for a multi-module compilation. This will not work if you
+   * have already specified [sources] on this builder.
+   *
+   * @param moduleName the module to get the builder for.
+   * @return the file builder.
+   */
+  fun multiModuleSources(moduleName: String) =
+      this.files(StandardLocation.MODULE_SOURCE_PATH, moduleName)
+
+  /**
+   * Add the given options to the compiler.
+   *
+   * @param options the options to add.
+   * @return this object for further call chaining.
+   */
+  fun options(vararg options: String) = this.apply { this.options += options }
+
+  /**
+   * Add the given processors to the compiler.
+   *
+   * @param processors the processors to add.
+   * @return this object for further call chaining.
+   */
+  fun processors(vararg processors: Processor) = this.apply { this.processors += processors }
+
+  /**
+   * Set the release version to use.
+   *
+   * You cannot set this as well as the source/target version, and you can only specify this once.
+   *
+   * @param version the release version.
+   * @return this object for further call chaining.
+   */
+  fun releaseVersion(version: Int) = this.options(Companion.RELEASE_FLAG, "$version")
+
+  /**
+   * Set the release version to use.
+   *
+   * You cannot set this as well as the source/target version, and you can only specify this once.
+   *
+   * @param version the release version.
+   * @return this object for further call chaining.
+   */
+  fun releaseVersion(version: SourceVersion) = this.releaseVersion(Companion.sourceToInt(version))
+
+  /**
+   * Get a file builder for a single-module/no-module compilation. This will not work if you
+   * have already specified [multiModuleSources] on this builder.
+   *
+   * @return the file builder.
+   */
+  fun sources() = this.files(StandardLocation.SOURCE_PATH)
+
+  /**
+   * Set the source version to use.
+   *
+   * You cannot set this as well as the release version, and you can only specify this once.
+   *
+   * @param version the source version.
+   * @return this object for further call chaining.
+   */
+  fun sourceVersion(version: Int) = this.options(Companion.SOURCE_FLAG, "$version")
+
+  /**
+   * Set the source version to use.
+   *
+   * You cannot set this as well as the release version, and you can only specify this once.
+   *
+   * @param version the source version.
+   * @return this object for further call chaining.
+   */
+  fun sourceVersion(version: SourceVersion) = this.sourceVersion(Companion.sourceToInt(version))
+
+  /**
+   * Set the source and target version to use.
+   *
+   * You cannot set this as well as the release version, nor the source and target version if you
+   * specified those individually. Additionally, you can only specify this once.
+   *
+   * @param version the source and target version.
+   * @return this object for further call chaining.
+   */
+  fun sourceAndTargetVersion(version: Int) = this
+      .sourceVersion(version)
+      .targetVersion(version)
+
+  /**
+   * Set the source and target version to use.
+   *
+   * You cannot set this as well as the release version, nor the source and target version if you
+   * specified those individually. Additionally, you can only specify this once.
+   *
+   * @param version the source and target version.
+   * @return this object for further call chaining.
+   */
+  fun sourceAndTargetVersion(version: SourceVersion) = this
+      .sourceVersion(version)
+      .targetVersion(version)
+
+  /**
+   * Set the target version to use.
+   *
+   * You cannot set this as well as the release version, and you can only specify this once.
+   *
+   * @param version the target version.
+   * @return this object for further call chaining.
+   */
+  fun targetVersion(version: Int) = this.options(Companion.TARGET_FLAG, "$version")
+
+  /**
+   * Set the target version to use.
+   *
+   * You cannot set this as well as the release version, and you can only specify this once.
+   *
+   * @param version the target version.
+   * @return this object for further call chaining.
+   */
+  fun targetVersion(version: SourceVersion) = this.targetVersion(Companion.sourceToInt(version))
+
+  /**
+   * Treat all warnings as errors.
+   *
+   * @return this object for further call chaining.
+   */
+  fun treatWarningsAsErrors() = this.options(Companion.WERROR_FLAG)
+
+  /**
+   * Step in the [JavaCompilationBuilder] that can create files for a location.
+   * <p>
+   * Once complete, call the [and] method to get a reference to the original builder.
+   */
+  inner class FileBuilder internal constructor(private val location: JavaRamLocation) {
+    /**
+     * Finish defining files in this location and get a reference to the compilation builder again.
+     *
+     * @return the [JavaCompilationBuilder] to chain further calls onto.
+     */
+    fun and() = this@JavaCompilationBuilder
+
+
+    /**
+     * Create a file with the given byte content.
+     *
+     * @param fileName the name of the file.
+     * @param bytes the byte content of the file.
+     * @return this builder, for further call chaining.
+     */
+    fun createFile(fileName: String, bytes: ByteArray) = this.apply {
+      this@JavaCompilationBuilder
+          .fileManager
+          .createFile(location, fileName, bytes)
+    }
+
+    /**
+     * Create a file with the given lines of content.
+     *
+     * @param fileName the name of the file.
+     * @param lines the lines of content to write.
+     * @return this builder, for further call chaining.
+     */
+    fun createFile(fileName: String, vararg lines: String) = this.apply {
+      this@JavaCompilationBuilder
+          .fileManager
+          .createFile(
+              location,
+              fileName,
+              lines.joinToString("\n").toByteArray()
+          )
+    }
+  }
 
   companion object {
+    // Newer OpenJDK versions allow both --source and -source, but JDK-11 does not support --source.
+    internal const val SOURCE_FLAG = "-source"
+    // Newer OpenJDK versions allow both --target and -target, but JDK-11 does not support --target.
+    internal const val TARGET_FLAG = "-target"
+    // Release has two dashes, OpenJDK has started to adopt GNU-style flags now.
+    internal const val RELEASE_FLAG = "--release"
+    // Flag to treat warnings as errors.
+    internal  const val WERROR_FLAG = "-Werror"
+    // Flag to specify header output locations
+    internal const val HEADER_FLAG = "-h"
+
     /**
      * Get a virtual Java compiler for the system default Java compiler implementation.
      *
@@ -383,14 +332,23 @@ class JavaCompilationBuilder internal constructor(
      */
     @JvmStatic
     fun compiler(compiler: JavaCompiler): JavaCompilationBuilder {
-      val diagnosticListener = JavaDiagnosticListener()
-      val fileManager = JavaRamFileManager.create(
-          compiler,
+      val stackTraceProvider = JavaStackTraceProvider.threadStackTraceProvider
+      val diagnosticListener = JavaDiagnosticListener(stackTraceProvider)
+
+      val standardFileManager = compiler.getStandardFileManager(
           diagnosticListener,
           Locale.ROOT,
           StandardCharsets.UTF_8
       )
+
+      val fileManager = JavaRamFileManager(standardFileManager)
+
       return JavaCompilationBuilder(compiler, diagnosticListener, fileManager)
     }
+
+    private fun sourceToInt(sourceVersion: SourceVersion) = sourceVersion
+        .name
+        .substringAfterLast('_')
+        .toInt()
   }
 }

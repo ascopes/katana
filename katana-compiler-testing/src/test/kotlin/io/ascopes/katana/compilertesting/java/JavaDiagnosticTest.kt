@@ -1,5 +1,3 @@
-@file:Suppress("ClassName")
-
 package io.ascopes.katana.compilertesting.java
 
 import io.mockk.every
@@ -7,7 +5,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -20,7 +17,7 @@ import kotlin.random.Random
 
 class JavaDiagnosticTest {
   @Nested
-  inner class `equals() tests` {
+  inner class EqualsTest {
     @Test
     fun `is equal to itself`() {
       val diagnostic = JavaDiagnostic(
