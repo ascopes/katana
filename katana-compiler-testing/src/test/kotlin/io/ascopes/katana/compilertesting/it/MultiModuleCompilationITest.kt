@@ -23,7 +23,7 @@ class MultiModuleCompilationITest {
         .releaseVersion(version)
         .multiModuleSources("helloworld.greet")
             .createFile(
-                "io/me/helloworld/greet/Greeter.java",
+                fileName = "io/me/helloworld/greet/Greeter.java",
                 """
                   package io.me.helloworld.greet;
                     
@@ -35,7 +35,7 @@ class MultiModuleCompilationITest {
                 """.trimIndent()
             )
             .createFile(
-                "module-info.java",
+                fileName = "module-info.java",
                 """
                   module helloworld.greet {
                     requires java.base;
@@ -46,7 +46,7 @@ class MultiModuleCompilationITest {
             .and()
         .multiModuleSources("helloworld.main")
             .createFile(
-                "io/me/helloworld/main/Main.java",
+                fileName ="io/me/helloworld/main/Main.java",
                 """
                   package io.me.helloworld.main;
                   
@@ -62,7 +62,7 @@ class MultiModuleCompilationITest {
                 """.trimIndent()
             )
             .createFile(
-                "module-info.java",
+                fileName = "module-info.java",
                 """
                   module helloworld.main {
                     requires java.base;
@@ -82,12 +82,12 @@ class MultiModuleCompilationITest {
     assertThat(compilation)
         .files()
         .generatedModuleClassFiles(
-            "helloworld.greet",
+            moduleName = "helloworld.greet",
             "io/me/helloworld/greet/Greeter.class",
             "module-info.class"
         )
         .generatedModuleClassFiles(
-            "helloworld.main",
+            moduleName = "helloworld.main",
             "io/me/helloworld/main/Main.class",
             "module-info.class"
         )
@@ -118,7 +118,7 @@ class MultiModuleCompilationITest {
         .releaseVersion(version)
         .multiModuleSources("helloworld.greet")
             .createFile(
-                "io/ascopes/helloworld/greet/Greeter.java",
+                fileName = "io/ascopes/helloworld/greet/Greeter.java",
                 """
                   package io.ascopes.helloworld.greet;
                   
@@ -130,7 +130,7 @@ class MultiModuleCompilationITest {
                 """.trimIndent()
             )
             .createFile(
-                "module-info.java",
+                fileName = "module-info.java",
                 """
                 module helloworld.greet {
                   requires java.base;
@@ -141,7 +141,7 @@ class MultiModuleCompilationITest {
             .and()
         .multiModuleSources("helloworld.main")
             .createFile(
-                "io/ascopes/helloworld/main/Main.java",
+                fileName = "io/ascopes/helloworld/main/Main.java",
                 """
                   package io.ascopes.helloworld.main;
                   
@@ -157,7 +157,7 @@ class MultiModuleCompilationITest {
                 """.trimIndent()
             )
             .createFile(
-                "module-info.java",
+                fileName = "module-info.java",
                 """
                   module helloworld.main {
                     requires java.base;
@@ -178,12 +178,12 @@ class MultiModuleCompilationITest {
     assertThat(compilation)
         .files()
         .generatedModuleClassFiles(
-            "helloworld.greet",
+            moduleName = "helloworld.greet",
             "io/ascopes/helloworld/greet/Greeter.class",
             "module-info.class"
         )
         .generatedModuleClassFiles(
-            "helloworld.main",
+            moduleName = "helloworld.main",
             "io/ascopes/helloworld/main/Main.class",
             "module-info.class"
         )
@@ -201,7 +201,7 @@ class MultiModuleCompilationITest {
         .releaseVersion(version)
         .multiModuleSources("helloworld.greet")
             .createFile(
-                "io/me/helloworld/greet/Greeter.java",
+                fileName = "io/me/helloworld/greet/Greeter.java",
                 """
                   package io.me.helloworld.greet;
                   
@@ -211,7 +211,7 @@ class MultiModuleCompilationITest {
                 """.trimIndent()
             )
             .createFile(
-                "module-info.java",
+                fileName = "module-info.java",
                 """
                   module helloworld.greet {
                     requires java.base;
@@ -222,7 +222,7 @@ class MultiModuleCompilationITest {
             .and()
         .multiModuleSources("helloworld.main")
             .createFile(
-                "io/me/helloworld/main/Main.java",
+                fileName = "io/me/helloworld/main/Main.java",
                 """
                   package io.me.helloworld.main;
                   
@@ -238,7 +238,7 @@ class MultiModuleCompilationITest {
                 """.trimIndent()
             )
             .createFile(
-                "module-info.java",
+                fileName = "module-info.java",
                 """
                   module helloworld.main {
                     requires java.base;

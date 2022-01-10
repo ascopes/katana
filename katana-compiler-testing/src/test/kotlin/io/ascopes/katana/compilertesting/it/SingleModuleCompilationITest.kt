@@ -23,7 +23,7 @@ class SingleModuleCompilationITest {
         .releaseVersion(version)
         .sources()
             .createFile(
-                "io/ascopes/helloworld/nonmodular/HelloWorld.java",
+                fileName = "io/ascopes/helloworld/nonmodular/HelloWorld.java",
                 """
                   package io.ascopes.helloworld.nonmodular;
                   
@@ -59,7 +59,7 @@ class SingleModuleCompilationITest {
         .releaseVersion(version)
         .sources()
             .createFile(
-                "io/ascopes/helloworld/modular/HelloWorld.java",
+                fileName = "io/ascopes/helloworld/modular/HelloWorld.java",
                 """
                   package io.ascopes.helloworld.modular;
                   
@@ -71,7 +71,7 @@ class SingleModuleCompilationITest {
                 """.trimIndent()
             )
             .createFile(
-                "module-info.java",
+                fileName = "module-info.java",
                 """
                   module helloworld {
                     requires java.base;
@@ -122,7 +122,7 @@ class SingleModuleCompilationITest {
         .releaseVersion(version)
         .sources()
             .createFile(
-                "io/ascopes/helloworld/HelloWorld.java",
+                fileName = "io/ascopes/helloworld/HelloWorld.java",
                 """
                   package io.ascopes.helloworld;
                   
@@ -161,7 +161,7 @@ class SingleModuleCompilationITest {
         .releaseVersion(version)
         .sources()
             .createFile(
-                "io/ascopes/helloworld/HelloWorld.java",
+                fileName = "io/ascopes/helloworld/HelloWorld.java",
                 """
                   package io.ascopes.helloworld;
                   

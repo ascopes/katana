@@ -12,7 +12,7 @@ class MultiModuleConflictITest {
         .javac()
         .sources()
             .createFile(
-                "foo/bar/Baz.java",
+                fileName = "foo/bar/Baz.java",
                 """
                   package foo.bar;
                   
@@ -28,7 +28,7 @@ class MultiModuleConflictITest {
       builder
           .multiModuleSources("some.modulename.here")
               .createFile(
-                  "eggs/spam/Blah.java",
+                  fileName = "eggs/spam/Blah.java",
                   """
                     package eggs.spam;
                     
