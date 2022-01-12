@@ -1,6 +1,6 @@
 package io.ascopes.katana.compilertesting.it
 
-import io.ascopes.katana.compilertesting.compilation.JavaCompilationBuilder
+import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 

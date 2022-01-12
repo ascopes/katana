@@ -6,10 +6,8 @@ module katana.compilertesting {
   requires kotlin.stdlib.jdk8;
   requires org.opentest4j;
 
-  exports io.ascopes.katana.compilertesting.assertions;
-  exports io.ascopes.katana.compilertesting.compilation;
-  exports io.ascopes.katana.compilertesting.diagnostics;
-  exports io.ascopes.katana.compilertesting.files;
+  exports io.ascopes.katana.compilertesting;
+  exports io.ascopes.katana.compilertesting.java;
 
   /////////////////////////////////////////////////////////////////////
   /// Modules that need updating when a module release is available ///

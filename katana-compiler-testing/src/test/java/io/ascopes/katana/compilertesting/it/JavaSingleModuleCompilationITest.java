@@ -1,9 +1,9 @@
 package io.ascopes.katana.compilertesting.it;
 
-import static io.ascopes.katana.compilertesting.assertions.CompilerAssert.assertThat;
+import static io.ascopes.katana.compilertesting.CompilerAssert.assertThat;
 
 import io.ascopes.katana.compilertesting.Each;
-import io.ascopes.katana.compilertesting.compilation.JavaCompilationBuilder;
+import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder;
 import javax.lang.model.SourceVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
