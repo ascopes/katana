@@ -9,7 +9,7 @@ import javax.tools.JavaFileObject
 /**
  * Results for an in-memory compilation pass.
  *
- * @param type the outcome of the compilation.
+ * @param result the outcome of the compilation.
  * @param modules the modules passed to the compiler.
  * @param processors the annotation processors passed to the compiler.
  * @param options the options passed to the compiler.
@@ -20,7 +20,7 @@ import javax.tools.JavaFileObject
  * @since 0.1.0
  */
 data class JavaCompilation internal constructor(
-    override val type: CompilationResult,
+    override val result: CompilationResult,
     val modules: List<String>,
     val processors: List<Processor>,
     val options: List<String>,

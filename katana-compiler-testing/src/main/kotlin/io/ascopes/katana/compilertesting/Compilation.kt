@@ -8,9 +8,9 @@ package io.ascopes.katana.compilertesting
  */
 interface Compilation<R : CompilationResult> {
   /**
-   * The type of outcome from the compilation.
+   * The result type for the outcome of the compilation.
    *
    * This determines whether compilation succeeded, failed, or produced an unhandled exception.
    */
-  val type: R
+  val result: R
 }

@@ -20,12 +20,12 @@ internal constructor(target: C) : CommonAssertions<C, A>(target) {
    * @return this assertion object for further checks.
    */
   fun isSuccessful() = apply {
-    if (!target.type.isSuccess) {
+    if (!target.result.isSuccess) {
       throw AssertionFailedError(
           UNEXPECTED_OUTCOME,
           SUCCESS,
           describeActualOutcomeType(),
-          target.type.exception
+          target.result.exception
       )
     }
   }
@@ -38,12 +38,12 @@ internal constructor(target: C) : CommonAssertions<C, A>(target) {
    * @return this assertion object for further checks.
    */
   fun isAFailure() = apply {
-    if (!target.type.isFailure) {
+    if (!target.result.isFailure) {
       throw AssertionFailedError(
           UNEXPECTED_OUTCOME,
           FAILURE,
           describeActualOutcomeType(),
-          target.type.exception
+          target.result.exception
       )
     }
   }
@@ -54,7 +54,7 @@ internal constructor(target: C) : CommonAssertions<C, A>(target) {
    * @return an assertion object for the raised exception.
    */
   fun raisedAnUnhandledException(): ExceptionAssertions<Throwable> {
-    if (!target.type.isException) {
+    if (!target.result.isException) {
       throw AssertionFailedError(
           UNEXPECTED_OUTCOME,
           EXCEPTION,
@@ -62,11 +62,11 @@ internal constructor(target: C) : CommonAssertions<C, A>(target) {
       )
     }
 
-    return ExceptionAssertions(target.type.exception!!)
+    return ExceptionAssertions(target.result.exception!!)
   }
 
   private fun describeActualOutcomeType(): String {
-    val type = target.type
+    val type = target.result
 
     return when {
       type.isSuccess -> SUCCESS

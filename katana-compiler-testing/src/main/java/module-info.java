@@ -1,7 +1,6 @@
 module katana.compilertesting {
   requires java.base;
   requires java.compiler;
-  requires kotlin.compiler.embeddable;
   requires kotlin.stdlib.jdk7;
   requires kotlin.stdlib.jdk8;
   requires org.opentest4j;

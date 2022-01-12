@@ -82,7 +82,7 @@ class JavaCompilationBuilder internal constructor(
     }
 
     return JavaCompilation(
-        type = outcome,
+        result = outcome,
         modules = this.modules,
         processors = this.processors,
         options = this.options,
