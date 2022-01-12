@@ -33,7 +33,7 @@
 
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-compiler</artifactId>
+      <artifactId>kotlin-compiler-embeddable</artifactId>
     </dependency>
 
     <dependency>

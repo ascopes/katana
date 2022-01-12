@@ -29,7 +29,7 @@ class JavaCompilationBuilder internal constructor(
     internal val compiler: JavaCompiler,
     internal val diagnosticListener: JavaDiagnosticListener,
     internal val fileManager: JavaRamFileManager,
-) {
+) : CompilationBuilder<JavaCompilation> {
   // Exposed for testing purposes only.
   internal val options = mutableListOf<String>()
   internal val modules = mutableListOf<String>()
@@ -40,7 +40,7 @@ class JavaCompilationBuilder internal constructor(
    *
    * @return the compilation result.
    */
-  fun compile(): JavaCompilation {
+  override fun compile(): JavaCompilation {
     val nonModuleCompilationUnits = this.fileManager
         .list(StandardLocation.SOURCE_PATH, "", setOf(Kind.SOURCE), true)
         .toList()
@@ -77,9 +77,9 @@ class JavaCompilationBuilder internal constructor(
     task.setProcessors(this.processors)
 
     val outcome = try {
-      JavaCompilationOutcomeType(task.call())
+      BasicCompilationResult(task.call())
     } catch (ex: Exception) {
-      JavaCompilationOutcomeType(ex)
+      BasicCompilationResult(ex)
     }
 
     return JavaCompilation(

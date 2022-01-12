@@ -1,7 +1,6 @@
 package io.ascopes.katana.compilertesting.compilation
 
 import io.ascopes.katana.compilertesting.diagnostics.JavaDiagnostic
-import io.ascopes.katana.compilertesting.files.JavaCompilationModuleMode
 import io.ascopes.katana.compilertesting.files.JavaRamFileManager
 import javax.annotation.processing.Processor
 import javax.tools.JavaFileObject
@@ -21,11 +20,11 @@ import javax.tools.JavaFileObject
  * @since 0.1.0
  */
 data class JavaCompilation internal constructor(
-    val type: JavaCompilationOutcomeType,
+    override val type: CompilationResult,
     val modules: List<String>,
     val processors: List<Processor>,
     val options: List<String>,
     val logs: String,
     val diagnostics: List<JavaDiagnostic<out JavaFileObject>>,
     val fileManager: JavaRamFileManager,
-)
+) : Compilation<CompilationResult>

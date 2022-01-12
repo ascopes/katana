@@ -13,7 +13,8 @@ import org.opentest4j.AssertionFailedError
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class JavaCompilationAssertions internal constructor(
     target: JavaCompilation
-) : CommonAssertions<JavaCompilation>(target) {
+) : CompilationAssertions<JavaCompilation, JavaCompilationAssertions>(target) {
+
   /**
    * Get an assertion object for the diagnostics produced by the compilation.
    *
@@ -64,75 +65,5 @@ class JavaCompilationAssertions internal constructor(
           target.fileManager.moduleMode
       )
     }
-  }
-
-  /**
-   * Assert that the compilation succeeded.
-   *
-   * @return this assertion object for further checks.
-   */
-  fun isSuccessful() = apply {
-    if (!target.type.isSuccess) {
-      throw AssertionFailedError(
-          UNEXPECTED_OUTCOME,
-          SUCCESS,
-          describeActualOutcomeType(),
-          target.type.exception
-      )
-    }
-  }
-
-  /**
-   * Assert that the compilation failed.
-   *
-   * This is not the same as the compiler throwing an unhandled exception.
-   *
-   * @return this assertion object for further checks.
-   */
-  fun isAFailure() = apply {
-    if (!target.type.isFailure) {
-      throw AssertionFailedError(
-          UNEXPECTED_OUTCOME,
-          FAILURE,
-          describeActualOutcomeType(),
-          target.type.exception
-      )
-    }
-  }
-
-  /**
-   * Assert that the compiler panicked and raised an unhandled exception of some description.
-   *
-   * @return an assertion object for the raised exception.
-   */
-  fun raisedAnUnhandledException(): ExceptionAssertions<Throwable> {
-    if (!target.type.isException) {
-      throw AssertionFailedError(
-          UNEXPECTED_OUTCOME,
-          EXCEPTION,
-          describeActualOutcomeType()
-      )
-    }
-
-    return ExceptionAssertions(target.type.exception!!)
-  }
-
-  private fun describeActualOutcomeType(): String {
-    val type = target.type
-
-    return when {
-      type.isSuccess -> SUCCESS
-      type.isFailure -> FAILURE
-      type.isException -> EXCEPTION
-      else -> throw UnsupportedOperationException(type.toString())
-    }
-  }
-
-  private companion object {
-    const val UNEXPECTED_OUTCOME = "Unexpected compilation outcome"
-
-    const val SUCCESS = "success"
-    const val FAILURE = "failure"
-    const val EXCEPTION = "unhandled exception"
   }
 }

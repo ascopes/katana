@@ -17,7 +17,7 @@ import org.opentest4j.MultipleFailuresError
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class JavaRamFileManagerAssertions internal constructor(
     target: JavaRamFileManager
-): CommonAssertions<JavaRamFileManager>(target) {
+): CommonAssertions<JavaRamFileManager, JavaRamFileManagerAssertions>(target) {
 
   /**
    * Assert that a given source file was generated in the non-module output sources.

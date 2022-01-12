@@ -13,7 +13,7 @@ import org.opentest4j.AssertionFailedError
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class ExceptionAssertions<T : Throwable> internal constructor(
     target: T
-) : CommonAssertions<T>(target) {
+) : CommonAssertions<T, ExceptionAssertions<T>>(target) {
   /**
    * Kotlin-style instance check. Will fail if the exception is not an instance of the provided
    * exception type.
@@ -76,7 +76,7 @@ class ExceptionAssertions<T : Throwable> internal constructor(
    * @param message the message to check for.
    * @return this assertion object for further checks.
    */
-  fun hasMessage(message: String) = apply {
+  fun hasMessageContent(message: String) = apply {
     hasMessage()
 
     if (target.message != message) {

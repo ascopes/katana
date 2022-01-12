@@ -13,7 +13,7 @@ import org.opentest4j.AssertionFailedError
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class JavaDiagnosticsAssertions internal constructor(
     target: List<JavaDiagnostic<*>>
-) : CommonAssertions<List<JavaDiagnostic<*>>>(target) {
+) : CommonAssertions<List<JavaDiagnostic<*>>, JavaDiagnosticsAssertions>(target) {
 
   /**
    * Assert that no errors were reported.

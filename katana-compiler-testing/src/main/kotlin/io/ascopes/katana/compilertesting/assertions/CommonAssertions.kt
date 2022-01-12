@@ -8,11 +8,14 @@ import org.opentest4j.AssertionFailedError
  * Common assertion methods.
  *
  * @param T the type of object that assertions are being performed on.
+ * @param A the implementation of [CommonAssertions] that is being defined. This enables methods
+ *    to facilitate type-safe chaining of the implementation internally.
  * @author Ashley Scopes
  * @since 0.1.0
  */
 @Suppress("unused")
-abstract class CommonAssertions<T> internal constructor(protected val target: T) {
+abstract class CommonAssertions<T, A: CommonAssertions<T, A>>
+internal constructor(protected val target: T) {
   /**
    * Assert that the target matches a given predicate.
    *
@@ -39,4 +42,14 @@ abstract class CommonAssertions<T> internal constructor(protected val target: T)
   fun satisfies(assertions: Consumer<T>) = apply {
     assertions.accept(target)
   }
+
+  protected inline fun apply(crossinline logic: A.() -> Unit): A {
+    val self = this.cast
+    self.logic()
+    return self
+  }
+
+  protected inline val cast: A
+    @Suppress("UNCHECKED_CAST")
+    get () = this as A
 }
