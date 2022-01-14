@@ -8,11 +8,10 @@ class MultiModuleConflictITest {
   @Test
   fun `I cannot define a multi-module source after defining a single-module source`() {
     //@formatter:off
-    val builder = JavaCompilationBuilder
-        .javac()
+    val builder = JavaCompilationBuilder.javac()
         .sources()
-            .createFile(
-                fileName = "foo/bar/Baz.java",
+            .create(
+                newFileName = "foo/bar/Baz.java",
                 """
                   package foo.bar;
                   
@@ -27,8 +26,8 @@ class MultiModuleConflictITest {
       //@formatter:off
       builder
           .multiModuleSources("some.modulename.here")
-              .createFile(
-                  fileName = "eggs/spam/Blah.java",
+              .create(
+                  newFileName = "eggs/spam/Blah.java",
                   """
                     package eggs.spam;
                     
@@ -43,10 +42,9 @@ class MultiModuleConflictITest {
   @Test
   fun `I cannot define a single-module source after defining a multi-module source`() {
     //@formatter:off
-    val builder = JavaCompilationBuilder
-        .javac()
+    val builder = JavaCompilationBuilder.javac()
         .multiModuleSources("some.modulename.here")
-            .createFile(
+            .create(
                 "eggs/spam/Blah.java",
                 """
                   package eggs.spam;
@@ -62,7 +60,7 @@ class MultiModuleConflictITest {
       //@formatter:off
       builder
           .sources()
-              .createFile(
+              .create(
                   "foo/bar/Baz.java",
                   """
                     package foo.bar;

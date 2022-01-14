@@ -3,17 +3,25 @@ package io.ascopes.katana.compilertesting.java
 import io.ascopes.katana.compilertesting.BasicCompilationResult
 import io.ascopes.katana.compilertesting.CompilationBuilder
 import io.ascopes.katana.compilertesting.StackTraceProvider
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.io.InputStream
 import java.io.StringWriter
+import java.net.URL
+import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
+import java.nio.file.Path
 import java.util.Locale
 import javax.annotation.processing.Processor
 import javax.lang.model.SourceVersion
+import javax.tools.FileObject
 import javax.tools.JavaCompiler
 import javax.tools.JavaFileManager.Location
 import javax.tools.JavaFileObject.Kind
 import javax.tools.StandardLocation
 import javax.tools.ToolProvider
 import kotlin.io.path.absolutePathString
+import kotlin.io.path.readBytes
 
 /**
  * Support for compiling files located in a virtual in-memory filesystem.
@@ -269,38 +277,138 @@ class JavaCompilationBuilder internal constructor(
   ) {
 
     /**
-     * Return the reference to the compilation builder.
+     *  Return the reference to the compilation builder. Same as calling [then].
      */
     fun and() = this@JavaCompilationBuilder
 
     /**
+     * Return the reference to the compilation builder. Same as calling [and].
+     */
+    fun then() = this@JavaCompilationBuilder
+
+    /**
      * Create a file with the given byte content.
      *
-     * @param fileName the name of the file.
+     * @param newFileName the name of the file.
      * @param bytes the byte content of the file.
      * @return this builder, for further call chaining.
      */
-    fun createFile(fileName: String, bytes: ByteArray) = apply {
-      this@JavaCompilationBuilder
-          .fileManager
-          .createFile(location, fileName, bytes)
-    }
+    fun create(newFileName: String, bytes: ByteArray) = this
+        .doCreate(newFileName) { bytes }
 
     /**
      * Create a file with the given lines of content.
      *
-     * @param fileName the name of the file.
+     * @param newFileName the name of the file.
      * @param lines the lines of content to write.
+     * @param lineSeparator the line separator to use, defaults to '\n'.
+     * @param charset the charset to write as, defaults to 'UTF-8'.
      * @return this builder, for further call chaining.
      */
-    fun createFile(fileName: String, vararg lines: String) = apply {
+    @JvmOverloads
+    fun create(
+        newFileName: String,
+        vararg lines: String,
+        lineSeparator: String = "\n",
+        charset: Charset = StandardCharsets.UTF_8,
+    ) = this.doCreate(newFileName) {
+      lines
+          .joinToString(separator = lineSeparator)
+          .toByteArray(charset = charset)
+    }
+
+    /**
+     * Add a file from the classpath.
+     *
+     * @param classLoader the class loader to use, defaults to the classloader of this class.
+     * @param classPathFile the class path file to add.
+     * @param newFileName the name to give the file that will be created.
+     * @throws FileNotFoundException if the file cannot be read.
+     * @return this builder, for further call chaining.
+     */
+    @Throws(FileNotFoundException::class)
+    fun copyFromClassPath(
+        classLoader: ClassLoader,
+        classPathFile: String,
+        newFileName: String,
+    ) = this
+        .doCreate(newFileName) {
+          classLoader
+              .getResource(classPathFile)
+              ?.readBytes()
+              ?: throw FileNotFoundException(
+                  "Could not read $classPathFile on class path for $classLoader"
+              )
+        }
+
+    /**
+     * Add a file from the current classpath.
+     *
+     * @param classPathFile the class path file to add.
+     * @param newFileName the name to give the file that will be created.
+     * @throws FileNotFoundException if the file cannot be read.
+     * @return this builder, for further call chaining.
+     */
+    @Throws(FileNotFoundException::class)
+    fun copyFromClassPath(
+        classPathFile: String,
+        newFileName: String,
+    ) = this
+        .copyFromClassPath(this::class.java.classLoader, classPathFile, newFileName)
+
+    /**
+     * Add a file from the host file system.
+     *
+     * @param filePath the path to the file on the file system to use.
+     * @param newFileName the name to give the file that will be created.
+     * @throws IOException if the file cannot be read.
+     * @return this builder, for further call chaining.
+     */
+    @Throws(IOException::class)
+    fun copyFrom(filePath: Path, newFileName: String) = this
+        .doCreate(newFileName) { filePath.readBytes() }
+
+    /**
+     * Add a file from the given compiler file object.
+     *
+     * @param fileObject the file object to use.
+     * @param newFileName the name to give the file that will be created.
+     * @throws IOException if the file object cannot be read.
+     * @return this builder, for further call chaining.
+     */
+    @Throws(IOException::class)
+    fun copyFrom(fileObject: FileObject, newFileName: String) = this
+        .doCreate(newFileName) { fileObject.openInputStream().use { it.readAllBytes() } }
+
+    /**
+     * Add a file from the given input stream.
+     *
+     * @param inputStream the input stream to read from.
+     * @param newFileName the name to give to the file that will be created.
+     * @throws IOException if the stream cannot be read.
+     */
+    @Throws(IOException::class)
+    fun copyFrom(inputStream: InputStream, newFileName: String) = this
+        .doCreate(newFileName) { inputStream.use { it.readAllBytes() } }
+
+    /**
+     * Add a file by reading the contents from the given URL.
+     *
+     * @param url the URL to fetch the contents from.
+     * @param newFileName the name to give to the file that will be created
+     * @throws IOException if the URL contents could not be downloaded.
+     * @return this builder, for further call chaining.
+     */
+    @Throws(IOException::class)
+    fun copyFrom(url: URL, newFileName: String) = this
+        .doCreate(newFileName) { url.readBytes() }
+
+    private inline fun doCreate(newFileName: String, supplier: () -> ByteArray) = apply {
+      val data = supplier()
+
       this@JavaCompilationBuilder
           .fileManager
-          .createFile(
-              location,
-              fileName,
-              lines.joinToString("\n").toByteArray()
-          )
+          .createFile(location, newFileName, data)
     }
   }
 

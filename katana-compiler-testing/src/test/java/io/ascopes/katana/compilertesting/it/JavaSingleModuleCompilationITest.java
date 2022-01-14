@@ -23,7 +23,7 @@ class JavaSingleModuleCompilationITest {
         .javac()
         .releaseVersion(version)
         .sources()
-            .createFile(
+            .create(
                 "test/java/it/HelloWorld.java",
                 "package test.java.it;",
                 "",

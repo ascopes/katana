@@ -18,12 +18,11 @@ class SingleModuleCompilationITest {
   @ParameterizedTest
   fun `I can compile a basic 'Hello, World!' application`(version: SourceVersion) {
     //@formatter:off
-    val compilation = JavaCompilationBuilder
-        .javac()
+    val compilation = JavaCompilationBuilder.javac()
         .releaseVersion(version)
         .sources()
-            .createFile(
-                fileName = "io/ascopes/helloworld/nonmodular/HelloWorld.java",
+            .create(
+                newFileName = "io/ascopes/helloworld/nonmodular/HelloWorld.java",
                 """
                   package io.ascopes.helloworld.nonmodular;
                   
@@ -54,12 +53,11 @@ class SingleModuleCompilationITest {
   @ParameterizedTest
   fun `I can compile a basic 'Hello, World!' application with modules`(version: SourceVersion) {
     //@formatter:off
-    val compilation = JavaCompilationBuilder
-        .javac()
+    val compilation = JavaCompilationBuilder.javac()
         .releaseVersion(version)
         .sources()
-            .createFile(
-                fileName = "io/ascopes/helloworld/modular/HelloWorld.java",
+            .create(
+                newFileName = "io/ascopes/helloworld/modular/HelloWorld.java",
                 """
                   package io.ascopes.helloworld.modular;
                   
@@ -70,8 +68,8 @@ class SingleModuleCompilationITest {
                   }
                 """.trimIndent()
             )
-            .createFile(
-                fileName = "module-info.java",
+            .create(
+                newFileName = "module-info.java",
                 """
                   module helloworld {
                     requires java.base;
@@ -117,12 +115,11 @@ class SingleModuleCompilationITest {
     }
 
     //@formatter:off
-    val compilation = JavaCompilationBuilder
-        .javac()
+    val compilation = JavaCompilationBuilder.javac()
         .releaseVersion(version)
         .sources()
-            .createFile(
-                fileName = "io/ascopes/helloworld/HelloWorld.java",
+            .create(
+                newFileName = "io/ascopes/helloworld/HelloWorld.java",
                 """
                   package io.ascopes.helloworld;
                   
@@ -156,12 +153,11 @@ class SingleModuleCompilationITest {
   @ParameterizedTest
   fun `Headers get created for the given sources`(version: SourceVersion) {
     //@formatter:off
-    val compilation = JavaCompilationBuilder
-        .javac()
+    val compilation = JavaCompilationBuilder.javac()
         .releaseVersion(version)
         .sources()
-            .createFile(
-                fileName = "io/ascopes/helloworld/HelloWorld.java",
+            .create(
+                newFileName = "io/ascopes/helloworld/HelloWorld.java",
                 """
                   package io.ascopes.helloworld;
                   
