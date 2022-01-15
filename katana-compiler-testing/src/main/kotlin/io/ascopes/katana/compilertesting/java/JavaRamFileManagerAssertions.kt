@@ -23,7 +23,7 @@ class JavaRamFileManagerAssertions internal constructor(
    * @param fileName the path of the file, relative to the output directory.
    * @return this assertion object for further checks.
    */
-  fun generatedSourceFile(fileName: String) = generatedSourceFiles(fileName)
+  fun hasSourceOutput(fileName: String) = hasSourceOutputs(fileName)
 
   /**
    * Assert that one or more source files were generated in the non-module output sources.
@@ -32,7 +32,7 @@ class JavaRamFileManagerAssertions internal constructor(
    * @param moreFileNames the additional file names to check for.
    * @return this assertion object for further checks.
    */
-  fun generatedSourceFiles(fileName: String, vararg moreFileNames: String) = apply {
+  fun hasSourceOutputs(fileName: String, vararg moreFileNames: String) = apply {
     expectAllFilesToExist(StandardLocation.SOURCE_OUTPUT, fileName, moreFileNames)
   }
 
@@ -43,10 +43,10 @@ class JavaRamFileManagerAssertions internal constructor(
    * @param fileName the path of the file, relative to the module's base directory.
    * @return this assertion object for further checks.
    */
-  fun generatedModuleSourceFile(
+  fun hasMultiModuleSourceOutput(
       moduleName: String,
       fileName: String
-  ) = generatedSourceFiles(moduleName, fileName)
+  ) = hasSourceOutputs(moduleName, fileName)
 
   /**
    * Assert that one or source files were generated in the modular source output location.
@@ -56,7 +56,7 @@ class JavaRamFileManagerAssertions internal constructor(
    * @param moreFileNames the additional file names to check for.
    * @return this assertion object for further checks.
    */
-  fun generatedModuleSourceFiles(
+  fun hasMultiModuleSourceOutputs(
       moduleName: String,
       fileName: String,
       vararg moreFileNames: String
@@ -65,21 +65,21 @@ class JavaRamFileManagerAssertions internal constructor(
   }
 
   /**
-   * Assert that a given class file was generated in the non-module output class location.
+   * Assert that a given file was generated in the non-module output class location.
    *
    * @param fileName the path of the file, relative to the output directory.
    * @return this assertion object for further checks.
    */
-  fun generatedClassFile(fileName: String) = generatedClassFiles(fileName)
+  fun hasClassOutput(fileName: String) = hasClassOutputs(fileName)
 
   /**
-   * Assert that one or more class files were generated in the non-module output class location.
+   * Assert that one or more files were generated in the non-module output class location.
    *
    * @param fileName the first file name to check for.
    * @param moreFileNames the additional file names to check for.
    * @return this assertion object for further checks.
    */
-  fun generatedClassFiles(fileName: String, vararg moreFileNames: String) = apply {
+  fun hasClassOutputs(fileName: String, vararg moreFileNames: String) = apply {
     expectAllFilesToExist(StandardLocation.CLASS_OUTPUT, fileName, moreFileNames)
   }
 
@@ -90,10 +90,10 @@ class JavaRamFileManagerAssertions internal constructor(
    * @param fileName the path of the file, relative to the module's base directory.
    * @return this assertion object for further checks.
    */
-  fun generatedModuleClassFile(
+  fun hasMultiModuleClassOutput(
       moduleName: String,
       fileName: String
-  ) = generatedModuleClassFiles(moduleName, fileName)
+  ) = hasMultiModuleClassOutputs(moduleName, fileName)
 
   /**
    * Assert that one or more class files were generated in the modular class output location.
@@ -103,7 +103,7 @@ class JavaRamFileManagerAssertions internal constructor(
    * @param moreFileNames the additional file names to check for.
    * @return this assertion object for further checks.
    */
-  fun generatedModuleClassFiles(
+  fun hasMultiModuleClassOutputs(
       moduleName: String,
       fileName: String,
       vararg moreFileNames: String
@@ -118,7 +118,7 @@ class JavaRamFileManagerAssertions internal constructor(
    * @param fileName the path of the file, relative to the output directory.
    * @return this assertion object for further checks.
    */
-  fun generatedHeaderFile(fileName: String) = generatedHeaderFiles(fileName)
+  fun hasHeaderOutput(fileName: String) = hasHeaderOutputs(fileName)
 
   /**
    * Assert that one or more C/C++ header files were generated in the non-module native header
@@ -128,7 +128,7 @@ class JavaRamFileManagerAssertions internal constructor(
    * @param moreFileNames the additional file names to check for.
    * @return this assertion object for further checks.
    */
-  fun generatedHeaderFiles(fileName: String, vararg moreFileNames: String) = apply {
+  fun hasHeaderOutputs(fileName: String, vararg moreFileNames: String) = apply {
     expectAllFilesToExist(StandardLocation.NATIVE_HEADER_OUTPUT, fileName, moreFileNames)
   }
 
@@ -139,10 +139,10 @@ class JavaRamFileManagerAssertions internal constructor(
    * @param fileName the path of the file, relative to the module's base directory.
    * @return this assertion object for further checks.
    */
-  fun generatedModuleHeaderFile(
+  fun hasMultiModuleHeaderOutput(
       moduleName: String,
       fileName: String
-  ) = generatedModuleHeaderFiles(moduleName, fileName)
+  ) = hasMultiModuleHeaderOutputs(moduleName, fileName)
 
   /**
    * Assert that one or more C/C++ header files were generated in the modular native header
@@ -153,7 +153,7 @@ class JavaRamFileManagerAssertions internal constructor(
    * @param moreFileNames the additional file names to check for.
    * @return this assertion object for further checks.
    */
-  fun generatedModuleHeaderFiles(
+  fun hasMultiModuleHeaderOutputs(
       moduleName: String,
       fileName: String,
       vararg moreFileNames: String

@@ -43,7 +43,7 @@ class JavaSingleModuleCompilationITest {
 
     assertThat(compilation)
         .files()
-        .generatedClassFile("test/java/it/HelloWorld.class");
+        .hasClassOutput("test/java/it/HelloWorld.class");
     //@formatter:off
   }
 }

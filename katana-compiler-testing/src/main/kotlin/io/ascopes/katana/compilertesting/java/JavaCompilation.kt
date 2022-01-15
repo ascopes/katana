@@ -2,6 +2,7 @@ package io.ascopes.katana.compilertesting.java
 
 import io.ascopes.katana.compilertesting.Compilation
 import io.ascopes.katana.compilertesting.CompilationResult
+import java.io.StringWriter
 import javax.annotation.processing.Processor
 import javax.tools.JavaFileObject
 
@@ -21,10 +22,10 @@ import javax.tools.JavaFileObject
  */
 data class JavaCompilation internal constructor(
     override val result: CompilationResult,
-    val modules: List<String>,
+    val modules: Set<String>,
     val processors: List<Processor>,
     val options: List<String>,
-    val logs: String,
+    val logs: StringWriter,
     val diagnostics: List<JavaDiagnostic<out JavaFileObject>>,
     val fileManager: JavaRamFileManager,
 ) : Compilation<CompilationResult>

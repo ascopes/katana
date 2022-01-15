@@ -45,7 +45,7 @@ class SingleModuleCompilationITest {
 
     assertThat(compilation)
         .files()
-        .generatedClassFile("io/ascopes/helloworld/nonmodular/HelloWorld.class")
+        .hasClassOutput("io/ascopes/helloworld/nonmodular/HelloWorld.class")
     //@formatter:on
   }
 
@@ -89,7 +89,7 @@ class SingleModuleCompilationITest {
 
         assertThat(compilation)
             .files()
-            .generatedClassFiles(
+            .hasClassOutputs(
                 "io/ascopes/helloworld/modular/HelloWorld.class",
                 "module-info.class"
             )
@@ -143,7 +143,7 @@ class SingleModuleCompilationITest {
 
     assertThat(compilation)
         .files()
-        .generatedClassFile("io/ascopes/helloworld/HelloWorld.class")
+        .hasClassOutput("io/ascopes/helloworld/HelloWorld.class")
 
     assertTrue(invoked, "annotation processor was not invoked")
     //@formatter:on
@@ -183,8 +183,8 @@ class SingleModuleCompilationITest {
 
     assertThat(compilation)
         .files()
-        .generatedClassFile("io/ascopes/helloworld/HelloWorld.class")
-        .generatedHeaderFile("io_ascopes_helloworld_HelloWorld.h")
+        .hasClassOutput("io/ascopes/helloworld/HelloWorld.class")
+        .hasHeaderOutput("io_ascopes_helloworld_HelloWorld.h")
     //@formatter:on
   }
 }

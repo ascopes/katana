@@ -80,12 +80,12 @@ class MultiModuleCompilationITest {
 
     assertThat(compilation)
         .files()
-        .generatedModuleClassFiles(
+        .hasMultiModuleClassOutputs(
             moduleName = "helloworld.greet",
             "io/me/helloworld/greet/Greeter.class",
             "module-info.class"
         )
-        .generatedModuleClassFiles(
+        .hasMultiModuleClassOutputs(
             moduleName = "helloworld.main",
             "io/me/helloworld/main/Main.class",
             "module-info.class"
@@ -175,12 +175,12 @@ class MultiModuleCompilationITest {
 
     assertThat(compilation)
         .files()
-        .generatedModuleClassFiles(
+        .hasMultiModuleClassOutputs(
             moduleName = "helloworld.greet",
             "io/ascopes/helloworld/greet/Greeter.class",
             "module-info.class"
         )
-        .generatedModuleClassFiles(
+        .hasMultiModuleClassOutputs(
             moduleName = "helloworld.main",
             "io/ascopes/helloworld/main/Main.class",
             "module-info.class"
@@ -255,17 +255,17 @@ class MultiModuleCompilationITest {
 
     assertThat(compilation)
         .files()
-        .generatedModuleClassFiles(
+        .hasMultiModuleClassOutputs(
             moduleName = "helloworld.greet",
             "io/me/helloworld/greet/Greeter.class",
             "module-info.class"
         )
-        .generatedModuleClassFiles(
+        .hasMultiModuleClassOutputs(
             moduleName = "helloworld.main",
             "io/me/helloworld/main/Main.class",
             "module-info.class"
         )
-        .generatedModuleHeaderFile(
+        .hasMultiModuleHeaderOutput(
             moduleName = "helloworld.greet",
             "io_me_helloworld_greet_Greeter.h"
         )

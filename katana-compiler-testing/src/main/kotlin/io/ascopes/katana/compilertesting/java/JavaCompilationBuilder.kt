@@ -6,6 +6,7 @@ import io.ascopes.katana.compilertesting.StackTraceProvider
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
+import java.io.Reader
 import java.io.StringWriter
 import java.net.URL
 import java.nio.charset.Charset
@@ -24,7 +25,10 @@ import kotlin.io.path.absolutePathString
 import kotlin.io.path.readBytes
 
 /**
- * Support for compiling files located in a virtual in-memory filesystem.
+ * Support for compiling Java files located in a virtual in-memory filesystem.
+ *
+ * This supports Java 9 and newer. The compiler interface provided with JDK-8 and older is not
+ * supported; however, you can still cross compile from JDK 9 or newer to JDK-8 or older.
  *
  * @author Ashley Scopes
  * @since 0.1.0
@@ -39,7 +43,7 @@ class JavaCompilationBuilder internal constructor(
 ) : CompilationBuilder<JavaCompilation> {
   // Exposed for testing purposes only.
   internal val options = mutableListOf<String>()
-  internal val modules = mutableListOf<String>()
+  internal val modules = mutableSetOf<String>()
   internal val processors = mutableListOf<Processor>()
 
   /**
@@ -58,15 +62,9 @@ class JavaCompilationBuilder internal constructor(
         .flatMap { this.fileManager.list(it, "", setOf(Kind.SOURCE), true) }
         .toList()
 
-    val compilationUnits = if (nonModuleCompilationUnits.isEmpty()) {
-      moduleCompilationUnits.isNotEmpty()
-          || throw IllegalStateException("No sources or module sources were provided to compile")
-      moduleCompilationUnits
-    } else if (moduleCompilationUnits.isNotEmpty()) {
-      throw IllegalStateException("Both sources and modular sources were provided")
-    } else {
-      nonModuleCompilationUnits
-    }
+    // Don't bother checking if both module and non-module sources exist. The file manager should
+    // do this for us.
+    val compilationUnits = nonModuleCompilationUnits + moduleCompilationUnits
 
     val stringWriter = StringWriter()
 
@@ -79,7 +77,7 @@ class JavaCompilationBuilder internal constructor(
         compilationUnits
     )
 
-    task.addModules(this.modules)
+    task.addModules(this.modules.sorted())
     task.setLocale(Locale.ROOT)
     task.setProcessors(this.processors)
 
@@ -91,10 +89,11 @@ class JavaCompilationBuilder internal constructor(
 
     return JavaCompilation(
         result = outcome,
+        // Sort to ensure reproducible compilation calls.
         modules = this.modules,
         processors = this.processors,
         options = this.options,
-        logs = stringWriter.toString(),
+        logs = stringWriter,
         diagnostics = this.diagnosticListener.diagnostics,
         fileManager = this.fileManager
     )
@@ -139,6 +138,18 @@ class JavaCompilationBuilder internal constructor(
           .path
           .absolutePathString()
   )
+
+  /**
+   * Add the following modules to the compilation to be considered.
+   *
+   * You probably don't need to use this...
+   *
+   * @param moduleNames the names of the modules to add.
+   * @return this object for further call chaining.
+   */
+  fun includeModules(vararg moduleNames: String) = this.apply {
+    this.modules += moduleNames
+  }
 
   /**
    * Get a file builder for a multi-module compilation. This will not work if you
@@ -389,7 +400,27 @@ class JavaCompilationBuilder internal constructor(
      */
     @Throws(IOException::class)
     fun copyFrom(inputStream: InputStream, newFileName: String) = this
-        .doCreate(newFileName) { inputStream.use { it.readAllBytes() } }
+        .doCreate(newFileName) { inputStream.buffered().use { it.readAllBytes() } }
+
+    /**
+     * Add a file from the given reader.
+     *
+     * @param reader the reader to read from.
+     * @param newFileName the name to give to the file that will be created.
+     * @param charset the charset to encode the file as. Defaults to `UTF-8` if omitted.
+     * @throws IOException if the stream cannot be read.
+     */
+    @JvmOverloads
+    @Throws(IOException::class)
+    fun copyFrom(
+        reader: Reader,
+        newFileName: String,
+        charset: Charset = StandardCharsets.UTF_8
+    ) = this
+        .doCreate(newFileName) {
+          val text = reader.use { it.readText() }
+          return@doCreate text.toByteArray(charset = charset)
+        }
 
     /**
      * Add a file by reading the contents from the given URL.
