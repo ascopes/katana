@@ -1,5 +1,4 @@
 module katana.compilertesting {
-  requires fuzzywuzzy;      // https://github.com/xdrop/fuzzywuzzy/pull/95
   requires java.base;
   requires java.compiler;
   requires jimfs;           // https://github.com/google/jimfs/pull/180
@@ -7,6 +6,7 @@ module katana.compilertesting {
   requires kotlin.stdlib;
   requires kotlin.stdlib.jdk7;
   requires kotlin.stdlib.jdk8;
+  requires me.xdrop.fuzzywuzzy;
   requires org.opentest4j;
 
   exports io.ascopes.katana.compilertesting;
