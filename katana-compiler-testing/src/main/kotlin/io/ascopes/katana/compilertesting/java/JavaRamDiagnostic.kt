@@ -13,7 +13,7 @@ import javax.tools.Diagnostic
  * @param diagnostic the original diagnostic to wrap.
  * @param stacktrace the stacktrace of the call to log the diagnostic.
  */
-class JavaDiagnostic<S> internal constructor(
+class JavaRamDiagnostic<S> internal constructor(
     val timestamp: Instant,
     // Exposed for testing purposes only.
     internal val diagnostic: Diagnostic<S>,
@@ -21,7 +21,7 @@ class JavaDiagnostic<S> internal constructor(
 ) : Diagnostic<S> by diagnostic {
 
   override fun equals(other: Any?) = when (other) {
-    is JavaDiagnostic<*> -> this.diagnostic == other.diagnostic
+    is JavaRamDiagnostic<*> -> this.diagnostic == other.diagnostic
     is Diagnostic<*> -> this.diagnostic == other
     else -> false
   }

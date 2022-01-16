@@ -12,13 +12,13 @@ import org.opentest4j.AssertionFailedError
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class JavaDiagnosticsAssertions
-  : CommonAssertions<List<JavaDiagnostic<*>>, JavaDiagnosticsAssertions> {
+  : CommonAssertions<List<JavaRamDiagnosticImpl>, JavaDiagnosticsAssertions> {
 
   /**
    * @param target the target of the assertions to perform.
    */
   @Suppress("ConvertSecondaryConstructorToPrimary")
-  internal constructor(target: List<JavaDiagnostic<*>>) : super(target)
+  internal constructor(target: List<JavaRamDiagnosticImpl>) : super(target)
 
   /**
    * Assert that no errors were reported.
@@ -126,7 +126,7 @@ class JavaDiagnosticsAssertions
   fun hasMatchingDiagnosticCount(
       message: String,
       count: Int,
-      predicate: (JavaDiagnostic<*>) -> Boolean
+      predicate: (JavaRamDiagnosticImpl) -> Boolean
   ) = apply {
     val matches = target
         .filter(predicate)

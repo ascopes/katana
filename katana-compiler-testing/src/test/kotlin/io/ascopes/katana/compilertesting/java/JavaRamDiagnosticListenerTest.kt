@@ -11,7 +11,7 @@ import java.time.Instant
 import javax.tools.Diagnostic
 import javax.tools.JavaFileObject
 
-class JavaDiagnosticListenerTest {
+class JavaRamDiagnosticListenerTest {
   private val dummyStackTraceProvider = object : StackTraceProvider {
     val frames = listOf(
         StackTraceElement("foo.bar.Baz", "somethingThatReportsStuff", "Baz.kt", 12),
@@ -73,7 +73,7 @@ class JavaDiagnosticListenerTest {
     assertEquals(1, listener.diagnostics.size)
     val wrappedDiagnostic = listener.diagnostics.first()
 
-    assertInstanceOf(JavaDiagnostic::class.java, wrappedDiagnostic)
+    assertInstanceOf(JavaRamDiagnostic::class.java, wrappedDiagnostic)
     assertEquals(this.dummyStackTraceProvider.frames, wrappedDiagnostic.stacktrace)
   }
 }

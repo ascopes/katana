@@ -1,6 +1,5 @@
 package io.ascopes.katana.compilertesting.java
 
-import io.ascopes.katana.compilertesting.java.JavaDiagnostic
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -16,12 +15,12 @@ import javax.tools.Diagnostic.Kind
 import javax.tools.JavaFileObject
 import kotlin.random.Random
 
-class JavaDiagnosticTest {
+class JavaRamDiagnosticTest {
   @Nested
   inner class EqualsTest {
     @Test
     fun `is equal to itself`() {
-      val diagnostic = JavaDiagnostic(
+      val diagnostic = JavaRamDiagnostic(
           mockk("timestamp"),
           mockk<Diagnostic<*>>("diagnostic"),
           mockk("stacktrace")
@@ -34,13 +33,13 @@ class JavaDiagnosticTest {
     fun `is equal to another JavaDiagnostic instance holding the same inner diagnostic`() {
       val innerDiagnostic = mockk<Diagnostic<*>>()
 
-      val diagnostic1 = JavaDiagnostic(
+      val diagnostic1 = JavaRamDiagnostic(
           mockk("timestamp1"),
           innerDiagnostic,
           mockk("stacktrace1")
       )
 
-      val diagnostic2 = JavaDiagnostic(
+      val diagnostic2 = JavaRamDiagnostic(
           mockk("timestamp2"),
           innerDiagnostic,
           mockk("stacktrace2")
@@ -52,7 +51,7 @@ class JavaDiagnosticTest {
     @Test
     fun `is equal to the inner diagnostic`() {
       val innerDiagnostic = mockk<Diagnostic<*>>()
-      val diagnostic = JavaDiagnostic(
+      val diagnostic = JavaRamDiagnostic(
           mockk("timestamp"),
           innerDiagnostic,
           mockk("stacktrace")
@@ -63,12 +62,12 @@ class JavaDiagnosticTest {
 
     @Test
     fun `is not equal to a different diagnostic`() {
-      val diagnostic1 = JavaDiagnostic(
+      val diagnostic1 = JavaRamDiagnostic(
           mockk("timestamp1"),
           mockk<Diagnostic<*>>("innerDiagnostic1"),
           mockk("stacktrace1")
       )
-      val diagnostic2 = JavaDiagnostic(
+      val diagnostic2 = JavaRamDiagnostic(
           mockk("timestamp2"),
           mockk<Diagnostic<*>>("innerDiagnostic2"),
           mockk("stacktrace2")
@@ -85,7 +84,7 @@ class JavaDiagnosticTest {
 
     every { innerDiagnostic.hashCode() } returns randomHashCode
 
-    val diagnostic = JavaDiagnostic(
+    val diagnostic = JavaRamDiagnostic(
         mockk("timestamp"),
         innerDiagnostic,
         mockk("stacktrace")
@@ -103,7 +102,7 @@ class JavaDiagnosticTest {
 
     every { innerDiagnostic.kind } returns kind
 
-    val diagnostic = JavaDiagnostic(timestamp, innerDiagnostic, stackFrames)
+    val diagnostic = JavaRamDiagnostic(timestamp, innerDiagnostic, stackFrames)
 
     assertEquals(diagnostic.kind, kind)
   }
@@ -117,7 +116,7 @@ class JavaDiagnosticTest {
 
     every { innerDiagnostic.source } returns source
 
-    val diagnostic = JavaDiagnostic(timestamp, innerDiagnostic, stackFrames)
+    val diagnostic = JavaRamDiagnostic(timestamp, innerDiagnostic, stackFrames)
 
     assertEquals(diagnostic.source, source)
   }
@@ -131,7 +130,7 @@ class JavaDiagnosticTest {
 
     every { innerDiagnostic.position } returns position
 
-    val diagnostic = JavaDiagnostic(timestamp, innerDiagnostic, stackFrames)
+    val diagnostic = JavaRamDiagnostic(timestamp, innerDiagnostic, stackFrames)
 
     assertEquals(diagnostic.position, position)
   }
@@ -145,7 +144,7 @@ class JavaDiagnosticTest {
 
     every { innerDiagnostic.startPosition } returns position
 
-    val diagnostic = JavaDiagnostic(timestamp, innerDiagnostic, stackFrames)
+    val diagnostic = JavaRamDiagnostic(timestamp, innerDiagnostic, stackFrames)
 
     assertEquals(diagnostic.startPosition, position)
   }
@@ -159,7 +158,7 @@ class JavaDiagnosticTest {
 
     every { innerDiagnostic.endPosition } returns position
 
-    val diagnostic = JavaDiagnostic(timestamp, innerDiagnostic, stackFrames)
+    val diagnostic = JavaRamDiagnostic(timestamp, innerDiagnostic, stackFrames)
 
     assertEquals(diagnostic.endPosition, position)
   }
@@ -173,7 +172,7 @@ class JavaDiagnosticTest {
 
     every { innerDiagnostic.lineNumber } returns lineNumber
 
-    val diagnostic = JavaDiagnostic(timestamp, innerDiagnostic, stackFrames)
+    val diagnostic = JavaRamDiagnostic(timestamp, innerDiagnostic, stackFrames)
 
     assertEquals(diagnostic.lineNumber, lineNumber)
   }
@@ -187,7 +186,7 @@ class JavaDiagnosticTest {
 
     every { innerDiagnostic.columnNumber } returns columnNumber
 
-    val diagnostic = JavaDiagnostic(timestamp, innerDiagnostic, stackFrames)
+    val diagnostic = JavaRamDiagnostic(timestamp, innerDiagnostic, stackFrames)
 
     assertEquals(diagnostic.columnNumber, columnNumber)
   }
@@ -201,7 +200,7 @@ class JavaDiagnosticTest {
 
     every { innerDiagnostic.code } returns code
 
-    val diagnostic = JavaDiagnostic(timestamp, innerDiagnostic, stackFrames)
+    val diagnostic = JavaRamDiagnostic(timestamp, innerDiagnostic, stackFrames)
 
     assertEquals(diagnostic.code, code)
   }
@@ -215,7 +214,7 @@ class JavaDiagnosticTest {
 
     every { innerDiagnostic.getMessage(any()) } returns message
 
-    val diagnostic = JavaDiagnostic(timestamp, innerDiagnostic, stackFrames)
+    val diagnostic = JavaRamDiagnostic(timestamp, innerDiagnostic, stackFrames)
 
     assertEquals(diagnostic.getMessage(Locale.CHINESE), message)
 
@@ -229,7 +228,7 @@ class JavaDiagnosticTest {
     val stackFrames = mockk<List<StackTraceElement>>()
     val timestamp = mockk<Instant>()
 
-    val diagnostic = JavaDiagnostic(timestamp, innerDiagnostic, stackFrames)
+    val diagnostic = JavaRamDiagnostic(timestamp, innerDiagnostic, stackFrames)
 
     assertEquals(diagnostic.toString(), innerDiagnostic.toString())
   }

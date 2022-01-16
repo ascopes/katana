@@ -4,7 +4,6 @@ import io.ascopes.katana.compilertesting.Compilation
 import io.ascopes.katana.compilertesting.CompilationResult
 import java.io.StringWriter
 import javax.annotation.processing.Processor
-import javax.tools.JavaFileObject
 
 
 /**
@@ -26,6 +25,6 @@ data class JavaCompilation internal constructor(
     val processors: List<Processor>,
     val options: List<String>,
     val logs: StringWriter,
-    val diagnostics: List<JavaDiagnostic<out JavaFileObject>>,
+    val diagnostics: List<JavaRamDiagnosticImpl>,
     val fileManager: JavaRamFileManager,
 ) : Compilation<CompilationResult>

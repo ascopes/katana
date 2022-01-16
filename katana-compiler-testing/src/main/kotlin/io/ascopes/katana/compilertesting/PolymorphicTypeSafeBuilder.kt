@@ -6,7 +6,7 @@ package io.ascopes.katana.compilertesting
  *
  * @param B the type of the class that implements this interface.
  * @author Ashley Scopes
- * @since 0.0.1
+ * @since 0.1.0
  */
 abstract class PolymorphicTypeSafeBuilder<B>
     internal constructor()

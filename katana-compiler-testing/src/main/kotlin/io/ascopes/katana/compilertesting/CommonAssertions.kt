@@ -2,7 +2,10 @@ package io.ascopes.katana.compilertesting
 
 import java.util.function.Consumer
 import java.util.function.Predicate
+import kotlin.jvm.Throws
 import org.opentest4j.AssertionFailedError
+import org.opentest4j.IncompleteExecutionException
+import org.opentest4j.TestAbortedException
 
 /**
  * Common assertion methods.
@@ -34,24 +37,45 @@ abstract class CommonAssertions<T, A>
    * @param predicate the predicate to match.
    * @return this assertion object for further checks.
    */
-  @JvmOverloads
-  fun matches(message: String? = null, predicate: Predicate<T>) = apply {
-    if (!predicate.test(target)) {
-      throw AssertionFailedError(
-          message ?: "The given predicate was not matched"
-      )
+  fun matches(predicate: Predicate<T>) = this
+      .matches("The given predicate returned false", predicate)
+
+  /**
+   * Assert that the target matches a given predicate.
+   *
+   * @param message the message to show when the predicate fails.
+   * @param predicate the predicate to match.
+   * @return this assertion object for further checks.
+   */
+  fun matches(message: String, predicate: Predicate<T>) = apply {
+    predicate.test(target) || throw AssertionFailedError(message)
+  }
+
+  /**
+   * Run some code on the given target, and catch any exceptions it throws.
+   *
+   * If an [AssertionError] or similar is thrown, the test is marked as failed.
+   * If any other [Throwable] is thrown, then the test is marked as erroneous.
+   *
+   * @param expectations the expectations to check.
+   * @return this assertion object for further checks.
+   */
+  fun satisfies(expectations: Expectations<T>) = apply {
+    try {
+      expectations.invoke(target)
+    } catch (ex: AssertionError) {
+      // Rethrow.
+      throw ex
+    } catch (ex: Throwable) {
+      throw IncompleteExecutionException("Unexpected exception thrown", ex)
     }
   }
 
   /**
-   * Assert that the target satisfies a given procedure.
-   *
-   * Any assertion errors should be raised directly.
-   *
-   * @param assertions the procedure containing assertions to invoke on the target object.
-   * @return this assertion object for further checks.
+   * Functional interface for an expectation routine.
    */
-  fun satisfies(assertions: Consumer<T>) = apply {
-    assertions.accept(target)
+  fun interface Expectations<T> {
+    @Throws(Exception::class)
+    fun invoke(target: T)
   }
 }

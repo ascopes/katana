@@ -28,7 +28,7 @@ abstract class CompilationAssertions<C, A> : CommonAssertions<C, A>
   fun isSuccessful() = apply {
     if (!target.result.isSuccess) {
       throw AssertionFailedError(
-          UNEXPECTED_OUTCOME,
+          UNEXPECTED_RESULT,
           SUCCESS,
           describeActualOutcomeType(),
           target.result.exception
@@ -46,7 +46,7 @@ abstract class CompilationAssertions<C, A> : CommonAssertions<C, A>
   fun isAFailure() = apply {
     if (!target.result.isFailure) {
       throw AssertionFailedError(
-          UNEXPECTED_OUTCOME,
+          UNEXPECTED_RESULT,
           FAILURE,
           describeActualOutcomeType(),
           target.result.exception
@@ -62,7 +62,7 @@ abstract class CompilationAssertions<C, A> : CommonAssertions<C, A>
   fun raisedAnUnhandledException(): ExceptionAssertions<Throwable> {
     if (!target.result.isException) {
       throw AssertionFailedError(
-          UNEXPECTED_OUTCOME,
+          UNEXPECTED_RESULT,
           EXCEPTION,
           describeActualOutcomeType()
       )
@@ -83,7 +83,7 @@ abstract class CompilationAssertions<C, A> : CommonAssertions<C, A>
   }
 
   private companion object {
-    const val UNEXPECTED_OUTCOME = "Unexpected compilation outcome"
+    const val UNEXPECTED_RESULT = "Unexpected compilation result"
 
     const val SUCCESS = "success"
     const val FAILURE = "failure"

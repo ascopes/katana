@@ -567,7 +567,7 @@ class JavaCompilationBuilderTest {
     @Test
     fun `the compilation result uses the diagnostics`() {
       // Given
-      val diagnostics = mockk<List<JavaDiagnostic<out JavaFileObject>>>()
+      val diagnostics = mockk<List<JavaRamDiagnostic<out JavaFileObject>>>()
       every { diagnosticListener.diagnostics } returns diagnostics
 
       // When
