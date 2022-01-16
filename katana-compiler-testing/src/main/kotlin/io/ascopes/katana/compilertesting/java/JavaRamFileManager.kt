@@ -47,11 +47,8 @@ import kotlin.streams.asSequence
  *
  * @author Ashley Scopes
  * @since 0.1.0
- * @param fileManager the compiler-supplied standard file manager to delegate most calls to.
  */
-class JavaRamFileManager(
-    fileManager: StandardJavaFileManager
-) : ForwardingJavaFileManager<StandardJavaFileManager>(fileManager) {
+class JavaRamFileManager : ForwardingJavaFileManager<StandardJavaFileManager> {
 
   /**
    * The module mode that was used for compilation.
@@ -65,11 +62,11 @@ class JavaRamFileManager(
   private val rootPath: Path
   private val inMemoryLocations: Map<StandardLocation, JavaRamFileLocation>
 
-  // Visible for testing only.
-  internal val standardFileManager: StandardJavaFileManager
-    get() = super.fileManager
-
-  init {
+  /**
+   * @param fileManager the compiler-supplied standard file manager to delegate most calls to.
+   */
+  @Suppress("ConvertSecondaryConstructorToPrimary")
+  internal constructor(fileManager: StandardJavaFileManager) : super(fileManager) {
     val fsName = UUID.randomUUID().toString()
     // Keep as a local to ensure it remains in scope for the cleaner operation.
     val fs = Jimfs.newFileSystem(fsName, Configuration.unix())
@@ -92,6 +89,10 @@ class JavaRamFileManager(
     // strangely.
     cleaner.register(this) { CompletableFuture.runAsync { fs.close() } }
   }
+
+  // Visible for testing only.
+  internal val standardFileManager: StandardJavaFileManager
+    get() = super.fileManager
 
   /**
    * Create a file in the given location.

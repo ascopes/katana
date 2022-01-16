@@ -32,19 +32,37 @@ import kotlin.io.path.readBytes
  *
  * @author Ashley Scopes
  * @since 0.1.0
- * @param compiler the Java Compiler implementation to use.
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class JavaCompilationBuilder internal constructor(
-    // Exposed for testing purposes only.
-    internal val compiler: JavaCompiler,
-    internal val diagnosticListener: JavaDiagnosticListener,
-    internal val fileManager: JavaRamFileManager,
-) : CompilationBuilder<JavaCompilation> {
+class JavaCompilationBuilder
+  : CompilationBuilder<JavaCompilation, JavaCompilationBuilder> {
+
   // Exposed for testing purposes only.
-  internal val options = mutableListOf<String>()
-  internal val modules = mutableSetOf<String>()
-  internal val processors = mutableListOf<Processor>()
+  internal val compiler: JavaCompiler
+  internal val diagnosticListener: JavaDiagnosticListener
+  internal val fileManager: JavaRamFileManager
+  internal val options: MutableList<String>
+  internal val modules: MutableSet<String>
+  internal val processors: MutableList<Processor>
+
+  /**
+   * @param compiler the Java compiler implementation to use.
+   * @param diagnosticListener the diagnostic listener implementation to use.
+   * @param fileManager the file manager implementation to use.
+   */
+  @Suppress("ConvertSecondaryConstructorToPrimary")
+  internal constructor(
+      compiler: JavaCompiler,
+      diagnosticListener: JavaDiagnosticListener,
+      fileManager: JavaRamFileManager
+  ) {
+    this.compiler = compiler
+    this.diagnosticListener = diagnosticListener
+    this.fileManager = fileManager
+    this.options = mutableListOf()
+    this.modules = mutableSetOf()
+    this.processors = mutableListOf()
+  }
 
   /**
    * Invoke the compiler with the given inputs, and return the compilation result.

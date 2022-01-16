@@ -29,20 +29,25 @@ import kotlin.io.path.toPath
  *
  * @author Ashley Scopes
  * @since 0.1.0
- * @param location the location of the file.
- * @param uri the URI of the in-memory file.
- * @param kind the kind of the file.
  */
-class JavaRamFileObject internal constructor(
-    private val location: JavaRamLocation,
-    uri: URI,
-    kind: Kind
-) : SimpleJavaFileObject(uri, kind) {
-  init {
+class JavaRamFileObject : SimpleJavaFileObject {
+  private val location: JavaRamLocation
+
+  /**
+   * @param location the location of the file.
+   * @param uri the URI of the in-memory file.
+   * @param kind the kind of the file.
+   */
+  internal constructor(
+      location: JavaRamLocation,
+      uri: URI,
+      kind: Kind
+  ) : super(uri, kind) {
     if (!uri.isAbsolute) {
       throw IllegalArgumentException("Expected absolute URI, but got '$uri'")
     }
 
+    this.location = location
     val jimfsScheme = Jimfs.URI_SCHEME
 
     if (uri.scheme != jimfsScheme) {
@@ -56,11 +61,8 @@ class JavaRamFileObject internal constructor(
    * @param location the file location in-memory.
    * @param path the path to the in-memory file.
    */
-  internal constructor(location: JavaRamLocation, path: Path) : this(
-      location,
-      path.toUri(),
-      determineKindOf(path)
-  )
+  internal constructor(location: JavaRamLocation, path: Path)
+      : this(location, path.toUri(), determineKindOf(path))
 
   /**
    * Determine if the file exists or not.

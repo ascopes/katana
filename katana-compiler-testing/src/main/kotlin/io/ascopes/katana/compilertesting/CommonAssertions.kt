@@ -14,8 +14,20 @@ import org.opentest4j.AssertionFailedError
  * @since 0.1.0
  */
 @Suppress("unused")
-abstract class CommonAssertions<T, A: CommonAssertions<T, A>>
-internal constructor(protected val target: T) {
+abstract class CommonAssertions<T, A>
+  : PolymorphicTypeSafeBuilder<A>
+    where A : CommonAssertions<T, A> {
+
+  protected val target: T
+
+  /**
+   * @param target the target of the assertions to perform.
+   */
+  @Suppress("ConvertSecondaryConstructorToPrimary")
+  internal constructor(target: T) {
+    this.target = target
+  }
+
   /**
    * Assert that the target matches a given predicate.
    *
@@ -42,14 +54,4 @@ internal constructor(protected val target: T) {
   fun satisfies(assertions: Consumer<T>) = apply {
     assertions.accept(target)
   }
-
-  protected inline fun apply(crossinline logic: A.() -> Unit): A {
-    val self = this.cast
-    self.logic()
-    return self
-  }
-
-  protected inline val cast: A
-    @Suppress("UNCHECKED_CAST")
-    get () = this as A
 }

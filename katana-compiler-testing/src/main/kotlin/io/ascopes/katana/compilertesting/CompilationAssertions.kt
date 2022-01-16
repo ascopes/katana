@@ -7,12 +7,18 @@ import org.opentest4j.AssertionFailedError
  * Base assertions for any form of compilation.
  *
  * @param C the compilation type.
- * @param target the compilation of type [C].
  * @author Ashley Scopes
  * @since 0.1.0
  */
-abstract class CompilationAssertions<C : Compilation<*>, A : CompilationAssertions<C, A>>
-internal constructor(target: C) : CommonAssertions<C, A>(target) {
+abstract class CompilationAssertions<C, A> : CommonAssertions<C, A>
+    where C : Compilation<*>,
+          A : CompilationAssertions<C, A> {
+
+  /**
+   * @param target the target of the assertions to perform.
+   */
+  @Suppress("ConvertSecondaryConstructorToPrimary")
+  internal constructor(target: C) : super(target)
 
   /**
    * Assert that the compilation succeeded.

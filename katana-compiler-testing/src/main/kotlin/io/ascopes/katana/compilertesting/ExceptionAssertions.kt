@@ -11,9 +11,15 @@ import org.opentest4j.AssertionFailedError
  * @since 0.1.0
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class ExceptionAssertions<T : Throwable> internal constructor(
-    target: T
-) : CommonAssertions<T, ExceptionAssertions<T>>(target) {
+class ExceptionAssertions<T : Throwable>
+  : CommonAssertions<T, ExceptionAssertions<T>> {
+
+  /**
+   * @param target the target of the assertions to perform.
+   */
+  @Suppress("ConvertSecondaryConstructorToPrimary")
+  internal constructor(target: T) : super(target)
+
   /**
    * Kotlin-style instance check. Will fail if the exception is not an instance of the provided
    * exception type.

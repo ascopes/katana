@@ -10,9 +10,14 @@ import org.opentest4j.AssertionFailedError
  * @since 0.1.0
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class JavaCompilationAssertions internal constructor(
-    target: JavaCompilation
-) : CompilationAssertions<JavaCompilation, JavaCompilationAssertions>(target) {
+class JavaCompilationAssertions
+  : CompilationAssertions<JavaCompilation, JavaCompilationAssertions> {
+
+  /**
+   * @param target the target of the assertions to perform.
+   */
+  @Suppress("ConvertSecondaryConstructorToPrimary")
+  internal constructor(target: JavaCompilation) : super(target)
 
   /**
    * Get an assertion object for the diagnostics produced by the compilation.
