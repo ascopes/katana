@@ -36,7 +36,7 @@
     <kotlin-tests-dir>${project.basedir}/src/test/kotlin</kotlin-tests-dir>
 
     <kotlin.compiler.apiVersion>${kotlin-api-version}</kotlin.compiler.apiVersion>
-    <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
+    <kotlin.compiler.incremental>false</kotlin.compiler.incremental>
     <kotlin.compiler.jvmTarget>${java-api-version}</kotlin.compiler.jvmTarget>
     <kotlin.compiler.languageVersion>${kotlin-api-version}</kotlin.compiler.languageVersion>
 
