@@ -1,7 +1,11 @@
 package io.ascopes.katana.compilertesting.java
 
 import io.ascopes.katana.compilertesting.CommonAssertions
+import io.ascopes.katana.compilertesting.FileContentAssertions
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 import javax.tools.StandardLocation
+import kotlin.io.path.toPath
 import org.opentest4j.AssertionFailedError
 import org.opentest4j.MultipleFailuresError
 
@@ -26,9 +30,13 @@ class JavaRamFileManagerAssertions
    * Assert that a given source file was generated in the non-module output sources.
    *
    * @param fileName the path of the file, relative to the output directory.
-   * @return this assertion object for further checks.
+   * @param charset the character encoding to use if the file is to be decoded. This is only
+   *    performed when first required, so can be ignored for binary files.
+   * @return the [FileContentAssertions] object for the file.
    */
-  fun hasSourceOutput(fileName: String) = hasSourceOutputs(fileName)
+  @JvmOverloads
+  fun hasSourceOutput(fileName: String, charset: Charset = StandardCharsets.UTF_8) =
+      getExpectedFileAsAssertions(StandardLocation.SOURCE_OUTPUT, fileName, charset)
 
   /**
    * Assert that one or more source files were generated in the non-module output sources.
@@ -46,12 +54,16 @@ class JavaRamFileManagerAssertions
    *
    * @param moduleName the name of the module.
    * @param fileName the path of the file, relative to the module's base directory.
-   * @return this assertion object for further checks.
+   * @param charset the character encoding to use if the file is to be decoded. This is only
+   *    performed when first required, so can be ignored for binary files.
+   * @return the [FileContentAssertions] object for the file.
    */
+  @JvmOverloads
   fun hasMultiModuleSourceOutput(
       moduleName: String,
-      fileName: String
-  ) = hasSourceOutputs(moduleName, fileName)
+      fileName: String,
+      charset: Charset = StandardCharsets.UTF_8
+  ) = getExpectedFileAsAssertions(StandardLocation.SOURCE_OUTPUT, moduleName, fileName, charset)
 
   /**
    * Assert that one or source files were generated in the modular source output location.
@@ -73,9 +85,13 @@ class JavaRamFileManagerAssertions
    * Assert that a given file was generated in the non-module output class location.
    *
    * @param fileName the path of the file, relative to the output directory.
-   * @return this assertion object for further checks.
+   * @param charset the character encoding to use if the file is to be decoded. This is only
+   *    performed when first required, so can be ignored for binary files.
+   * @return the [FileContentAssertions] object for the file.
    */
-  fun hasClassOutput(fileName: String) = hasClassOutputs(fileName)
+  @JvmOverloads
+  fun hasClassOutput(fileName: String, charset: Charset = StandardCharsets.UTF_8) =
+      getExpectedFileAsAssertions(StandardLocation.CLASS_OUTPUT, fileName, charset)
 
   /**
    * Assert that one or more files were generated in the non-module output class location.
@@ -93,12 +109,16 @@ class JavaRamFileManagerAssertions
    *
    * @param moduleName the name of the module.
    * @param fileName the path of the file, relative to the module's base directory.
-   * @return this assertion object for further checks.
+   * @param charset the character encoding to use if the file is to be decoded. This is only
+   *    performed when first required, so can be ignored for binary files.
+   * @return the [FileContentAssertions] object for the file.
    */
+  @JvmOverloads
   fun hasMultiModuleClassOutput(
       moduleName: String,
-      fileName: String
-  ) = hasMultiModuleClassOutputs(moduleName, fileName)
+      fileName: String,
+      charset: Charset = StandardCharsets.UTF_8
+  ) = getExpectedFileAsAssertions(StandardLocation.CLASS_OUTPUT, moduleName, fileName, charset)
 
   /**
    * Assert that one or more class files were generated in the modular class output location.
@@ -121,9 +141,13 @@ class JavaRamFileManagerAssertions
    * location.
    *
    * @param fileName the path of the file, relative to the output directory.
-   * @return this assertion object for further checks.
+   * @param charset the character encoding to use if the file is to be decoded. This is only
+   *    performed when first required, so can be ignored for binary files.
+   * @return the [FileContentAssertions] object for the file.
    */
-  fun hasHeaderOutput(fileName: String) = hasHeaderOutputs(fileName)
+  @JvmOverloads
+  fun hasHeaderOutput(fileName: String, charset: Charset = StandardCharsets.UTF_8) =
+      getExpectedFileAsAssertions(StandardLocation.NATIVE_HEADER_OUTPUT, fileName, charset)
 
   /**
    * Assert that one or more C/C++ header files were generated in the non-module native header
@@ -142,12 +166,21 @@ class JavaRamFileManagerAssertions
    *
    * @param moduleName the name of the module.
    * @param fileName the path of the file, relative to the module's base directory.
-   * @return this assertion object for further checks.
+   * @param charset the character encoding to use if the file is to be decoded. This is only
+   *    performed when first required, so can be ignored for binary files.
+   * @return the [FileContentAssertions] object for the file.
    */
+  @JvmOverloads
   fun hasMultiModuleHeaderOutput(
       moduleName: String,
-      fileName: String
-  ) = hasMultiModuleHeaderOutputs(moduleName, fileName)
+      fileName: String,
+      charset: Charset = StandardCharsets.UTF_8
+  ) = getExpectedFileAsAssertions(
+      StandardLocation.NATIVE_HEADER_OUTPUT,
+      moduleName,
+      fileName,
+      charset
+  )
 
   /**
    * Assert that one or more C/C++ header files were generated in the modular native header
@@ -213,6 +246,32 @@ class JavaRamFileManagerAssertions
       }
     }
   }
+
+  private fun getExpectedFileAsAssertions(
+      location: StandardLocation,
+      fileName: String,
+      charset: Charset
+  ): FileContentAssertions {
+    val file = getExpectedFile(location, fileName)
+    val bytes = file
+        .openInputStream()
+        .use { it.readAllBytes() }
+    return FileContentAssertions(file.toUri().toPath(), bytes, charset)
+  }
+
+  private fun getExpectedFileAsAssertions(
+      location: StandardLocation,
+      moduleName: String,
+      fileName: String,
+      charset: Charset,
+  ): FileContentAssertions {
+    val file = getExpectedFile(location, moduleName, fileName)
+    val bytes = file
+        .openInputStream()
+        .use { it.readAllBytes() }
+    return FileContentAssertions(file.toUri().toPath(), bytes, charset)
+  }
+
 
   private fun getExpectedFile(
       location: StandardLocation,

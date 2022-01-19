@@ -16,22 +16,26 @@
 
   <dependencies>
     <dependency>
+      <!-- In-memory file system -->
       <groupId>com.google.jimfs</groupId>
       <artifactId>jimfs</artifactId>
     </dependency>
 
     <dependency>
+      <!-- Kotlin mocking library for tests -->
       <groupId>io.mockk</groupId>
       <artifactId>mockk</artifactId>
       <scope>test</scope>
     </dependency>
 
     <dependency>
+      <!-- Fuzzy string matching for useful error messages relating to incorrect paths -->
       <groupId>me.xdrop</groupId>
       <artifactId>fuzzywuzzy</artifactId>
     </dependency>
 
     <dependency>
+      <!-- Reflection for Kotlin, needed for testing but also needed in module-info.java -->
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-reflect</artifactId>
     </dependency>
@@ -48,6 +52,10 @@
     </dependency>
 
     <dependency>
+      <!--
+        Standard classes for Java unit testing to provide IDE-interactive support for
+        test failures.
+      -->
       <groupId>org.opentest4j</groupId>
       <artifactId>opentest4j</artifactId>
     </dependency>
@@ -55,6 +63,12 @@
 
   <build>
     <plugins>
+      <plugin>
+        <!-- Needed to help JaCoCo's reporting to be correct. -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>

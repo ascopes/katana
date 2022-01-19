@@ -37,6 +37,13 @@ abstract class CompilationAssertions<C, A> : CommonAssertions<C, A>
   }
 
   /**
+   * Assert that the compilation succeeded without any warnings.
+   *
+   * @return this assertion object for further checks.
+   */
+  abstract fun isSuccessfulWithoutWarnings(): A
+
+  /**
    * Assert that the compilation failed.
    *
    * This is not the same as the compiler throwing an unhandled exception.

@@ -19,6 +19,12 @@ class JavaCompilationAssertions
   @Suppress("ConvertSecondaryConstructorToPrimary")
   internal constructor(target: JavaCompilation) : super(target)
 
+  override fun isSuccessfulWithoutWarnings() = apply {
+    // Just a short-cut.
+    isSuccessful()
+    diagnostics().hasNoWarnings()
+  }
+
   /**
    * Get an assertion object for the diagnostics produced by the compilation.
    *

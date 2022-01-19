@@ -76,6 +76,6 @@ abstract class CommonAssertions<T, A>
    */
   fun interface Expectations<T> {
     @Throws(Exception::class)
-    fun invoke(target: T)
+    operator fun invoke(target: T)
   }
 }

@@ -178,4 +178,7 @@ class CompilationAssertionsTest {
   internal class SomeCompilationAssertions<T>(target: T)
     : CompilationAssertions<T, SomeCompilationAssertions<T>>(target)
       where T : Compilation<BasicCompilationResult>
+  {
+    override fun isSuccessfulWithoutWarnings(): SomeCompilationAssertions<T> = TODO()
+  }
 }

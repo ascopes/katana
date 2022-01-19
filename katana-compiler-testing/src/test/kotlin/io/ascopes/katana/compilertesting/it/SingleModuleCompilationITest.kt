@@ -183,8 +183,8 @@ class SingleModuleCompilationITest {
 
     assertThat(compilation)
         .files()
-        .hasClassOutput("io/ascopes/helloworld/HelloWorld.class")
-        .hasHeaderOutput("io_ascopes_helloworld_HelloWorld.h")
+        .hasClassOutputs("io/ascopes/helloworld/HelloWorld.class")
+        .hasHeaderOutputs("io_ascopes_helloworld_HelloWorld.h")
     //@formatter:on
   }
 }

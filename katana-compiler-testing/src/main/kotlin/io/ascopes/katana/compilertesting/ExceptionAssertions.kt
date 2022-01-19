@@ -114,9 +114,8 @@ class ExceptionAssertions<T : Throwable>
    * @param pattern the pattern to search for.
    * @return this assertion object for further checks.
    */
-  fun hasMessageMatching(pattern: String): ExceptionAssertions<T> {
-    return this.hasMessageMatching(pattern.toRegex())
-  }
+  fun hasMessageMatching(pattern: String) =
+      hasMessageMatching(pattern.toRegex())
 
   /**
    * Assert that the exception has a message matching the given pattern.
@@ -137,9 +136,8 @@ class ExceptionAssertions<T : Throwable>
    * @param flags the [RegexOption] flags to allow.
    * @return this assertion object for further checks.
    */
-  fun hasMessageMatching(pattern: String, vararg flags: RegexOption): ExceptionAssertions<T> {
-    return this.hasMessageMatching(Regex(pattern, flags.toSet()))
-  }
+  fun hasMessageMatching(pattern: String, vararg flags: RegexOption) =
+      hasMessageMatching(Regex(pattern, flags.toSet()))
 
   /**
    * Assert that the exception has a message matching the given pattern.
