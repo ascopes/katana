@@ -12,6 +12,9 @@
 
   <modules>
     <module>katana-compiler-testing</module>
+    <module>katana-spi-components/katana-spi</module>
+    <module>katana-spi-components/katana-spi-annotation-processor</module>
+    <module>katana-spi-components/katana-spi-annotations</module>
   </modules>
 
   <properties>
@@ -22,6 +25,8 @@
     <jimfs.version>1.2</jimfs.version>
     <junit.version>5.8.2</junit.version>
     <kotlin.version>1.6.10</kotlin.version>
+    <kotlin-logging.version>2.1.21</kotlin-logging.version>
+    <logback.version>1.2.10</logback.version>
     <mockk.version>1.12.2</mockk.version>
     <opentest4j.version>1.2.0</opentest4j.version>
 
@@ -65,9 +70,21 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>${logback.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.google.jimfs</groupId>
         <artifactId>jimfs</artifactId>
         <version>${jimfs.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.microutils</groupId>
+        <artifactId>kotlin-logging-jvm</artifactId>
+        <version>${kotlin-logging.version}</version>
       </dependency>
 
       <dependency>
@@ -217,6 +234,12 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven-compiler-plugin.version}</version>
+
+          <configuration>
+            <source>${java-api-version}</source>
+            <target>${java-api-version}</target>
+          </configuration>
+
           <executions>
             <!--
               Replacing default-compile and default-testCompile so that we can handle joint Kotlin
@@ -239,10 +262,6 @@
               <goals>
                 <goal>compile</goal>
               </goals>
-              <configuration>
-                <source>${java-api-version}</source>
-                <target>${java-api-version}</target>
-              </configuration>
             </execution>
 
             <execution>
@@ -251,10 +270,6 @@
               <goals>
                 <goal>testCompile</goal>
               </goals>
-              <configuration>
-                <testSource>${java-api-version}</testSource>
-                <testTarget>${java-api-version}</testTarget>
-              </configuration>
             </execution>
           </executions>
         </plugin>

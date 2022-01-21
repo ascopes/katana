@@ -6,7 +6,7 @@ package io.ascopes.katana.compilertesting
  * @author Ashley Scopes
  * @since 0.1.0
  */
-internal interface StackTraceProvider: () -> List<StackTraceElement> {
+internal interface StackTraceProvider : () -> List<StackTraceElement> {
   companion object {
     /**
      * Stack trace provider that checks the current invocation thread.

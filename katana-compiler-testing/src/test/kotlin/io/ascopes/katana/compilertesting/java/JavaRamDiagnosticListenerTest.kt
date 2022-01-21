@@ -2,14 +2,14 @@ package io.ascopes.katana.compilertesting.java
 
 import io.ascopes.katana.compilertesting.StackTraceProvider
 import io.mockk.mockk
+import java.time.Instant
+import javax.tools.Diagnostic
+import javax.tools.JavaFileObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Test
-import java.time.Instant
-import javax.tools.Diagnostic
-import javax.tools.JavaFileObject
 
 class JavaRamDiagnosticListenerTest {
   private val dummyStackTraceProvider = object : StackTraceProvider {

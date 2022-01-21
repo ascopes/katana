@@ -2,8 +2,6 @@ package io.ascopes.katana.compilertesting.java
 
 import io.ascopes.katana.compilertesting.Each
 import io.ascopes.katana.compilertesting.StackTraceProvider
-import io.ascopes.katana.compilertesting.tempClassPath
-import io.ascopes.katana.compilertesting.tempDir
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -11,24 +9,18 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import io.mockk.verifyOrder
-import java.io.ByteArrayInputStream
-import java.io.StringReader
-import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.util.Locale
 import java.util.UUID
 import javax.annotation.processing.Processor
 import javax.lang.model.SourceVersion
-import javax.tools.FileObject
 import javax.tools.JavaCompiler
 import javax.tools.JavaFileObject
 import javax.tools.StandardJavaFileManager
 import javax.tools.StandardLocation
 import javax.tools.ToolProvider
 import kotlin.io.path.absolutePathString
-import kotlin.io.path.writeBytes
-import kotlin.random.Random
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertSame
@@ -290,6 +282,7 @@ class JavaCompilationBuilderTest {
       every { compiler.getTask(any(), any(), any(), any(), any(), any()) } returns compilationTask
       every { fileManager.list(any(), any(), any(), any()) } returns emptyList()
       every { fileManager.listLocationsForModules(any()) } returns emptyList()
+      every { fileManager.setClassPath(any()) } answers { }
       every { compilationTask.addModules(any()) } answers { }
       every { compilationTask.setProcessors(any()) } answers { }
       every { compilationTask.setLocale(any()) } answers { }
@@ -600,308 +593,19 @@ class JavaCompilationBuilderTest {
   }
 
   @Nested
-  inner class FileBuilderTest {
+  inner class JavaFileBuilderTest {
     @Test
     fun `and() returns the compilation builder`() {
       val parentBuilder = this@JavaCompilationBuilderTest.mockedBuilder()
-      val fileBuilder = parentBuilder.FileBuilder(mockk())
+      val fileBuilder = parentBuilder.JavaFileBuilder(mockk())
       assertSame(parentBuilder, fileBuilder.and())
     }
 
     @Test
     fun `then() returns the compilation builder`() {
       val parentBuilder = this@JavaCompilationBuilderTest.mockedBuilder()
-      val fileBuilder = parentBuilder.FileBuilder(mockk())
+      val fileBuilder = parentBuilder.JavaFileBuilder(mockk())
       assertSame(parentBuilder, fileBuilder.then())
-    }
-
-    @Test
-    fun `create(String, ByteArray) creates a file`() {
-      // Given
-      val fileManager = mockk<JavaRamFileManager>()
-      every { fileManager.createFile(any(), any(), any()) } answers { /* nothing */ }
-
-      val parentBuilder = this@JavaCompilationBuilderTest.mockedBuilder(fileManager = fileManager)
-      val location = mockk<JavaRamLocation>()
-      val fileBuilder = parentBuilder.FileBuilder(location)
-      val newFileName = "/foo/bar/${UUID.randomUUID()}"
-      val content = Random.Default.nextBytes(30)
-
-      // When
-      fileBuilder.create(newFileName, content)
-
-      // Then
-      verify { fileManager.createFile(location, newFileName, content) }
-    }
-
-    @Test
-    fun `create(String, vararg String) creates a file`() {
-      // Given
-      val fileManager = mockk<JavaRamFileManager>()
-      every { fileManager.createFile(any(), any(), any()) } answers { /* nothing */ }
-
-      val parentBuilder = this@JavaCompilationBuilderTest.mockedBuilder(fileManager = fileManager)
-      val location = mockk<JavaRamLocation>()
-      val fileBuilder = parentBuilder.FileBuilder(location)
-      val newFileName = "/foo/bar/${UUID.randomUUID()}"
-      val contentLines = (0..10).map { UUID.randomUUID().toString() }.toTypedArray()
-      val expectedFileBytes = contentLines
-          .joinToString(separator = "\n")
-          .toByteArray(StandardCharsets.UTF_8)
-
-      // When
-      fileBuilder.create(newFileName, *contentLines)
-
-      // Then
-      verify { fileManager.createFile(location, newFileName, expectedFileBytes) }
-    }
-
-    @ParameterizedTest
-    @Each.StandardCharset
-    fun `create(String, vararg String, String, Charset) creates a file`(charset: Charset) {
-      // Given
-      val fileManager = mockk<JavaRamFileManager>()
-      every { fileManager.createFile(any(), any(), any()) } answers { /* nothing */ }
-
-      val parentBuilder = this@JavaCompilationBuilderTest.mockedBuilder(fileManager = fileManager)
-      val location = mockk<JavaRamLocation>()
-      val fileBuilder = parentBuilder.FileBuilder(location)
-      val newFileName = "/foo/bar/${UUID.randomUUID()}"
-      val contentLines = (0..10).map { UUID.randomUUID().toString() }.toTypedArray()
-      val separator = UUID.randomUUID().toString()
-      val expectedFileBytes = contentLines
-          .joinToString(separator = separator)
-          .toByteArray(charset)
-
-      // When
-      fileBuilder.create(newFileName, *contentLines, charset = charset, lineSeparator = separator)
-
-      // Then
-      verify { fileManager.createFile(location, newFileName, expectedFileBytes) }
-    }
-
-    @Test
-    fun `copyFromClassPath(String, String) will create the file from the current classpath`() {
-      // Given
-      val fileManager = mockk<JavaRamFileManager>()
-      every { fileManager.createFile(any(), any(), any()) } answers { /* nothing */ }
-
-      val parentBuilder = this@JavaCompilationBuilderTest.mockedBuilder(fileManager = fileManager)
-      val location = mockk<JavaRamLocation>()
-      val fileBuilder = parentBuilder.FileBuilder(location)
-      val newFileName = "/foo/bar/${UUID.randomUUID()}"
-      val classPathFile = "SomeClasspathResource.txt"
-      val expectedFileBytes = this::class.java.classLoader.getResourceAsStream(classPathFile).use {
-        it!!.readAllBytes()
-      }
-
-      // When
-      fileBuilder.copyFromClassPath(
-          classPathFile,
-          newFileName
-      )
-
-      // Then
-      verify { fileManager.createFile(location, newFileName, expectedFileBytes) }
-    }
-
-    @Test
-    fun `copyFromClassPath(ClassLoader, String, String) will create the file from the classpath`() {
-      tempClassPath { root, urlClassLoader ->
-
-        // Given
-        val fileManager = mockk<JavaRamFileManager>()
-        every { fileManager.createFile(any(), any(), any()) } answers { /* nothing */ }
-
-        val parentBuilder = this@JavaCompilationBuilderTest.mockedBuilder(fileManager = fileManager)
-        val location = mockk<JavaRamLocation>()
-        val fileBuilder = parentBuilder.FileBuilder(location)
-        val newFileName = "/foo/bar/${UUID.randomUUID()}"
-        val classPathFile = UUID.randomUUID().toString()
-        val expectedFileBytes = this::class.java.classLoader
-            .getResourceAsStream("SomeClasspathResource.txt").use {
-              it!!.readAllBytes()
-            }
-
-        root.resolve(classPathFile).writeBytes(expectedFileBytes)
-
-        // When
-        fileBuilder.copyFromClassPath(
-            urlClassLoader,
-            classPathFile,
-            newFileName,
-        )
-
-        // Then
-        verify { fileManager.createFile(location, newFileName, expectedFileBytes) }
-      }
-    }
-
-    @Test
-    fun `copyFrom(Path, String) will create the file from the given path`() {
-      tempDir { root ->
-        // Given
-        val fileManager = mockk<JavaRamFileManager>()
-        every { fileManager.createFile(any(), any(), any()) } answers { /* nothing */ }
-
-        val parentBuilder = this@JavaCompilationBuilderTest.mockedBuilder(fileManager = fileManager)
-        val location = mockk<JavaRamLocation>()
-        val fileBuilder = parentBuilder.FileBuilder(location)
-        val newFileName = "/foo/bar/${UUID.randomUUID()}"
-        val classPathFile = UUID.randomUUID().toString()
-        val expectedFileBytes = this::class.java.classLoader
-            .getResourceAsStream("SomeClasspathResource.txt").use {
-              it!!.readAllBytes()
-            }
-
-        val filePath = root.resolve(classPathFile)
-        filePath.writeBytes(expectedFileBytes)
-
-        // When
-        fileBuilder.copyFrom(filePath, newFileName)
-
-        // Then
-        verify { fileManager.createFile(location, newFileName, expectedFileBytes) }
-      }
-    }
-
-    @Test
-    fun `copyFrom(FileObject, String) will create the file from the file object`() {
-      // Given
-      val fileManager = mockk<JavaRamFileManager>()
-      every { fileManager.createFile(any(), any(), any()) } answers { /* nothing */ }
-
-      val parentBuilder = this@JavaCompilationBuilderTest.mockedBuilder(fileManager = fileManager)
-      val location = mockk<JavaRamLocation>()
-      val fileBuilder = parentBuilder.FileBuilder(location)
-      val newFileName = "/foo/bar/${UUID.randomUUID()}"
-
-      val existingFileObject = mockk<FileObject>()
-      val expectedFileBytes = Random.Default.nextBytes(30)
-      every { existingFileObject.openInputStream() } answers { ByteArrayInputStream(expectedFileBytes) }
-
-      // When
-      fileBuilder.copyFrom(existingFileObject, newFileName)
-
-      // Then
-      verify { fileManager.createFile(location, newFileName, expectedFileBytes) }
-    }
-
-    @Test
-    fun `copyFrom(InputStream, String) will create the file from the InputStream`() {
-      // Given
-      val fileManager = mockk<JavaRamFileManager>()
-      every { fileManager.createFile(any(), any(), any()) } answers { /* nothing */ }
-
-      val parentBuilder = this@JavaCompilationBuilderTest.mockedBuilder(fileManager = fileManager)
-      val location = mockk<JavaRamLocation>()
-      val fileBuilder = parentBuilder.FileBuilder(location)
-      val newFileName = "/foo/bar/${UUID.randomUUID()}"
-
-      val expectedFileBytes = Random.Default.nextBytes(30)
-      val inputStream = ByteArrayInputStream(expectedFileBytes)
-
-      // When
-      fileBuilder.copyFrom(inputStream, newFileName)
-
-      // Then
-      verify { fileManager.createFile(location, newFileName, expectedFileBytes) }
-    }
-
-    @Test
-    fun `copyFrom(Reader, String) will create the file from the Reader`() {
-      // Given
-      val fileManager = mockk<JavaRamFileManager>()
-      every { fileManager.createFile(any(), any(), any()) } answers { /* nothing */ }
-
-      val parentBuilder = this@JavaCompilationBuilderTest.mockedBuilder(fileManager = fileManager)
-      val location = mockk<JavaRamLocation>()
-      val fileBuilder = parentBuilder.FileBuilder(location)
-      val newFileName = "/foo/bar/${UUID.randomUUID()}"
-
-      val text = """
-        Kotlin (/ˈkɒtlɪn/)[2] is a cross-platform, statically typed, general-purpose programming
-        language with type inference. Kotlin is designed to interoperate fully with Java, and the 
-        JVM version of Kotlin's standard library depends on the Java Class Library,[3] but type 
-        inference allows its syntax to be more concise. Kotlin mainly targets the JVM, but also
-        compiles to JavaScript (e.g., for frontend web applications using React[4]) or native
-        code via LLVM (e.g., for native iOS apps sharing business logic with Android apps).[5]
-        Language development costs are borne by JetBrains, while the Kotlin Foundation protects
-        the Kotlin trademark.[6]
-      """.trimIndent()
-
-      val expectedFileBytes = text.toByteArray(StandardCharsets.UTF_8)
-
-      val reader = StringReader(text)
-
-      // When
-      fileBuilder.copyFrom(reader, newFileName)
-
-      // Then
-      verify { fileManager.createFile(location, newFileName, expectedFileBytes) }
-    }
-
-    @ParameterizedTest
-    @Each.StandardCharset
-    fun `copyFrom(Reader, String, Charset) will create the file from the Reader`(charset: Charset) {
-      // Given
-      val fileManager = mockk<JavaRamFileManager>()
-      every { fileManager.createFile(any(), any(), any()) } answers { /* nothing */ }
-
-      val parentBuilder = this@JavaCompilationBuilderTest.mockedBuilder(fileManager = fileManager)
-      val location = mockk<JavaRamLocation>()
-      val fileBuilder = parentBuilder.FileBuilder(location)
-      val newFileName = "/foo/bar/${UUID.randomUUID()}"
-
-      val text = """
-        Kotlin (/ˈkɒtlɪn/)[2] is a cross-platform, statically typed, general-purpose programming
-        language with type inference. Kotlin is designed to interoperate fully with Java, and the 
-        JVM version of Kotlin's standard library depends on the Java Class Library,[3] but type 
-        inference allows its syntax to be more concise. Kotlin mainly targets the JVM, but also
-        compiles to JavaScript (e.g., for frontend web applications using React[4]) or native
-        code via LLVM (e.g., for native iOS apps sharing business logic with Android apps).[5]
-        Language development costs are borne by JetBrains, while the Kotlin Foundation protects
-        the Kotlin trademark.[6]
-      """.trimIndent()
-
-      val expectedFileBytes = text.toByteArray(charset = charset)
-
-      val reader = StringReader(text)
-
-      // When
-      fileBuilder.copyFrom(reader, newFileName, charset)
-
-      // Then
-      verify { fileManager.createFile(location, newFileName, expectedFileBytes) }
-    }
-
-    @Test
-    fun `copyFrom(URL, String) will create the file from the URL`() {
-      tempDir { root ->
-        // Given
-        val fileManager = mockk<JavaRamFileManager>()
-        every { fileManager.createFile(any(), any(), any()) } answers { /* nothing */ }
-
-        val parentBuilder = this@JavaCompilationBuilderTest.mockedBuilder(fileManager = fileManager)
-        val location = mockk<JavaRamLocation>()
-        val fileBuilder = parentBuilder.FileBuilder(location)
-        val newFileName = "/foo/bar/${UUID.randomUUID()}"
-        val classPathFile = UUID.randomUUID().toString()
-        val expectedFileBytes = this::class.java.classLoader
-            .getResourceAsStream("SomeClasspathResource.txt").use {
-              it!!.readAllBytes()
-            }
-
-        val filePath = root.resolve(classPathFile)
-        filePath.writeBytes(expectedFileBytes)
-        val fileUrl = filePath.toUri().toURL()
-
-        // When
-        fileBuilder.copyFrom(fileUrl, newFileName)
-
-        // Then
-        verify { fileManager.createFile(location, newFileName, expectedFileBytes) }
-      }
     }
   }
 

@@ -2,7 +2,7 @@ package io.ascopes.katana.compilertesting.java
 
 import com.google.common.jimfs.Configuration
 import com.google.common.jimfs.Jimfs
-import me.xdrop.fuzzywuzzy.FuzzySearch
+import java.io.File
 import java.lang.ref.Cleaner
 import java.nio.file.FileSystem
 import java.nio.file.FileVisitOption
@@ -30,6 +30,7 @@ import kotlin.io.path.relativeTo
 import kotlin.io.path.toPath
 import kotlin.io.path.writeBytes
 import kotlin.streams.asSequence
+import me.xdrop.fuzzywuzzy.FuzzySearch
 
 
 /**
@@ -184,6 +185,20 @@ class JavaRamFileManager : ForwardingJavaFileManager<StandardJavaFileManager> {
 
     return files
   }
+
+  /**
+   * Set the classpath to a set of files.
+   *
+   * @param files the files to add.
+   */
+  fun setClassPath(files: Iterable<File>) {
+    // TODO: can I pull these in-memory so that I don't get restricted by the File API?
+    // JIMFS and other file systems cannot build File objects like they can Path objects
+    // as the API only allows the default file manager to do this :(
+    // TODO: should I also be setting MODULE_PATH anywhere?
+    this.standardFileManager.setLocation(StandardLocation.CLASS_PATH, files)
+  }
+
 
   /**
    * Determine if the location contains a given file object.

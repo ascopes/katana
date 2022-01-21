@@ -9,7 +9,7 @@ package io.ascopes.katana.compilertesting
  * @since 0.1.0
  */
 abstract class PolymorphicTypeSafeBuilder<B>
-    internal constructor()
+internal constructor()
     where B : PolymorphicTypeSafeBuilder<B> {
   /**
    * Override for [apply] that returns the implementation type of whatever implements

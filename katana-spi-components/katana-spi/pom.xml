@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.ascopes.katana</groupId>
+    <artifactId>katana-parent</artifactId>
+    <relativePath>../../pom.xml</relativePath>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>katana-spi</artifactId>
+  <packaging>pom</packaging>
+
+  <description>
+    Annotations and annotation processor for generating ServiceLoader entries
+    for Service Provider Interfaces.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.ascopes.katana</groupId>
+      <artifactId>katana-spi-annotations</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <!-- Provided-scope so that it is not part of Fat JARs in projects depending on it. -->
+      <groupId>io.ascopes.katana</groupId>
+      <artifactId>katana-spi-annotation-processor</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+</project>

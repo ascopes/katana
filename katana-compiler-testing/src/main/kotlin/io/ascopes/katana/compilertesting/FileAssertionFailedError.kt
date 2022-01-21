@@ -1,7 +1,7 @@
 package io.ascopes.katana.compilertesting
 
-import org.opentest4j.AssertionFailedError
 import java.nio.file.Path
+import org.opentest4j.AssertionFailedError
 
 /**
  * Exception thrown when an assertion on a file fails.

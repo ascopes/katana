@@ -3,13 +3,6 @@
 package io.ascopes.katana.compilertesting.java
 
 import io.ascopes.katana.compilertesting.Each
-import io.ascopes.katana.compilertesting.java.JavaRamModuleLocation
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
 import java.nio.file.Path
 import java.util.UUID
 import javax.tools.JavaFileManager.Location
@@ -20,6 +13,12 @@ import javax.tools.StandardLocation.MODULE_PATH
 import javax.tools.StandardLocation.PATCH_MODULE_PATH
 import javax.tools.StandardLocation.PLATFORM_CLASS_PATH
 import javax.tools.StandardLocation.SOURCE_OUTPUT
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
 
 class JavaRamModuleLocationTest {
   @Test

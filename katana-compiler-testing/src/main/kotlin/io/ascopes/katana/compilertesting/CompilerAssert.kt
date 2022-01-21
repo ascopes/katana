@@ -8,8 +8,8 @@
  */
 package io.ascopes.katana.compilertesting
 
-import io.ascopes.katana.compilertesting.java.JavaCompilationAssertions
 import io.ascopes.katana.compilertesting.java.JavaCompilation
+import io.ascopes.katana.compilertesting.java.JavaCompilationAssertions
 
 /**
  * Start an assertion on a given [JavaCompilation].

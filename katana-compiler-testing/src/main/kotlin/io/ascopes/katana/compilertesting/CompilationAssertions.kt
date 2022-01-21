@@ -28,7 +28,7 @@ abstract class CompilationAssertions<C, A> : CommonAssertions<C, A>
   fun isSuccessful() = apply {
     if (!target.result.isSuccess) {
       throw AssertionFailedError(
-          UNEXPECTED_RESULT,
+          formatMessagesForUnexpectedResult(),
           SUCCESS,
           describeActualOutcomeType(),
           target.result.exception
@@ -53,7 +53,7 @@ abstract class CompilationAssertions<C, A> : CommonAssertions<C, A>
   fun isAFailure() = apply {
     if (!target.result.isFailure) {
       throw AssertionFailedError(
-          UNEXPECTED_RESULT,
+          formatMessagesForUnexpectedResult(),
           FAILURE,
           describeActualOutcomeType(),
           target.result.exception
@@ -69,7 +69,7 @@ abstract class CompilationAssertions<C, A> : CommonAssertions<C, A>
   fun raisedAnUnhandledException(): ExceptionAssertions<Throwable> {
     if (!target.result.isException) {
       throw AssertionFailedError(
-          UNEXPECTED_RESULT,
+          formatMessagesForUnexpectedResult(),
           EXCEPTION,
           describeActualOutcomeType()
       )
@@ -78,7 +78,11 @@ abstract class CompilationAssertions<C, A> : CommonAssertions<C, A>
     return ExceptionAssertions(target.result.exception!!)
   }
 
-  private fun describeActualOutcomeType(): String {
+  protected open fun formatMessagesForUnexpectedResult(): String {
+    return UNEXPECTED_RESULT
+  }
+
+  protected open fun describeActualOutcomeType(): String {
     val type = target.result
 
     return when {

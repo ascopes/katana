@@ -44,8 +44,8 @@ class JavaCompilationAssertions
    *
    * @return this assertion object for further checks.
    */
-  fun ranInLegacyMode() {
-    assert(target.fileManager.moduleMode == null) {
+  fun ranInLegacyMode() = apply {
+    assert(target.fileManager.moduleMode != null) {
       "No legacy/multi-module sources were provided, so the mode has not been set."
     }
 
@@ -63,7 +63,7 @@ class JavaCompilationAssertions
    *
    * @return this assertion object for further checks.
    */
-  fun ranInMultiModuleMode() {
+  fun ranInMultiModuleMode() = apply {
     assert(target.fileManager.moduleMode == null) {
       "No legacy/multi-module sources were provided, so the mode has not been set."
     }
@@ -75,5 +75,39 @@ class JavaCompilationAssertions
           target.fileManager.moduleMode
       )
     }
+  }
+
+  override fun describeActualOutcomeType(): String {
+    val messageBuilder = StringBuilder(super.describeActualOutcomeType())
+
+    if (target.diagnostics.isNotEmpty()) {
+      messageBuilder
+          .appendLine()
+          .appendLine()
+          .appendLine("===== Diagnostics =====")
+          .apply {
+            target.diagnostics.forEach { diagnostic ->
+              appendLine(diagnostic)
+              diagnostic.stacktrace.forEach { frame ->
+                append("\tat ")
+                appendLine(frame)
+              }
+              appendLine()
+            }
+          }
+    }
+
+    target
+        .logs
+        .takeIf { it.isNotBlank() }
+        ?.apply {
+          messageBuilder
+              .appendLine()
+              .appendLine()
+              .appendLine("===== Compiler output =====")
+              .appendLine(this)
+        }
+
+    return messageBuilder.toString()
   }
 }

@@ -2,8 +2,8 @@ package io.ascopes.katana.compilertesting.java
 
 import io.ascopes.katana.compilertesting.Compilation
 import io.ascopes.katana.compilertesting.CompilationResult
-import java.io.StringWriter
 import javax.annotation.processing.Processor
+import javax.tools.JavaFileObject
 
 
 /**
@@ -13,7 +13,7 @@ import javax.annotation.processing.Processor
  * @param modules the modules passed to the compiler.
  * @param processors the annotation processors passed to the compiler.
  * @param options the options passed to the compiler.
- * @param logs the standard output for the compiler.
+ * @param logs the standard output for the compiler, as a string.
  * @param diagnostics the diagnostics that the compiler output, along with call location details.
  * @param fileManager the file manager that was used.
  * @author Ashley Scopes
@@ -24,7 +24,7 @@ data class JavaCompilation internal constructor(
     val modules: Set<String>,
     val processors: List<Processor>,
     val options: List<String>,
-    val logs: StringWriter,
-    val diagnostics: List<JavaRamDiagnosticImpl>,
+    val logs: String,
+    val diagnostics: List<JavaRamDiagnostic<out JavaFileObject>>,
     val fileManager: JavaRamFileManager,
 ) : Compilation<CompilationResult>

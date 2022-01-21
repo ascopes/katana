@@ -3,12 +3,6 @@
 package io.ascopes.katana.compilertesting.java
 
 import io.ascopes.katana.compilertesting.Each
-import io.ascopes.katana.compilertesting.java.JavaRamFileLocation
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
 import java.nio.file.Path
 import java.util.UUID
 import javax.tools.JavaFileManager.Location
@@ -18,6 +12,11 @@ import javax.tools.StandardLocation.CLASS_PATH
 import javax.tools.StandardLocation.MODULE_PATH
 import javax.tools.StandardLocation.PATCH_MODULE_PATH
 import javax.tools.StandardLocation.SOURCE_OUTPUT
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
 
 class JavaRamFileLocationTest {
   @Test

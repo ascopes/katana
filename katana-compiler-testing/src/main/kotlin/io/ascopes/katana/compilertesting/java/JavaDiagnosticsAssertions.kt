@@ -2,6 +2,7 @@ package io.ascopes.katana.compilertesting.java
 
 import io.ascopes.katana.compilertesting.CommonAssertions
 import javax.tools.Diagnostic
+import javax.tools.JavaFileObject
 import org.opentest4j.AssertionFailedError
 
 /**
@@ -12,13 +13,13 @@ import org.opentest4j.AssertionFailedError
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class JavaDiagnosticsAssertions
-  : CommonAssertions<List<JavaRamDiagnosticImpl>, JavaDiagnosticsAssertions> {
+  : CommonAssertions<List<JavaRamDiagnostic<out JavaFileObject>>, JavaDiagnosticsAssertions> {
 
   /**
    * @param target the target of the assertions to perform.
    */
   @Suppress("ConvertSecondaryConstructorToPrimary")
-  internal constructor(target: List<JavaRamDiagnosticImpl>) : super(target)
+  internal constructor(target: List<JavaRamDiagnostic<out JavaFileObject>>) : super(target)
 
   /**
    * Assert that no errors were reported.
@@ -126,7 +127,7 @@ class JavaDiagnosticsAssertions
   fun hasMatchingDiagnosticCount(
       message: String,
       count: Int,
-      predicate: (JavaRamDiagnosticImpl) -> Boolean
+      predicate: (JavaRamDiagnostic<out JavaFileObject>) -> Boolean
   ) = apply {
     val matches = target
         .filter(predicate)

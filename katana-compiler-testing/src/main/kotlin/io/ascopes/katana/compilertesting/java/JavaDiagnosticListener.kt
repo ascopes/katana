@@ -1,6 +1,10 @@
 package io.ascopes.katana.compilertesting.java
 
 import java.time.Instant
+import javax.tools.Diagnostic
+import javax.tools.DiagnosticListener
+import javax.tools.JavaFileObject
+import mu.KotlinLogging
 
 /**
  * Collector of diagnostics.
@@ -12,13 +16,15 @@ import java.time.Instant
 internal class JavaDiagnosticListener(
     // Visible for testing purposes only.
     internal val stackTraceProvider: () -> List<StackTraceElement>
-) : DiagnosticListenerImpl {
-  private val diagnosticsList = mutableListOf<JavaRamDiagnosticImpl>()
+) : DiagnosticListener<JavaFileObject> {
+  private val logger = KotlinLogging.logger { }
+
+  private val diagnosticsList = mutableListOf<JavaRamDiagnostic<out JavaFileObject>>()
 
   /**
    * The collection of collected diagnostics.
    */
-  val diagnostics: List<JavaRamDiagnosticImpl>
+  val diagnostics: List<JavaRamDiagnostic<out JavaFileObject>>
     // Return a shallow copy.
     get() = ArrayList(this.diagnosticsList)
 
@@ -27,8 +33,11 @@ internal class JavaDiagnosticListener(
    *
    * @param diagnostic the diagnostic to report.
    */
-  override fun report(diagnostic: DiagnosticImpl) {
+  override fun report(diagnostic: Diagnostic<out JavaFileObject>) {
+    logger.info { diagnostic }
+
     val now = Instant.now()
+
     val stackTrace = this.stackTraceProvider()
     this.diagnosticsList.add(JavaRamDiagnostic(now, diagnostic, stackTrace))
   }

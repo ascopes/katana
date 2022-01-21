@@ -1,11 +1,8 @@
 package io.ascopes.katana.compilertesting
 
-import java.util.function.Consumer
 import java.util.function.Predicate
-import kotlin.jvm.Throws
 import org.opentest4j.AssertionFailedError
 import org.opentest4j.IncompleteExecutionException
-import org.opentest4j.TestAbortedException
 
 /**
  * Common assertion methods.

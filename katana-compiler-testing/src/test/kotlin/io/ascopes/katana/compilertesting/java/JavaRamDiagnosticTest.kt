@@ -3,10 +3,6 @@ package io.ascopes.katana.compilertesting.java
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.util.Locale
 import java.util.UUID
@@ -14,6 +10,10 @@ import javax.tools.Diagnostic
 import javax.tools.Diagnostic.Kind
 import javax.tools.JavaFileObject
 import kotlin.random.Random
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class JavaRamDiagnosticTest {
   @Nested

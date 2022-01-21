@@ -3,14 +3,14 @@ package io.ascopes.katana.compilertesting.it
 import io.ascopes.katana.compilertesting.Each
 import io.ascopes.katana.compilertesting.assertThat
 import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.parallel.Execution
-import org.junit.jupiter.api.parallel.ExecutionMode
-import org.junit.jupiter.params.ParameterizedTest
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
+import org.junit.jupiter.params.ParameterizedTest
 
 @Execution(ExecutionMode.CONCURRENT)
 class MultiModuleCompilationITest {

@@ -27,7 +27,7 @@ internal class BasicCompilationResult : CompilationResult {
    * `true` if the compilation was a success.
    */
   override val isSuccess: Boolean
-      get() = this.innerOutcomeType is SuccessOutcomeType
+    get() = this.innerOutcomeType is SuccessOutcomeType
 
   /**
    * `true` if the compilation failed due to the input.

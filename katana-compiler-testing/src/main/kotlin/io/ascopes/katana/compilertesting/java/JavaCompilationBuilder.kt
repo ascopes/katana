@@ -2,27 +2,28 @@ package io.ascopes.katana.compilertesting.java
 
 import io.ascopes.katana.compilertesting.BasicCompilationResult
 import io.ascopes.katana.compilertesting.CompilationBuilder
+import io.ascopes.katana.compilertesting.CompilationResult
+import io.ascopes.katana.compilertesting.FileBuilder
+import io.ascopes.katana.compilertesting.LoggingWriter
 import io.ascopes.katana.compilertesting.StackTraceProvider
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.io.InputStream
-import java.io.Reader
-import java.io.StringWriter
-import java.net.URL
-import java.nio.charset.Charset
+import java.io.File
+import java.net.URLClassLoader
 import java.nio.charset.StandardCharsets
-import java.nio.file.Path
 import java.util.Locale
 import javax.annotation.processing.Processor
 import javax.lang.model.SourceVersion
-import javax.tools.FileObject
 import javax.tools.JavaCompiler
 import javax.tools.JavaFileManager.Location
 import javax.tools.JavaFileObject.Kind
 import javax.tools.StandardLocation
 import javax.tools.ToolProvider
 import kotlin.io.path.absolutePathString
-import kotlin.io.path.readBytes
+import kotlin.system.measureNanoTime
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
+import mu.KLogger
+import mu.KotlinLogging
 
 /**
  * Support for compiling Java files located in a virtual in-memory filesystem.
@@ -33,16 +34,19 @@ import kotlin.io.path.readBytes
  * @author Ashley Scopes
  * @since 0.1.0
  */
-@Suppress("MemberVisibilityCanBePrivate", "unused")
+@Suppress("MemberVisibilityCanBePrivate", "unused", "JoinDeclarationAndAssignment")
 class JavaCompilationBuilder
   : CompilationBuilder<JavaCompilation, JavaCompilationBuilder> {
 
   // Exposed for testing purposes only.
+  internal val classPath: MutableList<File>
   internal val compiler: JavaCompiler
   internal val diagnosticListener: JavaDiagnosticListener
   internal val fileManager: JavaRamFileManager
-  internal val options: MutableList<String>
+  internal val logger: KLogger
   internal val modules: MutableSet<String>
+  internal val options: MutableList<String>
+  internal var prependTestClassPath: Boolean
   internal val processors: MutableList<Processor>
 
   /**
@@ -59,9 +63,44 @@ class JavaCompilationBuilder
     this.compiler = compiler
     this.diagnosticListener = diagnosticListener
     this.fileManager = fileManager
-    this.options = mutableListOf()
-    this.modules = mutableSetOf()
-    this.processors = mutableListOf()
+
+    classPath = mutableListOf()
+    logger = KotlinLogging.logger { }
+    modules = mutableSetOf()
+    options = mutableListOf()
+    prependTestClassPath = true
+    processors = mutableListOf()
+  }
+
+  /**
+   * Append the classpath with the given paths.
+   *
+   * These must be valid files on the default file system, or compilation will probably fail.
+   *
+   * @param paths the paths to add.
+   * @return this object for further call chaining.
+   */
+  fun appendClassPath(vararg paths: String) = apply {
+    paths
+        .map { File(it) }
+        .toList()
+        .let { classPath.addAll(it) }
+  }
+
+  /**
+   * Append the classpath with the contents of the given [URLClassLoader]s.
+   *
+   * These must be valid files on the default file system, or compilation will probably fail.
+   *
+   * @param classLoaders the class loaders to add the paths from.
+   * @return this object for further call chaining.
+   */
+  fun appendClassPath(vararg classLoaders: URLClassLoader) = apply {
+    classLoaders
+        .flatMap { @Suppress("UsePropertyAccessSyntax") it.getURLs().asSequence() }
+        .map { File(it.toURI()) }
+        .toList()
+        .let { classPath.addAll(it) }
   }
 
   /**
@@ -70,50 +109,87 @@ class JavaCompilationBuilder
    * @return the compilation result.
    */
   override fun compile(): JavaCompilation {
-    val nonModuleCompilationUnits = this.fileManager
-        .list(StandardLocation.SOURCE_PATH, "", setOf(Kind.SOURCE), true)
-        .toList()
-
-    val moduleCompilationUnits = this.fileManager
-        .listLocationsForModules(StandardLocation.MODULE_SOURCE_PATH)
-        .flatten()
-        .flatMap { this.fileManager.list(it, "", setOf(Kind.SOURCE), true) }
-        .toList()
+    // Set the classpath.
+    val classPath = generateFinalClassPath().toList()
+    fileManager.setClassPath(classPath)
 
     // Don't bother checking if both module and non-module sources exist. The file manager should
     // do this for us.
-    val compilationUnits = nonModuleCompilationUnits + moduleCompilationUnits
+    val compilationUnits = collectCompilationUnits()
 
-    val stringWriter = StringWriter()
+    val outputLogger = LoggingWriter()
 
-    val task = this.compiler.getTask(
-        stringWriter,
-        this.fileManager,
-        this.diagnosticListener,
-        this.options,
-        null,
+    logger.debug {
+      val initialFiles = fileManager.listAllInMemoryFiles().toList()
+
+      StringBuilder("Compilation settings:")
+          .appendLine()
+          .appendLine(" * Classpath (${classPath.size} path(s)):")
+          .apply { classPath.forEach { appendLine("    · ${it.toURI()}") } }
+          .appendLine(" * Compilation units (${compilationUnits.size} file(s)):")
+          .apply { compilationUnits.forEach { appendLine("    · ${it.toUri()}") } }
+          .appendLine(" * Compiler: $compiler")
+          .appendLine(" * Initial file system contents (${initialFiles.size} file(s)):")
+          .apply { initialFiles.forEach { appendLine("    · ${it.toUri()}") } }
+          .appendLine(" * Modules (${modules.size} item(s)):")
+          .apply { modules.forEach { appendLine("    · $it") } }
+          .appendLine(" * Processors (${processors.size} object(s)):")
+          .apply { processors.forEach { appendLine("    · $it") } }
+          .appendLine(" * Options (${options.size} item(s)):")
+          .apply { options.forEach { appendLine("    · <$it>") } }
+          .appendLine(" * Target module mode: ${fileManager.moduleMode}")
+          .toString()
+          .trimEnd()
+    }
+
+    val task = compiler.getTask(
+        outputLogger,
+        fileManager,
+        diagnosticListener,
+        options,
+        null,  // Always null, we do not filter this by default.
         compilationUnits
     )
 
-    task.addModules(this.modules.sorted())
+    task.addModules(modules.sorted())
     task.setLocale(Locale.ROOT)
-    task.setProcessors(this.processors)
+    task.setProcessors(processors)
 
-    val outcome = try {
-      BasicCompilationResult(task.call())
-    } catch (ex: Exception) {
-      BasicCompilationResult(ex)
+    val (result, timeTaken) = doCompile(task)
+
+    outputLogger.close()
+    val stderr = outputLogger.toString()
+
+    logger.debug {
+      val outcomeName = when {
+        result.isSuccess -> "succeeded"
+        result.isFailure -> "failed"
+        else -> "aborted"
+      }
+
+      val finalFiles = fileManager.listAllInMemoryFiles().toList()
+
+      StringBuilder("Compilation $outcomeName")
+          .appendLine()
+          .appendLine(" * Time taken: $timeTaken")
+          .appendLine(" * Compiler logs: ${stderr.toByteArray().size} byte(s)")
+          .appendLine(" * Diagnostic count: ${diagnosticListener.diagnostics.size}")
+          .appendLine(" * Final file system contents (${finalFiles.size} file(s)):")
+          .apply { finalFiles.forEach { appendLine("    · ${it.toUri()}") } }
+          .toString()
+          .trimEnd()
     }
 
+
     return JavaCompilation(
-        result = outcome,
+        result = result,
         // Sort to ensure reproducible compilation calls.
-        modules = this.modules,
-        processors = this.processors,
-        options = this.options,
-        logs = stringWriter,
-        diagnostics = this.diagnosticListener.diagnostics,
-        fileManager = this.fileManager
+        modules = modules,
+        processors = processors,
+        options = options,
+        logs = stderr,
+        diagnostics = diagnosticListener.diagnostics,
+        fileManager = fileManager
     )
   }
 
@@ -134,14 +210,14 @@ class JavaCompilationBuilder
    * @return the file builder.
    */
   @JvmOverloads
-  fun files(location: Location, moduleName: String? = null): FileBuilder {
+  fun files(location: Location, moduleName: String? = null): JavaFileBuilder {
     val ramLocation = if (moduleName == null) {
-      this.fileManager.getInMemoryLocationFor(location)
+      fileManager.getInMemoryLocationFor(location)
     } else {
-      this.fileManager.getInMemoryLocationFor(location, moduleName)
+      fileManager.getInMemoryLocationFor(location, moduleName)
     }
 
-    return FileBuilder(ramLocation)
+    return JavaFileBuilder(ramLocation)
   }
 
   /**
@@ -149,9 +225,9 @@ class JavaCompilationBuilder
    *
    * @return this object for further call chaining.
    */
-  fun generateHeaders() = this.options(
+  fun generateHeaders() = options(
       HEADER_FLAG,
-      this.fileManager
+      fileManager
           .getInMemoryLocationFor(StandardLocation.NATIVE_HEADER_OUTPUT)
           .path
           .absolutePathString()
@@ -165,8 +241,8 @@ class JavaCompilationBuilder
    * @param moduleNames the names of the modules to add.
    * @return this object for further call chaining.
    */
-  fun includeModules(vararg moduleNames: String) = this.apply {
-    this.modules += moduleNames
+  fun includeModules(vararg moduleNames: String) = apply {
+    modules += moduleNames
   }
 
   /**
@@ -177,7 +253,7 @@ class JavaCompilationBuilder
    * @return the file builder.
    */
   fun multiModuleSources(moduleName: String) =
-      this.files(StandardLocation.MODULE_SOURCE_PATH, moduleName)
+      files(StandardLocation.MODULE_SOURCE_PATH, moduleName)
 
   /**
    * Add the given options to the compiler.
@@ -203,7 +279,7 @@ class JavaCompilationBuilder
    * @param version the release version.
    * @return this object for further call chaining.
    */
-  fun releaseVersion(version: Int) = this.options(RELEASE_FLAG, "$version")
+  fun releaseVersion(version: Int) = options(RELEASE_FLAG, "$version")
 
   /**
    * Set the release version to use.
@@ -213,7 +289,7 @@ class JavaCompilationBuilder
    * @param version the release version.
    * @return this object for further call chaining.
    */
-  fun releaseVersion(version: SourceVersion) = this.releaseVersion(sourceToInt(version))
+  fun releaseVersion(version: SourceVersion) = releaseVersion(sourceToInt(version))
 
   /**
    * Get a file builder for a single-module/no-module compilation. This will not work if you
@@ -221,7 +297,7 @@ class JavaCompilationBuilder
    *
    * @return the file builder.
    */
-  fun sources() = this.files(StandardLocation.SOURCE_PATH)
+  fun sources() = files(StandardLocation.SOURCE_PATH)
 
   /**
    * Set the source version to use.
@@ -231,7 +307,7 @@ class JavaCompilationBuilder
    * @param version the source version.
    * @return this object for further call chaining.
    */
-  fun sourceVersion(version: Int) = this.options(SOURCE_FLAG, "$version")
+  fun sourceVersion(version: Int) = options(SOURCE_FLAG, "$version")
 
   /**
    * Set the source version to use.
@@ -241,7 +317,7 @@ class JavaCompilationBuilder
    * @param version the source version.
    * @return this object for further call chaining.
    */
-  fun sourceVersion(version: SourceVersion) = this.sourceVersion(sourceToInt(version))
+  fun sourceVersion(version: SourceVersion) = sourceVersion(sourceToInt(version))
 
   /**
    * Set the source and target version to use.
@@ -252,9 +328,7 @@ class JavaCompilationBuilder
    * @param version the source and target version.
    * @return this object for further call chaining.
    */
-  fun sourceAndTargetVersion(version: Int) = this
-      .sourceVersion(version)
-      .targetVersion(version)
+  fun sourceAndTargetVersion(version: Int) = sourceVersion(version).targetVersion(version)
 
   /**
    * Set the source and target version to use.
@@ -265,9 +339,7 @@ class JavaCompilationBuilder
    * @param version the source and target version.
    * @return this object for further call chaining.
    */
-  fun sourceAndTargetVersion(version: SourceVersion) = this
-      .sourceVersion(version)
-      .targetVersion(version)
+  fun sourceAndTargetVersion(version: SourceVersion) = sourceVersion(version).targetVersion(version)
 
   /**
    * Set the target version to use.
@@ -277,7 +349,7 @@ class JavaCompilationBuilder
    * @param version the target version.
    * @return this object for further call chaining.
    */
-  fun targetVersion(version: Int) = this.options(TARGET_FLAG, "$version")
+  fun targetVersion(version: Int) = options(TARGET_FLAG, "$version")
 
   /**
    * Set the target version to use.
@@ -287,23 +359,48 @@ class JavaCompilationBuilder
    * @param version the target version.
    * @return this object for further call chaining.
    */
-  fun targetVersion(version: SourceVersion) = this.targetVersion(sourceToInt(version))
+  fun targetVersion(version: SourceVersion) = targetVersion(sourceToInt(version))
 
   /**
    * Treat all warnings as errors.
    *
    * @return this object for further call chaining.
    */
-  fun treatWarningsAsErrors() = this.options(WERROR_FLAG)
+  fun treatWarningsAsErrors() = options(WERROR_FLAG)
+
+  /**
+   * Enable or disable the inclusion of the current class path of the running JVM for the
+   * compilation task when it runs.
+   *
+   * By default, this is enabled, but you can disable it or re-enable it elsewhere using this
+   * method.
+   *
+   * The impact of disabling this is that any dependencies in the current JVM classpath will not be
+   * detectable by the compiler when it runs. Generally this is not overly useful, but you may
+   * have scenarios where you want to be able to control this.
+   *
+   * This does not impact anything you append to the classpath manually.
+   *
+   * @param useClassPath true to use the class path (default), or false to disable it.
+   * @return this object for further call chaining.
+   */
+  @JvmOverloads
+  fun useCurrentClassPath(useClassPath: Boolean = true) = apply {
+    logger.debug {
+      val value = if (useClassPath) "enabled" else "disabled"
+      "Use of current JVM classpath is $value"
+    }
+    prependTestClassPath = useClassPath
+  }
 
   /**
    * Step in the [JavaCompilationBuilder] that can create files for a location.
    * <p>
    * Once complete, call the [and] method to get a reference to the original builder.
    */
-  inner class FileBuilder internal constructor(
+  inner class JavaFileBuilder internal constructor(
       private val location: JavaRamLocation
-  ) {
+  ) : FileBuilder<JavaFileBuilder>() {
 
     /**
      *  Return the reference to the compilation builder. Same as calling [then].
@@ -315,151 +412,66 @@ class JavaCompilationBuilder
      */
     fun then() = this@JavaCompilationBuilder
 
-    /**
-     * Create a file with the given byte content.
-     *
-     * @param newFileName the name of the file.
-     * @param bytes the byte content of the file.
-     * @return this builder, for further call chaining.
-     */
-    fun create(newFileName: String, bytes: ByteArray) = this
-        .doCreate(newFileName) { bytes }
+    override fun doCreate(newFileName: String, contentProvider: FileContentProvider) = apply {
+      val data = contentProvider()
 
-    /**
-     * Create a file with the given lines of content.
-     *
-     * @param newFileName the name of the file.
-     * @param lines the lines of content to write.
-     * @param lineSeparator the line separator to use, defaults to '\n'.
-     * @param charset the charset to write as, defaults to 'UTF-8'.
-     * @return this builder, for further call chaining.
-     */
-    @JvmOverloads
-    fun create(
-        newFileName: String,
-        vararg lines: String,
-        lineSeparator: String = "\n",
-        charset: Charset = StandardCharsets.UTF_8,
-    ) = this.doCreate(newFileName) {
-      lines
-          .joinToString(separator = lineSeparator)
-          .toByteArray(charset = charset)
-    }
-
-    /**
-     * Add a file from the classpath.
-     *
-     * @param classLoader the class loader to use, defaults to the classloader of this class.
-     * @param classPathFile the class path file to add.
-     * @param newFileName the name to give the file that will be created.
-     * @throws FileNotFoundException if the file cannot be read.
-     * @return this builder, for further call chaining.
-     */
-    @Throws(FileNotFoundException::class)
-    fun copyFromClassPath(
-        classLoader: ClassLoader,
-        classPathFile: String,
-        newFileName: String,
-    ) = this
-        .doCreate(newFileName) {
-          classLoader
-              .getResource(classPathFile)
-              ?.readBytes()
-              ?: throw FileNotFoundException(
-                  "Could not read $classPathFile on class path for $classLoader"
-              )
-        }
-
-    /**
-     * Add a file from the current classpath.
-     *
-     * @param classPathFile the class path file to add.
-     * @param newFileName the name to give the file that will be created.
-     * @throws FileNotFoundException if the file cannot be read.
-     * @return this builder, for further call chaining.
-     */
-    @Throws(FileNotFoundException::class)
-    fun copyFromClassPath(
-        classPathFile: String,
-        newFileName: String,
-    ) = this
-        .copyFromClassPath(this::class.java.classLoader, classPathFile, newFileName)
-
-    /**
-     * Add a file from the host file system.
-     *
-     * @param filePath the path to the file on the file system to use.
-     * @param newFileName the name to give the file that will be created.
-     * @throws IOException if the file cannot be read.
-     * @return this builder, for further call chaining.
-     */
-    @Throws(IOException::class)
-    fun copyFrom(filePath: Path, newFileName: String) = this
-        .doCreate(newFileName) { filePath.readBytes() }
-
-    /**
-     * Add a file from the given compiler file object.
-     *
-     * @param fileObject the file object to use.
-     * @param newFileName the name to give the file that will be created.
-     * @throws IOException if the file object cannot be read.
-     * @return this builder, for further call chaining.
-     */
-    @Throws(IOException::class)
-    fun copyFrom(fileObject: FileObject, newFileName: String) = this
-        .doCreate(newFileName) { fileObject.openInputStream().use { it.readAllBytes() } }
-
-    /**
-     * Add a file from the given input stream.
-     *
-     * @param inputStream the input stream to read from.
-     * @param newFileName the name to give to the file that will be created.
-     * @throws IOException if the stream cannot be read.
-     */
-    @Throws(IOException::class)
-    fun copyFrom(inputStream: InputStream, newFileName: String) = this
-        .doCreate(newFileName) { inputStream.buffered().use { it.readAllBytes() } }
-
-    /**
-     * Add a file from the given reader.
-     *
-     * @param reader the reader to read from.
-     * @param newFileName the name to give to the file that will be created.
-     * @param charset the charset to encode the file as. Defaults to `UTF-8` if omitted.
-     * @throws IOException if the stream cannot be read.
-     */
-    @JvmOverloads
-    @Throws(IOException::class)
-    fun copyFrom(
-        reader: Reader,
-        newFileName: String,
-        charset: Charset = StandardCharsets.UTF_8
-    ) = this
-        .doCreate(newFileName) {
-          val text = reader.use { it.readText() }
-          return@doCreate text.toByteArray(charset = charset)
-        }
-
-    /**
-     * Add a file by reading the contents from the given URL.
-     *
-     * @param url the URL to fetch the contents from.
-     * @param newFileName the name to give to the file that will be created
-     * @throws IOException if the URL contents could not be downloaded.
-     * @return this builder, for further call chaining.
-     */
-    @Throws(IOException::class)
-    fun copyFrom(url: URL, newFileName: String) = this
-        .doCreate(newFileName) { url.readBytes() }
-
-    private inline fun doCreate(newFileName: String, supplier: () -> ByteArray) = apply {
-      val data = supplier()
-
-      this@JavaCompilationBuilder
-          .fileManager
+      fileManager
           .createFile(location, newFileName, data)
     }
   }
+
+  private fun generateFinalClassPath(): Iterable<File> {
+    val classPath = LinkedHashSet<File>()
+
+    if (prependTestClassPath) {
+      val rawClassPath = System.getProperty("java.class.path", "")!!
+      val rawSeparator = System.getProperty("path.separator", File.pathSeparator)!!
+      val rawModulePath = System.getProperty("jdk.module.path", "")!!
+
+      rawClassPath
+          .split(Regex.fromLiteral(rawSeparator))
+          .map { File(it) }
+          .also { classPath.addAll(it) }
+
+      rawModulePath
+          .split(Regex.fromLiteral(rawSeparator))
+          .map { File(it) }
+          .also { classPath.addAll(it) }
+    }
+
+    classPath.addAll(this.classPath)
+
+    return classPath
+  }
+
+  private fun collectCompilationUnits() = fileManager
+      .run {
+        sequence {
+          yield(StandardLocation.SOURCE_PATH)
+          yieldAll(listLocationsForModules(StandardLocation.MODULE_SOURCE_PATH).flatten())
+        }
+      }
+      .flatMap { fileManager.list(it, "", setOf(Kind.SOURCE), true) }
+      .toList()
+
+  private fun doCompile(task: JavaCompiler.CompilationTask): CompilationData {
+    val resultRef: BasicCompilationResult
+
+    val timeTaken = measureNanoTime {
+      resultRef = try {
+        BasicCompilationResult(task.call())
+      } catch (ex: Exception) {
+        BasicCompilationResult(ex)
+      }
+    }.toDuration(DurationUnit.NANOSECONDS)
+
+    return CompilationData(resultRef, timeTaken)
+  }
+
+  private data class CompilationData(
+      val result: CompilationResult,
+      val timeTaken: Duration
+  )
 
   companion object {
     // Newer OpenJDK versions allow both --source and -source, but JDK-11 does not support --source.
