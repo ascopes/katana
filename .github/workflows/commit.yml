@@ -24,7 +24,7 @@ jobs:
       - name: Run tests
         run: |
           ./mvnw-docker "${{matrix.image}}" \
-              -B -T3 clean package \
+              -B -T3C clean package \
               -Dcheckstyle.skip=true
 
 # TODO: enforce checkstyle.

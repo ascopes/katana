@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.ascopes.katana</groupId>
+    <artifactId>katana-compiler-testing-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>katana-compiler-testing-java</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.ascopes.katana</groupId>
+      <artifactId>katana-compiler-testing-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <!-- In-memory file system -->
+      <groupId>com.google.jimfs</groupId>
+      <artifactId>jimfs</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.github.microutils</groupId>
+      <artifactId>kotlin-logging-jvm</artifactId>
+    </dependency>
+
+    <dependency>
+      <!-- Kotlin mocking library for tests -->
+      <groupId>io.mockk</groupId>
+      <artifactId>mockk</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <!-- Fuzzy string matching for useful error messages relating to incorrect paths -->
+      <groupId>me.xdrop</groupId>
+      <artifactId>fuzzywuzzy</artifactId>
+    </dependency>
+
+    <dependency>
+      <!-- Reflection for Kotlin, needed for testing but also needed in module-info.java -->
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-reflect</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib-jdk8</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <!--
+        Standard classes for Java unit testing to provide IDE-interactive support for
+        test failures.
+      -->
+      <groupId>org.opentest4j</groupId>
+      <artifactId>opentest4j</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <!-- Needed to help JaCoCo's reporting to be correct. -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>

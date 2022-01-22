@@ -11,10 +11,8 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>katana-compiler-testing</module>
-    <module>katana-spi-components/katana-spi</module>
-    <module>katana-spi-components/katana-spi-annotation-processor</module>
-    <module>katana-spi-components/katana-spi-annotations</module>
+    <module>katana-compiler-testing-parent</module>
+    <module>katana-spi-parent</module>
   </modules>
 
   <properties>
