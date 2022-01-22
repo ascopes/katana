@@ -1,4 +1,4 @@
-# katana-compiler-testing
+# katana-compiler-testing-java
 
 In-memory integrations for the java.compiler module to allow integration testing the compilation of
 Java sources and the behaviour of annotation processors.
@@ -21,8 +21,8 @@ An example of usage may look like the following:
 ```java
 import org.junit.jupiter.api.Test;
 
-import static CompilerAssert.assertThatJavaCompilation;
-import static JavaCompilationBuilder.javac;
+import static io.ascopes.katana.compilertesting.java.JavaAssertions.assertThatJavaCompilation;
+import static io.ascopes.katana.compilertesting.java.JavaCompilationBuilder.javac;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MyIntegrationTest {
@@ -62,5 +62,15 @@ class MyIntegrationTest {
                 .files()
                 .hasClassOutputs("module-info.class", "my/packagename/here/HelloWorld.class");
     }
+}
+```
+
+## JPMS Modules
+
+If you require this in a JPMS-enabled project, add the following entries to your `module-info.java`:
+
+```java
+module my.modulename.here {
+  requires transitive katana.compilertesting.java;
 }
 ```
