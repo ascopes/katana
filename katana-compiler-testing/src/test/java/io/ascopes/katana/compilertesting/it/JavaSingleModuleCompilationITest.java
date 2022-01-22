@@ -1,6 +1,6 @@
 package io.ascopes.katana.compilertesting.it;
 
-import static io.ascopes.katana.compilertesting.CompilerAssert.assertThat;
+import static io.ascopes.katana.compilertesting.CompilerAssert.assertThatCompilation;
 
 import io.ascopes.katana.compilertesting.Each;
 import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder;
@@ -36,12 +36,12 @@ class JavaSingleModuleCompilationITest {
             .and()
         .compile();
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .isSuccessful()
         .diagnostics()
         .hasNoWarnings();
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .files()
         .hasClassOutput("test/java/it/HelloWorld.class");
     //@formatter:off

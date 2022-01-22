@@ -1,7 +1,7 @@
 package io.ascopes.katana.compilertesting.it
 
 import io.ascopes.katana.compilertesting.Each
-import io.ascopes.katana.compilertesting.assertThat
+import io.ascopes.katana.compilertesting.assertThatCompilation
 import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
@@ -36,10 +36,10 @@ class SourceGeneratorITest {
         .processors(MyAnnotationProcessor(version))
         .compile()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .isSuccessfulWithoutWarnings()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .files()
         .hasClassOutput("foo.bar.baz.Bork/info.txt")
           .hasContent("Hello, World!")

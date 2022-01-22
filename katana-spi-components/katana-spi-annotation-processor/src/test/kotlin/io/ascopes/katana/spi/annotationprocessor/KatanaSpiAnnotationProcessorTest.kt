@@ -1,6 +1,6 @@
 package io.ascopes.katana.spi.annotationprocessor
 
-import io.ascopes.katana.compilertesting.assertThat
+import io.ascopes.katana.compilertesting.assertThatCompilation
 import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder
 import org.junit.jupiter.params.ParameterizedTest
 import javax.lang.model.SourceVersion
@@ -44,7 +44,7 @@ class KatanaSpiAnnotationProcessorTest {
         .processors(KatanaSpiAnnotationProcessor())
         .compile()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .isSuccessfulWithoutWarnings()
         .ranInLegacyMode()
         .files()

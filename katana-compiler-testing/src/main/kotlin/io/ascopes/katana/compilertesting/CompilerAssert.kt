@@ -17,4 +17,4 @@ import io.ascopes.katana.compilertesting.java.JavaCompilationAssertions
  * @param compilation the compilation.
  * @return the assertion builder for the compilation.
  */
-fun assertThat(compilation: JavaCompilation) = JavaCompilationAssertions(compilation)
+fun assertThatCompilation(compilation: JavaCompilation) = JavaCompilationAssertions(compilation)

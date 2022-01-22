@@ -1,7 +1,7 @@
 package io.ascopes.katana.compilertesting.it
 
 import io.ascopes.katana.compilertesting.Each
-import io.ascopes.katana.compilertesting.assertThat
+import io.ascopes.katana.compilertesting.assertThatCompilation
 import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
@@ -36,14 +36,14 @@ class SingleModuleCompilationITest {
             .and()
         .compile()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .isSuccessful()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .diagnostics()
         .hasNoWarnings()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .files()
         .hasClassOutput("io/ascopes/helloworld/nonmodular/HelloWorld.class")
     //@formatter:on
@@ -80,14 +80,14 @@ class SingleModuleCompilationITest {
             .and()
         .compile()
 
-      assertThat(compilation)
+      assertThatCompilation(compilation)
           .isSuccessful()
 
-      assertThat(compilation)
+      assertThatCompilation(compilation)
           .diagnostics()
           .hasNoWarnings()
 
-        assertThat(compilation)
+        assertThatCompilation(compilation)
             .files()
             .hasClassOutputs(
                 "io/ascopes/helloworld/modular/HelloWorld.class",
@@ -134,14 +134,14 @@ class SingleModuleCompilationITest {
         .processors(annotationProcessor)
         .compile()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .isSuccessful()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .diagnostics()
         .hasNoWarnings()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .files()
         .hasClassOutput("io/ascopes/helloworld/HelloWorld.class")
 
@@ -174,14 +174,14 @@ class SingleModuleCompilationITest {
         .generateHeaders()
         .compile()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .isSuccessful()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .diagnostics()
         .hasNoWarnings()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .files()
         .hasClassOutputs("io/ascopes/helloworld/HelloWorld.class")
         .hasHeaderOutputs("io_ascopes_helloworld_HelloWorld.h")

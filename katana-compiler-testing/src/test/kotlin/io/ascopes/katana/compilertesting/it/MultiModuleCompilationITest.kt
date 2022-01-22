@@ -1,7 +1,7 @@
 package io.ascopes.katana.compilertesting.it
 
 import io.ascopes.katana.compilertesting.Each
-import io.ascopes.katana.compilertesting.assertThat
+import io.ascopes.katana.compilertesting.assertThatCompilation
 import io.ascopes.katana.compilertesting.java.JavaCompilationBuilder
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
@@ -73,12 +73,12 @@ class MultiModuleCompilationITest {
             .and()
         .compile()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .isSuccessful()
         .diagnostics()
         .hasNoWarnings()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .files()
         .hasMultiModuleClassOutputs(
             moduleName = "helloworld.greet",
@@ -168,12 +168,12 @@ class MultiModuleCompilationITest {
         .processors(annotationProcessor)
         .compile()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .isSuccessful()
         .diagnostics()
         .hasNoWarnings()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .files()
         .hasMultiModuleClassOutputs(
             moduleName = "helloworld.greet",
@@ -248,12 +248,12 @@ class MultiModuleCompilationITest {
         .generateHeaders()
         .compile()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .isSuccessful()
         .diagnostics()
         .hasNoWarnings()
 
-    assertThat(compilation)
+    assertThatCompilation(compilation)
         .files()
         .hasMultiModuleClassOutputs(
             moduleName = "helloworld.greet",
